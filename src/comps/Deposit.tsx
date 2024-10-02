@@ -2,8 +2,15 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { classNames } from "@/util";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import {
+  ChevronDownIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/20/solid";
 
+import { FlowContainer } from "@/comps/core/FlowContainer";
+import { Heading, SubText } from "@/comps/core/Heading";
+import { FlowForm } from "@/comps/core/Form";
+import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
 /* 
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -23,20 +30,147 @@ enum DEPOSIT_STEP {
   AMOUNT,
   ADDRESS,
   CONFIRM,
+  REVIEW,
 }
+
+/* 
+  basic structure of a flow step
+  1) heading with sometime a action item to the right of the heading
+  2) subtext to give context to the user with the possibility of tags 
+  3) form to collect data or the final step which is usually reviewing all data before submitting (or even revewing post submission)
+  4) buttons to navigate between steps
+*/
+type DepositFlowStepProps = {
+  setStep: (step: DEPOSIT_STEP) => void;
+};
+const DepositFlowAmount = ({ setStep }: DepositFlowStepProps) => {
+  const handleSubmit = (value: string | undefined) => {
+    setStep(DEPOSIT_STEP.ADDRESS);
+  };
+  return (
+    <FlowContainer>
+      <>
+        <div className="w-full flex flex-row items-center justify-between">
+          <Heading>Deposit</Heading>
+        </div>
+        <SubText>Convert BTC into sBTC</SubText>
+        <FlowForm
+          nameKey="amount"
+          type="text"
+          placeholder="Enter BTC amount to transfer"
+          handleSubmit={(value) => handleSubmit(value)}
+        ></FlowForm>
+      </>
+    </FlowContainer>
+  );
+};
+
+const DepositFlowAddress = ({ setStep }: DepositFlowStepProps) => {
+  const handleSubmit = (value: string | undefined) => {
+    setStep(DEPOSIT_STEP.CONFIRM);
+  };
+  return (
+    <FlowContainer>
+      <>
+        <div className="w-full flex flex-row items-center justify-between">
+          <Heading>Deposit</Heading>
+        </div>
+        <SubText>Amount selected to transfer</SubText>
+        <FlowForm
+          nameKey="address"
+          type="text"
+          placeholder="Enter Stacks address to transfer to"
+          handleSubmit={(value) => handleSubmit(value)}
+        >
+          <SecondaryButton
+            onClick={() => setStep(DEPOSIT_STEP.AMOUNT)}
+            isValid={true}
+          >
+            PREV
+          </SecondaryButton>
+        </FlowForm>
+      </>
+    </FlowContainer>
+  );
+};
+
+const DepositFlowConfirm = ({ setStep }: DepositFlowStepProps) => {
+  const handleNextClick = () => {
+    setStep(DEPOSIT_STEP.REVIEW);
+  };
+  const handlePrevClick = () => {
+    setStep(DEPOSIT_STEP.ADDRESS);
+  };
+  return (
+    <FlowContainer>
+      <>
+        <div className="w-full flex flex-row items-center justify-between">
+          <Heading>Deposit</Heading>
+        </div>
+        <div className="flex flex-col  gap-2">
+          <div className="flex flex-col gap-1">
+            <SubText>Amount selected to Transfer</SubText>
+            <p className="text-black font-Matter font-semibold text-sm">btc</p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <SubText>Stacks address to transfer to</SubText>
+            <p className="text-black font-Matter font-semibold text-sm">
+              SPXXXXXX
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-1 ">
+          <div className="w-full p-4 bg-lightOrange h-10 rounded-lg flex flex-row items-center justify-center gap-2">
+            <InformationCircleIcon className="h-6 w-6 text-orange" />
+            <p className="text-orange font-Matter font-semibold text-sm">
+              Please verify the information before proceeding
+            </p>
+          </div>
+        </div>
+        <div className="w-full flex-row flex justify-between items-center">
+          <SecondaryButton onClick={handlePrevClick}>PREV</SecondaryButton>
+          <PrimaryButton onClick={handleNextClick}>NEXT</PrimaryButton>
+        </div>
+      </>
+    </FlowContainer>
+  );
+};
+
+const DepositFlowReview = ({ setStep }: DepositFlowStepProps) => {
+  return (
+    <FlowContainer>
+      <>
+        <div className="w-full flex flex-row items-center justify-between">
+          <Heading>Deposit</Heading>
+        </div>
+        <SubText>Tx submitted</SubText>
+      </>
+    </FlowContainer>
+  );
+};
+
 const DepositFlow = () => {
   const [step, setStep] = useState(DEPOSIT_STEP.AMOUNT);
 
-  return (
-    <div
-      style={{
-        maxWidth: "800px",
-      }}
-      className="w-full flex-row flex border-2 gap-4 border-lightGray rounded-2xl "
-    >
-      <DepositAmount />
-    </div>
-  );
+  const handleUpdateStep = (newStep: DEPOSIT_STEP) => {
+    setStep(newStep);
+  };
+  const renderStep = () => {
+    switch (step) {
+      case DEPOSIT_STEP.AMOUNT:
+        return <DepositFlowAmount setStep={handleUpdateStep} />;
+      case DEPOSIT_STEP.ADDRESS:
+        return <DepositFlowAddress setStep={handleUpdateStep} />;
+      case DEPOSIT_STEP.CONFIRM:
+        return <DepositFlowConfirm setStep={handleUpdateStep} />;
+      case DEPOSIT_STEP.REVIEW:
+        return <DepositFlowReview setStep={handleUpdateStep} />;
+      default:
+        return null;
+    }
+  };
+
+  return <>{renderStep()}</>;
 };
 
 export default DepositFlow;
@@ -98,6 +232,18 @@ const DepositAmount = () => {
                 className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
               >
                 SATS
+              </p>
+              <p
+                onClick={() => setSelectedDenomination(DENOMINATIONS.BTC)}
+                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
+              >
+                BTC
+              </p>
+              <p
+                onClick={() => setSelectedDenomination(DENOMINATIONS.USD)}
+                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
+              >
+                USD
               </p>
             </MenuItems>
           </Menu>
