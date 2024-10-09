@@ -438,8 +438,6 @@ const createPTRAddress = async () => {
     //console.log("transactions", transactions);
     console.log("listUnspentres", listUnspentres);
 
-    throw new Error("stop");
-
     const p2trTing = getP2TR(DEPOSIT_SEED_PHRASE);
     // console.log("p2trTing", p2trTing);
     // console.log("p2trTing.address", p2trTing.address);
@@ -454,6 +452,9 @@ const createPTRAddress = async () => {
       console.log("signersPublicKey", signersPublicKey);
       console.log("privateKey", privateKey);
 
+      if (signersPublicKey === undefined) {
+        throw new Error("Signer public key is undefined");
+      }
       const network: BitcoinNetwork = "regtest";
 
       const senderPrivKeyWIF = privateKeyToWIF(privateKey, network);
