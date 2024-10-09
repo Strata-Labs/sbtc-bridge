@@ -1,5 +1,6 @@
 import { crypto, networks, payments } from "bitcoinjs-lib";
 import { HDKey } from "@scure/bip32";
+import { sha256 } from "@noble/hashes/sha256";
 
 console.log("network", networks.regtest);
 
@@ -10,8 +11,9 @@ console.log("network", networks.regtest);
 
 const createMasterWallet = (seed: string) => {
   console.log("crypto", crypto);
-  const seedBuffer = crypto.sha256(Buffer.from(seed));
-  const root = HDKey.fromMasterSeed(seedBuffer);
+  const seedHash = sha256.create().update(seed).digest();
+
+  const root = HDKey.fromMasterSeed(seedHash);
   console.log("root", root);
   return root;
 };
