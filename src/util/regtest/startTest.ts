@@ -48,8 +48,6 @@ const createAddressFromMasterWallet = (masterWallet: HDKey) => {
   //console.log("p2kh.address", p2kh.address);
 
   if (!p2pk.pubkey) throw new Error("no pubkey");
-  console.log("p2kh.pubkey hex", p2pk.pubkey.toString("hex"));
-  console.log("p2pk pubkey ", p2pk.pubkey.toString("utf-8"));
 
   // hex to string utf
 
