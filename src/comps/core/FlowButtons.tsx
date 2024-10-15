@@ -16,6 +16,7 @@ export const PrimaryButton = ({
     <button
       type={type}
       className="w-48 rounded-lg py-3 flex justify-center items-center flex-row bg-orange"
+      onClick={onClick}
     >
       <p
         className={classNames(

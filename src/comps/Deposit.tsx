@@ -96,6 +96,7 @@ const DepositFlowAddress = ({ setStep }: DepositFlowStepProps) => {
 
 const DepositFlowConfirm = ({ setStep }: DepositFlowStepProps) => {
   const handleNextClick = () => {
+    console.log("DepositFlowConfirm - handle next step");
     setStep(DEPOSIT_STEP.REVIEW);
   };
   const handlePrevClick = () => {
@@ -128,8 +129,10 @@ const DepositFlowConfirm = ({ setStep }: DepositFlowStepProps) => {
           </div>
         </div>
         <div className="w-full flex-row flex justify-between items-center">
-          <SecondaryButton onClick={handlePrevClick}>PREV</SecondaryButton>
-          <PrimaryButton onClick={handleNextClick}>NEXT</PrimaryButton>
+          <SecondaryButton onClick={() => handlePrevClick()}>
+            PREV
+          </SecondaryButton>
+          <PrimaryButton onClick={() => handleNextClick()}>NEXT</PrimaryButton>
         </div>
       </>
     </FlowContainer>
@@ -137,13 +140,45 @@ const DepositFlowConfirm = ({ setStep }: DepositFlowStepProps) => {
 };
 
 const DepositFlowReview = ({ setStep }: DepositFlowStepProps) => {
+  const handleNextClick = () => {
+    // open a new tab with this link https://www.bitscript.app/transactions?transaction=020000000001019aa9ec88a9a964451673b2e7d0ac0f9309b7acb8e6b87d6a1215d2f3e5de2dde0000000000ffffffff010200000000000000225120fb32fece50b22877384d8e0a242ebc7a12603a7f937839f7c136ebe6af8b0be302483045022100a2ab485e3ca3100f80460bb8bea191edb39487656a3470f1a4a6fe5e51842fed02201e831e1990f9c6c8a8c1b0d51104391f46a5c4f5a7fbfeaf9ec4b7c3c0d2bed3012102fc8961e2839d574c7c23f3c177825dcdc230745be96db02237431e17307832e100000000&env=MAINNET
+    console.log("DepositFlowReview - handle next step");
+
+    var urlLink =
+      "https://www.bitscript.app/transactions?transaction=020000000001019aa9ec88a9a964451673b2e7d0ac0f9309b7acb8e6b87d6a1215d2f3e5de2dde0000000000ffffffff010200000000000000225120fb32fece50b22877384d8e0a242ebc7a12603a7f937839f7c136ebe6af8b0be302483045022100a2ab485e3ca3100f80460bb8bea191edb39487656a3470f1a4a6fe5e51842fed02201e831e1990f9c6c8a8c1b0d51104391f46a5c4f5a7fbfeaf9ec4b7c3c0d2bed3012102fc8961e2839d574c7c23f3c177825dcdc230745be96db02237431e17307832e100000000&env=MAINNET";
+    window.open(urlLink, "_blank");
+  };
   return (
     <FlowContainer>
       <>
         <div className="w-full flex flex-row items-center justify-between">
-          <Heading>Deposit</Heading>
+          <Heading>Review Transaction</Heading>
         </div>
-        <SubText>Tx submitted</SubText>
+        <div className="flex flex-col  gap-2">
+          <div className="flex flex-col gap-1">
+            <SubText>Amount selected to Transfer</SubText>
+            <p className="text-black font-Matter font-semibold text-sm">btc</p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <SubText>Stacks address to transfer to</SubText>
+            <p className="text-black font-Matter font-semibold text-sm">
+              SPXXXXXX
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-1 ">
+          <div className="w-full p-4 bg-lightOrange h-10 rounded-lg flex flex-row items-center justify-center gap-2">
+            <InformationCircleIcon className="h-6 w-6 text-orange" />
+            <p className="text-orange font-Matter font-semibold text-sm">
+              Please give the transaction some time to confirm
+            </p>
+          </div>
+        </div>
+        <div className="w-full flex-row flex justify-between items-center">
+          <PrimaryButton onClick={() => handleNextClick()}>
+            VIEW TX
+          </PrimaryButton>
+        </div>
       </>
     </FlowContainer>
   );
@@ -152,7 +187,9 @@ const DepositFlowReview = ({ setStep }: DepositFlowStepProps) => {
 const DepositFlow = () => {
   const [step, setStep] = useState(DEPOSIT_STEP.AMOUNT);
 
+  console.log("step", step);
   const handleUpdateStep = (newStep: DEPOSIT_STEP) => {
+    console.log("newstep", newStep);
     setStep(newStep);
   };
   const renderStep = () => {
