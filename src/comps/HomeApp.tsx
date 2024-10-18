@@ -34,14 +34,14 @@ const HomeApp = () => {
     SECTION.DEPOSIT
   );
 
-  if (typeof window !== "undefined") {
-    return "loading...";
-  }
-
   const selectedSectionData = sectionsMap.get(selectedSection);
 
   if (selectedSectionData === undefined) {
     return null;
+  }
+
+  if (typeof window == "undefined") {
+    return "loading...";
   }
 
   return (
