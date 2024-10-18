@@ -43,8 +43,8 @@ type RpcResponse = {
 };
 
 const rpcUrl = "http://localhost:18443/";
-const rpcUser = "setbern";
-const rpcPassword = "setbern";
+const rpcUser = "devenv";
+const rpcPassword = "devenv";
 
 const rpcHandlerCore = async (
   method: RpcMethods,

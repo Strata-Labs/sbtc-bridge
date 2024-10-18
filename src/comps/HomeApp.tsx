@@ -57,7 +57,6 @@ const HomeApp = () => {
 
         <Faqs />
       </div>
-      <h1>Home</h1>
     </>
   );
 };
