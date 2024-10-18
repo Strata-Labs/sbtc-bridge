@@ -303,7 +303,7 @@ const DepositFlowConfirm = ({
 
           <div className="flex flex-col gap-1">
             <SubText>Signer PubKey</SubText>
-            <p className="text-black font-Matter font-semibold text-sm">
+            <p className="text-black font-Matter break-all font-semibold text-sm">
               {localStorage.getItem("signerPubKey") || "N/A"}
             </p>
           </div>

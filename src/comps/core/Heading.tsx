@@ -7,6 +7,8 @@ export const Heading = ({ children }: TextProps) => {
 
 export const SubText = ({ children }: TextProps) => {
   return (
-    <p className="text-darkGray font-Matter font-thin text-sm">{children}</p>
+    <p className="text-darkGray break-all font-Matter font-thin text-sm">
+      {children}
+    </p>
   );
 };
