@@ -201,10 +201,12 @@ export const createDepositTx = async (
     // Broadcast the transaction
     const decodedTx = await decodeRawTransaction(txHex);
     console.log("decodedTx", decodedTx);
+
     //console.log("jig", JSON.stringify(decodedTx, null, 2));
     const testTx = await testMempoolAccept(txHex);
     console.log("testTx", testTx);
-    return txHex;
+
+    return decodedTx;
     throw new Error("stop");
 
     const id = await sendRawTransaction(txHex);

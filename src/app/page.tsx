@@ -1,3 +1,5 @@
+"use client";
+
 import HomeApp from "@/comps/HomeApp";
 import Image from "next/image";
 
