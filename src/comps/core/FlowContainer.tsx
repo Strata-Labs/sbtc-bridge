@@ -15,10 +15,10 @@ export const FlowContainer = ({ children }: FlowContainerProps) => {
       <div
         style={{
           backgroundColor: "rgba(253, 157, 65, 0.1)",
-          height: "320px",
+
           width: "320px",
         }}
-        className="flex flex-col items-center justify-center"
+        className="flex flex-col items-center justify-center flex-1"
       >
         <Image
           src="/images/StacksBitcoin.svg"

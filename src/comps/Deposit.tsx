@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+"use client";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import { classNames } from "@/util";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -11,6 +12,8 @@ import { FlowContainer } from "@/comps/core/FlowContainer";
 import { Heading, SubText } from "@/comps/core/Heading";
 import { FlowForm } from "@/comps/core/Form";
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
+import { createDepositTx } from "../util/regtest/lib";
+import { getP2WSH } from "@/util/regtest/wallet";
 /* 
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -33,6 +36,136 @@ enum DEPOSIT_STEP {
   REVIEW,
 }
 
+const SetSeedPhraseForDeposit = () => {
+  const [seedPhraseComponentKey, setSeedPhraseComponentKey] = useState(0);
+
+  useEffect(() => {
+    // ge the seed phrase from local storage
+    const seedPhrase = localStorage.getItem("seedPhrase");
+    if (seedPhrase) {
+      setSeedPhraseComponentKey(seedPhraseComponentKey + 1);
+    }
+  }, []);
+  const handleSubmit = (value: string | undefined) => {
+    if (value) {
+      // set value to local storage
+      localStorage.setItem("seedPhrase", value);
+      setSeedPhraseComponentKey(seedPhraseComponentKey + 1);
+    }
+  };
+
+  return (
+    <>
+      <FlowContainer>
+        <>
+          <div className="w-full flex flex-row items-center justify-between">
+            <Heading>Set Seed Phrase</Heading>
+          </div>
+          <SubText>Set the seed phrase this RegTest wallet will use </SubText>
+          <FlowForm
+            nameKey="seedPhrase"
+            type="text"
+            placeholder="Enter string to use as seed phrase"
+            handleSubmit={(value) => handleSubmit(value)}
+          ></FlowForm>
+        </>
+      </FlowContainer>
+      <GenerateBechWallet key={seedPhraseComponentKey} />
+    </>
+  );
+};
+
+type SetSignerPubkeyProps = {
+  handleUpdateSignerPubKey: (number: number) => void;
+  signerPubComponentKey: number;
+};
+const SetSignerPubkey = ({
+  handleUpdateSignerPubKey,
+  signerPubComponentKey,
+}: SetSignerPubkeyProps) => {
+  const [signerPubKey, setSignerPubkey] = useState("");
+
+  useEffect(() => {
+    // ge the seed phrase from local storage
+    const signerPubKey = localStorage.getItem("signerPubKey");
+    if (signerPubKey) {
+      setSignerPubkey(signerPubKey);
+    }
+  }, []);
+
+  const handleSubmit = (value: string | undefined) => {
+    if (value) {
+      handleUpdateSignerPubKey(signerPubComponentKey + 1);
+      // set value to local storage
+      setSignerPubkey(value);
+      localStorage.setItem("signerPubKey", value);
+    }
+  };
+
+  return (
+    <>
+      <FlowContainer>
+        <>
+          <div className="w-full flex flex-row items-center justify-between">
+            <Heading>Set Signer Pub Key</Heading>
+          </div>
+          <SubText>Signer PubKey {signerPubKey} </SubText>
+          <FlowForm
+            nameKey="SignerPubKey"
+            type="text"
+            placeholder="Enter the signer public key"
+            handleSubmit={(value) => handleSubmit(value)}
+          ></FlowForm>
+        </>
+      </FlowContainer>
+    </>
+  );
+};
+
+const GenerateBechWallet = () => {
+  const [isValid, setIsValid] = useState(false);
+  const [value, setValue] = useState("");
+
+  const handleSubmit = (value: string | undefined) => {
+    if (value) {
+      // set value to local storage
+
+      const seedPhrase = localStorage.getItem("seedPhrase");
+
+      if (seedPhrase) {
+        const p2wsh = getP2WSH(seedPhrase);
+
+        if (p2wsh) {
+          console.log("p2wsh", p2wsh);
+          setIsValid(true);
+          setValue(p2wsh.address as any);
+        }
+      }
+    }
+  };
+
+  const seedPhrase = localStorage.getItem("seedPhrase") || "";
+  return (
+    <FlowContainer>
+      <>
+        <div className="w-full flex flex-row items-center justify-between">
+          <Heading>Generate Address from Seed</Heading>
+        </div>
+        <SubText>Seed Phrase: {seedPhrase} </SubText>
+        {value !== "" && <SubText>Address : {value} </SubText>}
+        <div className="flex-1" />
+        <div className="w-full flex-row flex justify-between items-center">
+          {seedPhrase !== "" && (
+            <PrimaryButton onClick={() => handleSubmit(seedPhrase)}>
+              GENERATE
+            </PrimaryButton>
+          )}
+        </div>
+      </>
+    </FlowContainer>
+  );
+};
+
 /* 
   basic structure of a flow step
   1) heading with sometime a action item to the right of the heading
@@ -43,9 +176,16 @@ enum DEPOSIT_STEP {
 type DepositFlowStepProps = {
   setStep: (step: DEPOSIT_STEP) => void;
 };
-const DepositFlowAmount = ({ setStep }: DepositFlowStepProps) => {
+
+type DepositFlowAmountProps = DepositFlowStepProps & {
+  setAmount: (amount: number) => void;
+};
+const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
   const handleSubmit = (value: string | undefined) => {
-    setStep(DEPOSIT_STEP.ADDRESS);
+    if (value) {
+      setAmount(parseInt(value));
+      setStep(DEPOSIT_STEP.ADDRESS);
+    }
   };
   return (
     <FlowContainer>
@@ -56,8 +196,8 @@ const DepositFlowAmount = ({ setStep }: DepositFlowStepProps) => {
         <SubText>Convert BTC into sBTC</SubText>
         <FlowForm
           nameKey="amount"
-          type="text"
-          placeholder="Enter BTC amount to transfer"
+          type="number"
+          placeholder="BTC amount to transfer (in sats)"
           handleSubmit={(value) => handleSubmit(value)}
         ></FlowForm>
       </>
@@ -65,9 +205,19 @@ const DepositFlowAmount = ({ setStep }: DepositFlowStepProps) => {
   );
 };
 
-const DepositFlowAddress = ({ setStep }: DepositFlowStepProps) => {
+type DepositFlowAddressProps = DepositFlowStepProps & {
+  setStxAddress: (address: string) => void;
+};
+
+const DepositFlowAddress = ({
+  setStep,
+  setStxAddress,
+}: DepositFlowAddressProps) => {
   const handleSubmit = (value: string | undefined) => {
-    setStep(DEPOSIT_STEP.CONFIRM);
+    if (value) {
+      setStxAddress(value);
+      setStep(DEPOSIT_STEP.CONFIRM);
+    }
   };
   return (
     <FlowContainer>
@@ -94,14 +244,37 @@ const DepositFlowAddress = ({ setStep }: DepositFlowStepProps) => {
   );
 };
 
-const DepositFlowConfirm = ({ setStep }: DepositFlowStepProps) => {
-  const handleNextClick = () => {
+type DepositFlowConfirmProps = DepositFlowStepProps & {
+  amount: number;
+  stxAddress: string;
+};
+
+const DepositFlowConfirm = ({
+  setStep,
+  amount,
+  stxAddress,
+}: DepositFlowConfirmProps) => {
+  const handleNextClick = async () => {
     console.log("DepositFlowConfirm - handle next step");
+    console.log("createPTRAddress", createDepositTx);
+
+    const senderSeedPhrase = localStorage.getItem("seedPhrase") || "";
+
+    const signerPubKey = localStorage.getItem("signerPubKey") || "";
+
+    const testThing = await createDepositTx(
+      stxAddress,
+      senderSeedPhrase,
+      signerPubKey,
+      amount
+    );
+    console.log("testThing", testThing);
     setStep(DEPOSIT_STEP.REVIEW);
   };
   const handlePrevClick = () => {
     setStep(DEPOSIT_STEP.ADDRESS);
   };
+
   return (
     <FlowContainer>
       <>
@@ -111,12 +284,32 @@ const DepositFlowConfirm = ({ setStep }: DepositFlowStepProps) => {
         <div className="flex flex-col  gap-2">
           <div className="flex flex-col gap-1">
             <SubText>Amount selected to Transfer</SubText>
-            <p className="text-black font-Matter font-semibold text-sm">btc</p>
+            <p className="text-black font-Matter font-semibold text-sm">
+              {amount} sats
+            </p>
           </div>
           <div className="flex flex-col gap-1">
             <SubText>Stacks address to transfer to</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              SPXXXXXX
+              {stxAddress}
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <SubText>Stacks address to transfer to</SubText>
+            <p className="text-black font-Matter font-semibold text-sm">
+              {stxAddress}
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <SubText>Stacks address to transfer to</SubText>
+            <p className="text-black font-Matter font-semibold text-sm">
+              {stxAddress}
+            </p>
+          </div>
+          <div className="flex flex-col gap-1">
+            <SubText>Stacks address to transfer to</SubText>
+            <p className="text-black font-Matter font-semibold text-sm">
+              {stxAddress}
             </p>
           </div>
         </div>
@@ -139,13 +332,25 @@ const DepositFlowConfirm = ({ setStep }: DepositFlowStepProps) => {
   );
 };
 
-const DepositFlowReview = ({ setStep }: DepositFlowStepProps) => {
+type TransactionInfo = {
+  hex: string;
+  txId: string;
+};
+type DepositFlowReviewProps = DepositFlowStepProps & {
+  transactionInfo: TransactionInfo;
+  amount: number;
+  stxAddress: string;
+};
+
+const DepositFlowReview = ({
+  setStep,
+  transactionInfo,
+}: DepositFlowReviewProps) => {
   const handleNextClick = () => {
     // open a new tab with this link https://www.bitscript.app/transactions?transaction=020000000001019aa9ec88a9a964451673b2e7d0ac0f9309b7acb8e6b87d6a1215d2f3e5de2dde0000000000ffffffff010200000000000000225120fb32fece50b22877384d8e0a242ebc7a12603a7f937839f7c136ebe6af8b0be302483045022100a2ab485e3ca3100f80460bb8bea191edb39487656a3470f1a4a6fe5e51842fed02201e831e1990f9c6c8a8c1b0d51104391f46a5c4f5a7fbfeaf9ec4b7c3c0d2bed3012102fc8961e2839d574c7c23f3c177825dcdc230745be96db02237431e17307832e100000000&env=MAINNET
     console.log("DepositFlowReview - handle next step");
 
-    var urlLink =
-      "https://www.bitscript.app/transactions?transaction=020000000001019aa9ec88a9a964451673b2e7d0ac0f9309b7acb8e6b87d6a1215d2f3e5de2dde0000000000ffffffff010200000000000000225120fb32fece50b22877384d8e0a242ebc7a12603a7f937839f7c136ebe6af8b0be302483045022100a2ab485e3ca3100f80460bb8bea191edb39487656a3470f1a4a6fe5e51842fed02201e831e1990f9c6c8a8c1b0d51104391f46a5c4f5a7fbfeaf9ec4b7c3c0d2bed3012102fc8961e2839d574c7c23f3c177825dcdc230745be96db02237431e17307832e100000000&env=MAINNET";
+    var urlLink = `https://www.bitscript.app/transactions?transaction=${transactionInfo.hex}&env=TESTNET`;
     window.open(urlLink, "_blank");
   };
   return (
@@ -176,6 +381,9 @@ const DepositFlowReview = ({ setStep }: DepositFlowStepProps) => {
         </div>
         <div className="w-full flex-row flex justify-between items-center">
           <PrimaryButton onClick={() => handleNextClick()}>
+            VIEW TX INFO
+          </PrimaryButton>
+          <PrimaryButton onClick={() => handleNextClick()}>
             VIEW TX
           </PrimaryButton>
         </div>
@@ -187,27 +395,87 @@ const DepositFlowReview = ({ setStep }: DepositFlowStepProps) => {
 const DepositFlow = () => {
   const [step, setStep] = useState(DEPOSIT_STEP.AMOUNT);
 
+  const [stxAddress, _setStxAddress] = useState("");
+  const [amount, _setAmount] = useState(0);
+  const [signerPubComponentKey, setSignerPubComponentKey] = useState(0);
+
+  const [transactionInfo, setTransactionInfo] = useState<TransactionInfo>({
+    hex: "",
+    txId: "",
+  });
+
   console.log("step", step);
   const handleUpdateStep = (newStep: DEPOSIT_STEP) => {
     console.log("newstep", newStep);
     setStep(newStep);
   };
+
+  const handleUpdateSignerPubKey = (number: number) => {
+    setSignerPubComponentKey(number);
+  };
+
+  const setStxAddress = (address: string) => {
+    _setStxAddress(address);
+  };
+
+  const setAmount = (amount: number) => {
+    _setAmount(amount);
+  };
   const renderStep = () => {
     switch (step) {
       case DEPOSIT_STEP.AMOUNT:
-        return <DepositFlowAmount setStep={handleUpdateStep} />;
+        return (
+          <DepositFlowAmount setAmount={setAmount} setStep={handleUpdateStep} />
+        );
       case DEPOSIT_STEP.ADDRESS:
-        return <DepositFlowAddress setStep={handleUpdateStep} />;
+        return (
+          <DepositFlowAddress
+            setStxAddress={setStxAddress}
+            setStep={handleUpdateStep}
+          />
+        );
       case DEPOSIT_STEP.CONFIRM:
-        return <DepositFlowConfirm setStep={handleUpdateStep} />;
+        return (
+          <DepositFlowConfirm
+            key={signerPubComponentKey + "-DepositFlowConfirm"}
+            setStep={handleUpdateStep}
+            amount={amount}
+            stxAddress={stxAddress}
+          />
+        );
       case DEPOSIT_STEP.REVIEW:
-        return <DepositFlowReview setStep={handleUpdateStep} />;
+        return (
+          <DepositFlowReview
+            transactionInfo={transactionInfo}
+            amount={amount}
+            stxAddress={stxAddress}
+            setStep={handleUpdateStep}
+          />
+        );
       default:
-        return null;
+        return <div> test</div>;
     }
   };
 
-  return <>{renderStep()}</>;
+  return (
+    <>
+      {renderStep()}
+      <div
+        style={{
+          margin: "16px 0",
+        }}
+      />
+      <SetSignerPubkey
+        handleUpdateSignerPubKey={handleUpdateSignerPubKey}
+        signerPubComponentKey={signerPubComponentKey}
+        key={signerPubComponentKey + "-SetSignerPubkey"}
+      />
+
+      <SetSeedPhraseForDeposit
+        key={signerPubComponentKey + "-SetSeedPhraseForDeposit"}
+      />
+    </>
+  );
 };
 
 export default DepositFlow;

@@ -14,12 +14,8 @@ import * as crypto from "crypto";
 
 // You need to provide the ECC library. The ECC library must implement
 // all the methods of the `TinySecp256k1Interface` interface.
-const tinysecp: TinySecp256k1Interface = require("tiny-secp256k1");
-const ECPair: ECPairAPI = ECPairFactory(tinysecp);
 
 import {
-  createDescriptorWallet,
-  createInitWallet,
   createRawTransaction,
   createTaprootAddress,
   createWallet,
@@ -47,7 +43,8 @@ import {
   sendRawTransaction,
   signRawTransactionWithWallet,
   unloadWallet,
-} from "./rpcCommands";
+} from "../bitcoinClient";
+
 import {
   BitcoinNetwork,
   getP2pkh,
@@ -56,7 +53,6 @@ import {
   privateKeyToWIF,
   uint8ArrayToHexString,
 } from "./wallet";
-import { createAndSignTaprootTransactionWithScripts } from "./depositRequest";
 import { DEPOSIT_SEED_PHRASE } from "./lib";
 
 const WALLET_NAME = "sbtcWallet";
@@ -77,18 +73,11 @@ export const startUp = async () => {
       const walletAddress = await getNewAddress();
       console.log("walletAddress", walletAddress);
 
-      const genTo = await generateToAddress({
-        address: walletAddress,
-        nblocks: 101,
-      });
+      const genTo = await generateToAddress(walletAddress, 101);
 
       console.log("genTo", genTo);
 
-      const listUnspentres = await listUnspent({
-        minconf: 0,
-        maxconf: 9999999,
-        addresses: [walletAddress],
-      });
+      const listUnspentres = await listUnspent(0, 9999999, [walletAddress]);
 
       console.log("listUnspentres", listUnspentres);
     } else {
@@ -112,11 +101,7 @@ const sendFundsBetweenAddresses = async (
 ) => {
   try {
     // Step 3: List UTXOs for the sender wallet address
-    const utxos = await listUnspent({
-      minconf: 0,
-      maxconf: 9999999,
-      addresses: [senderAddy],
-    });
+    const utxos = await listUnspent(0, 9999999, [senderAddy]);
     if (utxos.length === 0)
       throw new Error(`No UTXOs available for address ${senderAddy}`);
 
@@ -203,13 +188,9 @@ export const sendFundsTest = async () => {
 
     await mineAndCheckId(txId);
 
-    const listUnspentres = await listUnspent({
-      minconf: 0,
-      maxconf: 9999999,
-      addresses: [
-        "bcrt1pljykrc5rn4t5clpr70qh0qjaehprqazma9kmqg3hgv0pwvrcxtsse2ukfl",
-      ],
-    });
+    const listUnspentres = await listUnspent(0, 9999999, [
+      "bcrt1pljykrc5rn4t5clpr70qh0qjaehprqazma9kmqg3hgv0pwvrcxtsse2ukfl",
+    ]);
 
     console.log("listUnspentres", listUnspentres);
   } catch (err: any) {
