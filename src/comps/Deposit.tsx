@@ -295,21 +295,16 @@ const DepositFlowConfirm = ({
             </p>
           </div>
           <div className="flex flex-col gap-1">
-            <SubText>Stacks address to transfer to</SubText>
+            <SubText>Sender Seed Phrase</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {stxAddress}
+              {localStorage.getItem("seedPhrase") || "N/A"}
             </p>
           </div>
+
           <div className="flex flex-col gap-1">
-            <SubText>Stacks address to transfer to</SubText>
+            <SubText>Signer PubKey</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {stxAddress}
-            </p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <SubText>Stacks address to transfer to</SubText>
-            <p className="text-black font-Matter font-semibold text-sm">
-              {stxAddress}
+              {localStorage.getItem("signerPubKey") || "N/A"}
             </p>
           </div>
         </div>

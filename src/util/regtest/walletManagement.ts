@@ -53,7 +53,7 @@ import {
   privateKeyToWIF,
   uint8ArrayToHexString,
 } from "./wallet";
-import { DEPOSIT_SEED_PHRASE } from "./lib";
+import { DEPOSIT_SEED_PHRASE_DEFAULT } from "./lib";
 
 const WALLET_NAME = "sbtcWallet";
 
@@ -168,6 +168,7 @@ export const mineAndCheckId = async (txId: string) => {
     // Step 3: Check the status of the transaction
     const txStatus = await getTransactionStatus(txId);
     console.log("Transaction Status:", txStatus);
+    return txStatus;
   } catch (err: any) {
     throw new Error(err);
   }
@@ -202,10 +203,10 @@ export const importPrivKeyHelper = async () => {
   try {
     const network: BitcoinNetwork = "regtest";
 
-    const p2trTing = getP2TR(DEPOSIT_SEED_PHRASE);
+    const p2trTing = getP2TR(DEPOSIT_SEED_PHRASE_DEFAULT);
     const address = p2trTing.address;
 
-    const privateKey = getPrivateKeyFromP2tr(DEPOSIT_SEED_PHRASE);
+    const privateKey = getPrivateKeyFromP2tr(DEPOSIT_SEED_PHRASE_DEFAULT);
     const senderPrivKeyWIF = privateKeyToWIF(privateKey, network);
 
     const importPrivRes = await importPrivKey(senderPrivKeyWIF);
@@ -220,7 +221,7 @@ export const importAddressHelper = async () => {
   try {
     const network: BitcoinNetwork = "regtest";
 
-    const p2trTing = getP2TR(DEPOSIT_SEED_PHRASE);
+    const p2trTing = getP2TR(DEPOSIT_SEED_PHRASE_DEFAULT);
     const address = p2trTing.address;
 
     const resTing = await scanTxOutSet(address || "");

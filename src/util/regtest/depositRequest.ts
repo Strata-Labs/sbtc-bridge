@@ -140,12 +140,12 @@ function toXOnly(pubkey: Buffer): Buffer {
 
 export const createDepositScriptP2TROutput = async (
   senderPrivKeyWIF: string,
+  senderAddress: string,
   stxDepositAddress: string,
   amount: number,
   signersPublicKey: string,
   maxFee: number,
-  lockTime: number,
-  senderAddress: string
+  lockTime: number
 ) => {
   try {
     // const internalPubkey = hexToUint8Array(
