@@ -155,7 +155,9 @@ export const createDepositTx = async (
   stxAddress: string,
   senderSeedPhrase: string,
   signerPubKey: string,
-  amount: number
+  amount: number,
+  maxFee: number,
+  lockTime: number
 ) => {
   try {
     console.log("createPTRAddress");
@@ -183,9 +185,6 @@ export const createDepositTx = async (
     // stx
     const stxDepositAddress = stxAddress;
 
-    const maxFee = 10000;
-    const lockTime = 25;
-
     // Create and sign the Taproot transaction with deposit and reclaim scripts
     const txHex = await createDepositScriptP2TROutput(
       senderPrivKeyWIF,
@@ -206,14 +205,10 @@ export const createDepositTx = async (
     const testTx = await testMempoolAccept(txHex);
     console.log("testTx", testTx);
 
-    return decodedTx;
-    throw new Error("stop");
-
     const id = await sendRawTransaction(txHex);
     console.log("id", id);
 
-    const mineAndCheck = await mineAndCheckId(id);
-    console.log("mineAndCheck", mineAndCheck);
+    return decodedTx;
   } catch (err: any) {
     console.error("Error creating PTR address:", err);
     throw new Error(err);

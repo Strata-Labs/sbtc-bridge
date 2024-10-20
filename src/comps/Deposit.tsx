@@ -13,7 +13,15 @@ import { Heading, SubText } from "@/comps/core/Heading";
 import { FlowForm } from "@/comps/core/Form";
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
 import { createDepositTx } from "../util/regtest/lib";
-import { getP2WSH } from "@/util/regtest/wallet";
+import {
+  getP2WSH,
+  hexToUint8Array,
+  uint8ArrayToHexString,
+} from "@/util/regtest/wallet";
+import {
+  createDepositScript,
+  createReclaimScript,
+} from "@/util/regtest/depositRequest";
 /* 
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -259,17 +267,59 @@ const DepositFlowConfirm = ({
     console.log("DepositFlowConfirm - handle next step");
     console.log("createPTRAddress", createDepositTx);
 
+    const lockTime = 25;
+
+    const maxFee = 10000;
+
     const senderSeedPhrase = localStorage.getItem("seedPhrase") || "";
 
+    //const recipientBytes = Buffer.from(hexToUint8Array(stxDepositAddress));
+
     const signerPubKey = localStorage.getItem("signerPubKey") || "";
+    // Create the reclaim script and convert to Buffer
+    const reclaimScript = Buffer.from(
+      createReclaimScript(lockTime, new Uint8Array([]))
+    );
+
+    const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
+    console.log("reclaimScriptHex", reclaimScriptHex);
+
+    const signerUint8Array = hexToUint8Array(signerPubKey);
+
+    const recipientBytes = Buffer.from(hexToUint8Array(stxAddress));
+
+    const depositScript = Buffer.from(
+      createDepositScript(signerUint8Array, maxFee, recipientBytes)
+    );
+    // convert buffer to hex
+    const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
 
     const testThing = await createDepositTx(
       stxAddress,
       senderSeedPhrase,
       signerPubKey,
-      amount
+      amount,
+      maxFee,
+      lockTime
     );
+
     console.log("testThing", testThing);
+    const emilyReqPayload = {
+      bitcoin_txid: testThing.txId,
+      bitcoin_tx_output_index: 0,
+      reclaim_script: reclaimScriptHex,
+      deposit_script: depositScriptHexPreHash,
+    };
+
+    // make emily post request
+    const response = await fetch("/api/emilyDeposit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(emilyReqPayload),
+    });
+
     //setStep(DEPOSIT_STEP.REVIEW);
   };
   const handlePrevClick = () => {

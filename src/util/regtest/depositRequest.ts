@@ -33,7 +33,7 @@ const flipEndian = (buffer: Uint8Array): Uint8Array => {
   return flipped;
 };
 
-const createDepositScript = (
+export const createDepositScript = (
   signersPubKey: Uint8Array, // Use Uint8Array instead of Buffer
   maxFee: number,
   recipientBytes: Uint8Array // Use Uint8Array instead of Buffer
@@ -79,7 +79,7 @@ const createDepositScript = (
 };
 //the max fee is 8 bytes, big endian
 
-const createReclaimScript = (
+export const createReclaimScript = (
   lockTime: number,
   additionalScriptBytes: Uint8Array // Use Uint8Array for additional script data
 ): Uint8Array => {
