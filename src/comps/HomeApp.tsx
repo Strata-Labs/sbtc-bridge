@@ -52,6 +52,7 @@ const HomeApp = () => {
         />
         <div className="w-screen flex "></div>
         {selectedSection === SECTION.DEPOSIT && <DepositFlow />}
+        {selectedSection === SECTION.WITHDRAW && <p>Coming Soon :)</p>}
         {selectedSection === SECTION.HISTORY && <HistoryView />}
 
         <Faqs />

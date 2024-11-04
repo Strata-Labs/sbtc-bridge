@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const Header = () => {
   return (
@@ -9,14 +10,16 @@ const Header = () => {
         }}
         className="flex-1  flex-row flex items-center justify-between"
       >
-        <div className="">
-          <Image
-            src="/images/StacksNav.svg"
-            alt="Stacks Logo"
-            width={100}
-            height={100}
-          />
-        </div>
+        <Link href="/">
+          <div className="">
+            <Image
+              src="/images/StacksNav.svg"
+              alt="Stacks Logo"
+              width={100}
+              height={100}
+            />
+          </div>
+        </Link>
         <div className="flex flex-row gap-10 items-center">
           <h5 className="font-Matter text-xs tracking-wide ">LEARN MORE</h5>
           <h4 className="font-Matter text-xs tracking-wide ">HISTORY</h4>
