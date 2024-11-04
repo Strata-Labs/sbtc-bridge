@@ -9,14 +9,14 @@ import { HistoryTx, HistoryTxProps } from "./Status";
 
 const HistoryView = () => {
   const [history, setHistory] = useState<HistoryTxProps[]>([
-    {
-      txid: "asdfasdfasdfasdfasdf",
-      vout: 0,
-      scriptPubKey: "",
-      desc: "",
-      amount: 0,
-      height: 0,
-    },
+    // {
+    //   txid: "asdfasdfasdfasdfasdf",
+    //   vout: 0,
+    //   scriptPubKey: "",
+    //   desc: "",
+    //   amount: 0,
+    //   height: 0,
+    // },
   ]);
   const handleSubmit = async (value: string | undefined) => {
     try {
