@@ -24,9 +24,14 @@ const HistoryView = () => {
         // call the bitcoin api to get the history of address
         console.log("value", value);
         const history = await scanTxOutSet(value);
-        if (history && history.unspents > 0) {
+        if (history) {
           console.log("history", history);
           setHistory(history.unspents);
+          if (history.unspents > 0) {
+            window.alert("No history found for this address");
+          }
+        } else {
+          window.alert("Failed to get history for this address");
         }
       }
     } catch (err: any) {
