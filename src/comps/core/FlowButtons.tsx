@@ -15,7 +15,7 @@ export const PrimaryButton = ({
   return (
     <button
       type={type}
-      className="w-48 rounded-lg py-3 flex justify-center items-center flex-row bg-orange"
+      className="w-40 rounded-lg py-3 flex justify-center items-center flex-row bg-orange"
       onClick={onClick}
     >
       <p
@@ -40,7 +40,7 @@ export const SecondaryButton = ({
     <button
       onClick={onClick}
       type={type}
-      className="w-48 rounded-lg py-3 flex justify-center items-center flex-row bg-lightOrange"
+      className="w-40 rounded-lg py-3 flex justify-center items-center flex-row bg-lightOrange"
     >
       <p
         className={classNames(

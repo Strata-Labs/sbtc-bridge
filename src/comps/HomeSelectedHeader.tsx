@@ -17,7 +17,7 @@ type SectionActionProps = {
   activeSection: SECTION;
   text: string;
 };
-const SectionAction = ({
+export const SectionAction = ({
   section,
   activeSection,
   text,

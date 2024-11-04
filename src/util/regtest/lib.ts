@@ -25,6 +25,7 @@ import {
 } from "./wallet";
 import { createDepositScriptP2TROutput } from "./depositRequest";
 import { mineAndCheckId } from "./walletManagement";
+import { c32addressDecode } from "c32check";
 
 const loadedWalletAddress = "bcrt1qgvg8arxt83wyny36g7elnz8mq37rgvwh6d6s52";
 const secondWallet = "bcrt1qqtw6azqvurzrrhyrwzlknd5rve4pkgnas3sgc9";
@@ -160,6 +161,23 @@ export const createDepositTx = async (
   lockTime: number
 ) => {
   try {
+    // serialize the stx address
+    const [version, hash] = c32addressDecode(
+      "SP2RZRSEQHCFPHSBHJTKNWT86W6VSK51M7BCMY06Q"
+    );
+    // Convert the version to a 1-byte Uint8Array
+    const versionArray = new Uint8Array([version]);
+
+    // Convert the public key hash (hex string) to Uint8Array
+    const hashArray = Uint8Array.from(Buffer.from(hash, "hex"));
+
+    // Combine the version and hash into a single Uint8Array
+    const serializedAddress = new Uint8Array(
+      versionArray.length + hashArray.length
+    );
+    serializedAddress.set(versionArray, 0);
+    serializedAddress.set(hashArray, versionArray.length);
+
     console.log("createPTRAddress");
 
     const DEPOSIT_SEED_PHRASE = senderSeedPhrase;
@@ -189,7 +207,7 @@ export const createDepositTx = async (
     const txHex = await createDepositScriptP2TROutput(
       senderPrivKeyWIF,
       p2wsh.address || "",
-      stxDepositAddress || "",
+      serializedAddress || "",
       amount,
       signerPubKey,
       maxFee,

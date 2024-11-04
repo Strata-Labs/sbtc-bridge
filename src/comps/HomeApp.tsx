@@ -6,11 +6,13 @@ import Image from "next/image";
 import Faqs from "./Faqs";
 import SelectedSection from "./HomeSelectedHeader";
 import DepositFlow from "./Deposit";
+import HistoryView from "./HistoryView";
 
 export enum SECTION {
   DEPOSIT = "DEPOSIT",
   WITHDRAW = "WITHDRAW",
   HISTORY = "HISTORY",
+  STATUS = "STATUS",
 }
 
 const COLORS = {
@@ -40,10 +42,6 @@ const HomeApp = () => {
     return null;
   }
 
-  if (typeof window == "undefined") {
-    return "loading...";
-  }
-
   return (
     <>
       <Header />
@@ -53,7 +51,8 @@ const HomeApp = () => {
           onClickSection={(section) => setSelectedSection(section)}
         />
         <div className="w-screen flex "></div>
-        <DepositFlow />
+        {selectedSection === SECTION.DEPOSIT && <DepositFlow />}
+        {selectedSection === SECTION.HISTORY && <HistoryView />}
 
         <Faqs />
       </div>

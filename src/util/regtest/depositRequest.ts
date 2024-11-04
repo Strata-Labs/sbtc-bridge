@@ -141,7 +141,7 @@ function toXOnly(pubkey: Buffer): Buffer {
 export const createDepositScriptP2TROutput = async (
   senderPrivKeyWIF: string,
   senderAddress: string,
-  stxDepositAddress: string,
+  stxDepositAddress: Uint8Array,
   amount: number,
   signersPublicKey: string,
   maxFee: number,
@@ -184,7 +184,7 @@ export const createDepositScriptP2TROutput = async (
 
     // Create the deposit script and convert to Buffer
     console.log("stxDepositAddress", stxDepositAddress);
-    const recipientBytes = Buffer.from(hexToUint8Array(stxDepositAddress));
+    const recipientBytes = stxDepositAddress;
     const depositScript = Buffer.from(
       createDepositScript(internalPubkey, maxFee, recipientBytes)
     );

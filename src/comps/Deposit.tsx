@@ -1,7 +1,10 @@
 "use client";
+
 import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import { classNames } from "@/util";
+import { c32addressDecode } from "c32check";
+
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import {
   ChevronDownIcon,
@@ -92,13 +95,24 @@ const SetSignerPubkey = ({
   handleUpdateSignerPubKey,
   signerPubComponentKey,
 }: SetSignerPubkeyProps) => {
-  const [signerPubKey, setSignerPubkey] = useState("");
+  const [signerPubKey, setSignerPubkey] = useState(
+    "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0"
+  );
 
   useEffect(() => {
     // ge the seed phrase from local storage
     const signerPubKey = localStorage.getItem("signerPubKey");
     if (signerPubKey) {
       setSignerPubkey(signerPubKey);
+    } else {
+      // set 50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0 as default
+      localStorage.setItem(
+        "signerPubKey",
+        "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0"
+      );
+      setSignerPubkey(
+        "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0"
+      );
     }
   }, []);
 
@@ -148,7 +162,13 @@ const GenerateBechWallet = () => {
           console.log("p2wsh", p2wsh);
           setIsValid(true);
           setValue(p2wsh.address as any);
+          // set value to local storage to fetch later
+          localStorage.setItem("senderPublicKey", p2wsh.address as any);
         }
+      } else {
+        // window alert
+
+        window.alert("Please set the seed phrase first");
       }
     }
   };
@@ -264,63 +284,83 @@ const DepositFlowConfirm = ({
   stxAddress,
 }: DepositFlowConfirmProps) => {
   const handleNextClick = async () => {
-    console.log("DepositFlowConfirm - handle next step");
-    console.log("createPTRAddress", createDepositTx);
+    try {
+      console.log("DepositFlowConfirm - handle next step");
+      console.log("createPTRAddress", createDepositTx);
 
-    const lockTime = 25;
+      // serialize the stx address
+      const [version, hash] = c32addressDecode(
+        "SP2RZRSEQHCFPHSBHJTKNWT86W6VSK51M7BCMY06Q"
+      );
+      // Convert the version to a 1-byte Uint8Array
+      const versionArray = new Uint8Array([version]);
 
-    const maxFee = 10000;
+      // Convert the public key hash (hex string) to Uint8Array
+      const hashArray = Uint8Array.from(Buffer.from(hash, "hex"));
 
-    const senderSeedPhrase = localStorage.getItem("seedPhrase") || "";
+      // Combine the version and hash into a single Uint8Array
+      const serializedAddress = new Uint8Array(
+        versionArray.length + hashArray.length
+      );
+      serializedAddress.set(versionArray, 0);
+      serializedAddress.set(hashArray, versionArray.length);
+      const lockTime = 25;
 
-    //const recipientBytes = Buffer.from(hexToUint8Array(stxDepositAddress));
+      const maxFee = 10000;
 
-    const signerPubKey = localStorage.getItem("signerPubKey") || "";
-    // Create the reclaim script and convert to Buffer
-    const reclaimScript = Buffer.from(
-      createReclaimScript(lockTime, new Uint8Array([]))
-    );
+      const senderSeedPhrase = localStorage.getItem("seedPhrase") || "";
 
-    const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
-    console.log("reclaimScriptHex", reclaimScriptHex);
+      //const recipientBytes = Buffer.from(hexToUint8Array(stxDepositAddress));
 
-    const signerUint8Array = hexToUint8Array(signerPubKey);
+      const signerPubKey = localStorage.getItem("signerPubKey") || "";
+      // Create the reclaim script and convert to Buffer
+      const reclaimScript = Buffer.from(
+        createReclaimScript(lockTime, new Uint8Array([]))
+      );
 
-    const recipientBytes = Buffer.from(hexToUint8Array(stxAddress));
+      const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
+      console.log("reclaimScriptHex", reclaimScriptHex);
 
-    const depositScript = Buffer.from(
-      createDepositScript(signerUint8Array, maxFee, recipientBytes)
-    );
-    // convert buffer to hex
-    const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
+      const signerUint8Array = hexToUint8Array(signerPubKey);
 
-    const testThing = await createDepositTx(
-      stxAddress,
-      senderSeedPhrase,
-      signerPubKey,
-      amount,
-      maxFee,
-      lockTime
-    );
+      const recipientBytes = Buffer.from(hexToUint8Array(stxAddress));
 
-    console.log("testThing", testThing);
-    const emilyReqPayload = {
-      bitcoin_txid: testThing.txId,
-      bitcoin_tx_output_index: 0,
-      reclaim_script: reclaimScriptHex,
-      deposit_script: depositScriptHexPreHash,
-    };
+      const depositScript = Buffer.from(
+        createDepositScript(signerUint8Array, maxFee, recipientBytes)
+      );
+      // convert buffer to hex
+      const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
 
-    // make emily post request
-    const response = await fetch("/api/emilyDeposit", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(emilyReqPayload),
-    });
+      const testThing = await createDepositTx(
+        stxAddress,
+        senderSeedPhrase,
+        signerPubKey,
+        amount,
+        maxFee,
+        lockTime
+      );
 
-    //setStep(DEPOSIT_STEP.REVIEW);
+      console.log("testThing", testThing);
+      const emilyReqPayload = {
+        bitcoin_txid: testThing.txId,
+        bitcoin_tx_output_index: 0,
+        reclaim_script: reclaimScriptHex,
+        deposit_script: depositScriptHexPreHash,
+      };
+
+      // make emily post request
+      const response = await fetch("/api/emilyDeposit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(emilyReqPayload),
+      });
+
+      setStep(DEPOSIT_STEP.REVIEW);
+    } catch (error) {
+      console.log("error", error);
+    }
   };
   const handlePrevClick = () => {
     setStep(DEPOSIT_STEP.ADDRESS);
@@ -351,7 +391,12 @@ const DepositFlowConfirm = ({
               {localStorage.getItem("seedPhrase") || "N/A"}
             </p>
           </div>
-
+          <div className="flex flex-col gap-1">
+            <SubText>Sender Address</SubText>
+            <p className="text-black font-Matter font-semibold text-sm">
+              {localStorage.getItem("senderPublicKey") || "N/A"}
+            </p>
+          </div>
           <div className="flex flex-col gap-1">
             <SubText>Signer PubKey</SubText>
             <p className="text-black font-Matter break-all font-semibold text-sm">
