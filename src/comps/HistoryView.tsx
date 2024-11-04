@@ -10,7 +10,7 @@ import { HistoryTx, HistoryTxProps } from "./Status";
 const HistoryView = () => {
   const [history, setHistory] = useState<HistoryTxProps[]>([
     {
-      txid: "",
+      txid: "asdfasdfasdfasdfasdf",
       vout: 0,
       scriptPubKey: "",
       desc: "",
