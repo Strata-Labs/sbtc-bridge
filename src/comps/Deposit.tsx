@@ -153,10 +153,8 @@ const SetEmilyUrl = () => {
   );
 };
 
-type SetSignerPubkeyProps = {
-  signerPubComponentKey: number;
-};
-const SetSignerPubkey = ({ signerPubComponentKey }: SetSignerPubkeyProps) => {
+type SetSignerPubkeyProps = {};
+const SetSignerPubkey = () => {
   const [signerPubKey, setSignerPubkey] = useAtom(signerPubKeyAtom);
 
   const handleSubmit = (value: string | undefined) => {
@@ -312,6 +310,13 @@ type DepositFlowConfirmProps = DepositFlowStepProps & {
   handleUpdatingTransactionInfo: (info: TransactionInfo) => void;
 };
 
+type EmilyDepositCreationType = {
+  bitcoinTxid: string;
+  bitcoinTxOutputIndex: number;
+  reclaimScript: string;
+  depositScript: string;
+};
+
 const DepositFlowConfirm = ({
   setStep,
   amount,
@@ -322,6 +327,8 @@ const DepositFlowConfirm = ({
   const bridgeAddress = useAtomValue(bridgeAddressAtom);
 
   const signerPubKey = useAtomValue(signerPubKeyAtom);
+
+  const emilyUrl = useAtomValue(emilyUrlAtom);
 
   const handleNextClick = async () => {
     try {
@@ -389,6 +396,7 @@ const DepositFlowConfirm = ({
         bitcoinTxOutputIndex: 0,
         reclaimScript: reclaimScriptHex,
         depositScript: depositScriptHexPreHash,
+        url: emilyUrl,
       };
 
       // make emily post request
@@ -548,7 +556,6 @@ const DepositFlow = () => {
 
   const [stxAddress, _setStxAddress] = useState("");
   const [amount, _setAmount] = useState(0);
-  const [signerPubComponentKey, setSignerPubComponentKey] = useState(0);
   const [transactionInfo, setTransactionInfo] = useState<TransactionInfo>({
     hex: "",
     txId: "",
@@ -587,7 +594,6 @@ const DepositFlow = () => {
       case DEPOSIT_STEP.CONFIRM:
         return (
           <DepositFlowConfirm
-            key={signerPubComponentKey + "-DepositFlowConfirm"}
             setStep={handleUpdateStep}
             amount={amount}
             stxAddress={stxAddress}
@@ -616,14 +622,9 @@ const DepositFlow = () => {
           margin: "16px 0",
         }}
       />
-      <SetSignerPubkey
-        signerPubComponentKey={signerPubComponentKey}
-        key={signerPubComponentKey + "-SetSignerPubkey"}
-      />
+      <SetSignerPubkey />
 
-      <SetSeedPhraseForDeposit
-        key={signerPubComponentKey + "-SetSeedPhraseForDeposit"}
-      />
+      <SetSeedPhraseForDeposit />
       <SetBitcoinDUrl />
       <SetEmilyUrl />
     </>
