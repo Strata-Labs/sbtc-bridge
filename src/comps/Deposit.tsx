@@ -357,7 +357,7 @@ const DepositFlowConfirm = ({
         "serializedAddressHex",
         uint8ArrayToHexString(serializedAddress)
       );
-      const lockTime = 25;
+      const lockTime = 6000;
 
       const maxFee = 10000;
 
