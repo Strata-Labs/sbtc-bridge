@@ -275,10 +275,14 @@ export const createDepositScriptP2TROutput = async (
           vout: utxo.vout,
           amount: BigInt(Math.round(utxo.amount * 100000000)),
           scriptPubKey: utxo.scriptPubKey,
+          height: utxo.height,
         });
       });
     }
 
+    utxos.sort((a: any, b: any) => a.height - b.height);
+    console.log("utxos", utxos);
+    throw new Error("stop");
     const psbt = new bitcoin.Psbt({ network });
 
     // Add UTXOs as inputs
