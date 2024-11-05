@@ -175,8 +175,6 @@ export const createDepositTx = async (
     console.log("testTing", p2wsh.address);
     console.log("p2wshPrivateKeys", p2wshPrivateKeys);
 
-    const signersPublicKey = createUnspendableTaprootKey();
-
     const network: BitcoinNetwork = "regtest";
 
     const senderPrivKeyWIF = privateKeyToWIF(privateKey, network);
@@ -195,17 +193,14 @@ export const createDepositTx = async (
 
     console.log("txHex", txHex);
     // Broadcast the transaction
-    const decodedTx = await decodeRawTransaction(txHex);
-    console.log("decodedTx", decodedTx);
 
     //console.log("jig", JSON.stringify(decodedTx, null, 2));
     const testTx = await testMempoolAccept(txHex);
     console.log("testTx", testTx);
 
-    const id = await sendRawTransaction(txHex);
-    console.log("id", id);
+    return txHex;
 
-    return decodedTx;
+    //return decodedTx;
   } catch (err: any) {
     console.error("Error creating PTR address:", err);
     throw new Error(err);

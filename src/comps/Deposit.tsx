@@ -30,8 +30,10 @@ import {
   bitcoinDaemonUrlAtom,
   bridgeAddressAtom,
   bridgeSeedPhraseAtom,
+  emilyUrlAtom,
   signerPubKeyAtom,
 } from "@/util/atoms";
+import { decodeRawTransaction, sendRawTransaction } from "@/util/bitcoinClient";
 /* 
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -110,6 +112,38 @@ const SetBitcoinDUrl = () => {
             nameKey="rpcUrl"
             type="text"
             initialValue={bitcoinDaemonUrl}
+            placeholder="Enter string to use as rpc url"
+            handleSubmit={(value) => handleSubmit(value)}
+          ></FlowForm>
+        </>
+      </FlowContainer>
+    </>
+  );
+};
+
+const SetEmilyUrl = () => {
+  const [emilyUrl, setEmilyUrl] = useAtom(emilyUrlAtom);
+
+  const handleSubmit = (value: string | undefined) => {
+    if (value) {
+      // set value to local storage
+
+      setEmilyUrl(value);
+    }
+  };
+
+  return (
+    <>
+      <FlowContainer>
+        <>
+          <div className="w-full flex flex-row items-center justify-between">
+            <Heading>Set Emily API Url </Heading>
+          </div>
+          <SubText>Set the Emily url: {emilyUrl} </SubText>
+          <FlowForm
+            nameKey="rpcUrl"
+            type="text"
+            initialValue={emilyUrl}
             placeholder="Enter string to use as rpc url"
             handleSubmit={(value) => handleSubmit(value)}
           ></FlowForm>
@@ -275,12 +309,14 @@ const DepositFlowAddress = ({
 type DepositFlowConfirmProps = DepositFlowStepProps & {
   amount: number;
   stxAddress: string;
+  handleUpdatingTransactionInfo: (info: TransactionInfo) => void;
 };
 
 const DepositFlowConfirm = ({
   setStep,
   amount,
   stxAddress,
+  handleUpdatingTransactionInfo,
 }: DepositFlowConfirmProps) => {
   const bridgeSeedPhrase = useAtomValue(bridgeSeedPhraseAtom);
   const bridgeAddress = useAtomValue(bridgeAddressAtom);
@@ -293,7 +329,7 @@ const DepositFlowConfirm = ({
       console.log("createPTRAddress", createDepositTx);
 
       // serialize the stx address
-      const [version, hash] = c32addressDecode("stxAddress");
+      const [version, hash] = c32addressDecode(stxAddress);
       // Convert the version to a 1-byte Uint8Array
       const versionArray = new Uint8Array([version]);
 
@@ -302,10 +338,17 @@ const DepositFlowConfirm = ({
 
       // Combine the version and hash into a single Uint8Array
       const serializedAddress = new Uint8Array(
-        versionArray.length + hashArray.length
+        1 + versionArray.length + hashArray.length
       );
-      serializedAddress.set(versionArray, 0);
-      serializedAddress.set(hashArray, versionArray.length);
+      serializedAddress.set(hexToUint8Array("0x05"), 0);
+      serializedAddress.set(versionArray, 1);
+      serializedAddress.set(hashArray, 1 + versionArray.length);
+
+      console.log("serializedAddress", serializedAddress);
+      console.log(
+        "serializedAddressHex",
+        uint8ArrayToHexString(serializedAddress)
+      );
       const lockTime = 25;
 
       const maxFee = 10000;
@@ -328,8 +371,8 @@ const DepositFlowConfirm = ({
       // convert buffer to hex
       const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
 
-      const testThing = await createDepositTx(
-        stxAddress,
+      const txHex = await createDepositTx(
+        serializedAddress,
         senderSeedPhrase,
         signerPubKey,
         amount,
@@ -337,9 +380,12 @@ const DepositFlowConfirm = ({
         lockTime
       );
 
-      console.log("testThing", testThing);
+      const decodedTx = await decodeRawTransaction(txHex);
+      console.log("decodedTx", decodedTx);
+
+      console.log("testThing", txHex);
       const emilyReqPayload = {
-        bitcoinTxid: testThing.txid,
+        bitcoinTxid: decodedTx.txid,
         bitcoinTxOutputIndex: 0,
         reclaimScript: reclaimScriptHex,
         depositScript: depositScriptHexPreHash,
@@ -358,7 +404,14 @@ const DepositFlowConfirm = ({
         throw new Error("Error with the request");
       }
 
+      const id = await sendRawTransaction(txHex);
+      console.log("id", id);
+
       setStep(DEPOSIT_STEP.REVIEW);
+      handleUpdatingTransactionInfo({
+        hex: txHex,
+        txId: id,
+      });
     } catch (error) {
       console.log("error", error);
     }
@@ -515,6 +568,9 @@ const DepositFlow = () => {
     _setAmount(amount);
   };
 
+  const handleUpdatingTransactionInfo = (info: TransactionInfo) => {
+    setTransactionInfo(info);
+  };
   const renderStep = () => {
     switch (step) {
       case DEPOSIT_STEP.AMOUNT:
@@ -535,6 +591,7 @@ const DepositFlow = () => {
             setStep={handleUpdateStep}
             amount={amount}
             stxAddress={stxAddress}
+            handleUpdatingTransactionInfo={handleUpdatingTransactionInfo}
           />
         );
       case DEPOSIT_STEP.REVIEW:
@@ -568,6 +625,7 @@ const DepositFlow = () => {
         key={signerPubComponentKey + "-SetSeedPhraseForDeposit"}
       />
       <SetBitcoinDUrl />
+      <SetEmilyUrl />
     </>
   );
 };

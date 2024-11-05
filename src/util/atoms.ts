@@ -17,6 +17,7 @@ const undefinedStringCheck = (value: string) => {
   - BridgeAddress (cached)
   - BitcoinDaemonUrl (cached)
   - SignerPubKey (cached)
+  - EmilyUrl (cached)
 */
 
 const CoreBridgeSeedPhrase = atom<string>("DEPOSIT");
@@ -92,5 +93,23 @@ signerPubKeyAtom.onMount = (setAtom) => {
   const signerPubKey = localStorage.getItem(signerPubKeyStoreKey);
   if (signerPubKey) {
     if (!undefinedStringCheck(signerPubKey)) setAtom(signerPubKey);
+  }
+};
+
+const CoreEmilyUrl = atom<string>("http://localhost:3031");
+const emilyUrlStoreKey = "emilyUrl";
+
+export const emilyUrlAtom = atom(
+  (get) => get(CoreEmilyUrl),
+  (_get, set, update: string) => {
+    localStorage.setItem(emilyUrlStoreKey, update);
+    set(CoreEmilyUrl, update);
+  }
+);
+
+emilyUrlAtom.onMount = (setAtom) => {
+  const emilyUrl = localStorage.getItem(emilyUrlStoreKey);
+  if (emilyUrl) {
+    if (!undefinedStringCheck(emilyUrl)) setAtom(emilyUrl);
   }
 };

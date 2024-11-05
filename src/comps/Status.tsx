@@ -72,6 +72,23 @@ const Status = () => {
       window.alert("Error fetching transaction details");
     }
   };
+
+  const handleDetermineIfSbtcDeposit = (txInfo: BitcoinTransactionResponse) => {
+    if (txDetails) {
+      // determin if any of the outputs may be a depoist tx
+      // this logic will def need to be cleaned up eventaully
+      // loop throug the vouts and see if any of scriptPubKey types is "witness_v1_taproot"
+
+      for (let i = 0; i < txInfo.vout.length; i++) {
+        if (
+          txInfo.vout[i].scriptPubKey &&
+          txInfo.vout[i].scriptPubKey.type === "witness_v1_taproot"
+        ) {
+          return true;
+        }
+      }
+    }
+  };
   return (
     <StatusContainer>
       <>

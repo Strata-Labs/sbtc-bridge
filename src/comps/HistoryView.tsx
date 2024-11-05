@@ -18,6 +18,9 @@ const HistoryView = () => {
     //   height: 0,
     // },
   ]);
+
+  const [totalBitcoinHeld, setTotalBitcoinHeld] = useState<number>(0);
+
   const handleSubmit = async (value: string | undefined) => {
     try {
       if (value) {
@@ -25,11 +28,16 @@ const HistoryView = () => {
         console.log("value", value);
         const history = await scanTxOutSet(value);
         if (history) {
-          console.log("history", history);
-          setHistory(history.unspents);
-          if (history.unspents > 0) {
+          if (history.unspents === 0) {
             window.alert("No history found for this address");
           }
+          const totalBalance = history.unspents.reduce(
+            (acc: number, utxo: HistoryTxProps) => acc + utxo.amount,
+            0
+          );
+          console.log("history", history);
+          setHistory(history.unspents);
+          setTotalBitcoinHeld(totalBalance);
         } else {
           window.alert("Failed to get history for this address");
         }
@@ -48,6 +56,10 @@ const HistoryView = () => {
             <Heading>Address Tx History</Heading>
           </div>
           <SubText>scantxoutset </SubText>
+          {totalBitcoinHeld !== 0 && (
+            <SubText>Total Balance {totalBitcoinHeld}</SubText>
+          )}
+
           <FlowForm
             nameKey="SignerPubKey"
             type="text"

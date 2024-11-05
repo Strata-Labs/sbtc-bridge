@@ -93,6 +93,7 @@ const TransferAction = () => {
 
       const psbt = new bitcoin.Psbt({ network });
 
+      console.log("inputs", inputs);
       // Add inputs with nonWitnessUtxo for legacy address
       inputs.forEach((input) => {
         psbt.addInput({
