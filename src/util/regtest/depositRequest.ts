@@ -193,7 +193,7 @@ export const createDepositScriptP2TROutput = async (
     console.log("depositScriptHexPreHash", depositScriptHexPreHash);
     console.log("depositScript", depositScript);
 
-    // // Hash the leaf scripts using tapLeafHash
+    //  Hash the leaf scripts using tapLeafHash
     const depositScriptHash = bip341.tapleafHash({ output: depositScript });
     console.log("depositScriptHash", depositScriptHash);
     const depositScriptHashHex = uint8ArrayToHexString(depositScriptHash);
@@ -234,7 +234,13 @@ export const createDepositScriptP2TROutput = async (
     const tweakHex = uint8ArrayToHexString(tweak);
     console.log("tweakHex", tweakHex);
     // Step 2: Apply the tweak to the internal public key to get the tweaked Taproot output key
-    const taprootPubKey = bip341.tweakKey(internalPubkey, tweak);
+
+    const NUMS_X_COORDINATE = new Uint8Array([
+      0x50, 0x92, 0x9b, 0x74, 0xc1, 0xa0, 0x49, 0x54, 0xb7, 0x8b, 0x4b, 0x60,
+      0x35, 0xe9, 0x7a, 0x5e, 0x07, 0x8a, 0x5a, 0x0f, 0x28, 0xec, 0x96, 0xd5,
+      0x47, 0xbf, 0xee, 0x9a, 0xce, 0x80, 0x3a, 0xc0,
+    ]);
+    const taprootPubKey = bip341.tweakKey(NUMS_X_COORDINATE, tweak);
     console.log("taprootPubKey", taprootPubKey);
 
     if (taprootPubKey === null) {
