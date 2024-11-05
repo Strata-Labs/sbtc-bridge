@@ -1,3 +1,5 @@
+import { bitcoinDaemonUrlAtom, store } from "./atoms";
+
 // Type definitions
 type RpcRequest = {
   rpcMethod: string;
@@ -20,6 +22,8 @@ const rpcRequest = async (
   rpcMethod: string,
   params: any[] = []
 ): Promise<any> => {
+  const bitcoinDUrl = store.get(bitcoinDaemonUrlAtom);
+
   const response = await fetch("/api/bitcoind", {
     method: "POST",
     headers: {
@@ -28,6 +32,7 @@ const rpcRequest = async (
     body: JSON.stringify({
       rpcMethod,
       params,
+      bitcoinDUrl,
     }),
   });
 

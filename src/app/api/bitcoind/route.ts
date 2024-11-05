@@ -36,6 +36,7 @@ type RpcRequestParams = any[];
 type RpcRequest = {
   rpcMethod: RpcMethods;
   params: RpcRequestParams;
+  bitcoinDUrl: string;
 };
 
 type RpcResponse = {
@@ -48,7 +49,8 @@ const rpcPassword = "devnet";
 
 const rpcHandlerCore = async (
   method: RpcMethods,
-  params: RpcRequestParams
+  params: RpcRequestParams,
+  bitcoinDUrl: string
 ): Promise<any> => {
   const headers = {
     "Content-Type": "application/json",
@@ -64,7 +66,7 @@ const rpcHandlerCore = async (
   });
 
   try {
-    const response = await fetch(rpcUrl, {
+    const response = await fetch(bitcoinDUrl, {
       method: "POST",
       headers: headers,
       body: body,
@@ -84,7 +86,7 @@ const rpcHandlerCore = async (
 
 export async function POST(req: NextRequest) {
   try {
-    const { rpcMethod, params }: RpcRequest = await req.json();
+    const { rpcMethod, params, bitcoinDUrl }: RpcRequest = await req.json();
 
     if (!rpcMethod || !Object.values(RpcMethods).includes(rpcMethod)) {
       return NextResponse.json(
@@ -93,7 +95,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await rpcHandlerCore(rpcMethod, params);
+    const result = await rpcHandlerCore(rpcMethod, params, bitcoinDUrl);
     return NextResponse.json({ result }, { status: 200 });
   } catch (error) {
     return NextResponse.json(

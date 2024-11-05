@@ -119,12 +119,15 @@ const Status = () => {
         vout: vout,
         url: emilyUrl,
       };
+      // create search params for the url from the payload
+      const searchParams = new URLSearchParams(emilyGetPayload as any);
+
       const response = await fetch("/api/emilyDeposit", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(emilyGetPayload),
+        //body: JSON.stringify(emilyGetPayload),
       });
 
       console.log("handleFetchFromEmily -> response", response);
