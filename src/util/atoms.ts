@@ -58,7 +58,7 @@ bridgeAddressAtom.onMount = (setAtom) => {
 
 const DEFAULT_BITCOIN_D_URL = "http://bitcoin:18443";
 
-const CoreBitcoinDaemonUrl = atom<string>(DEFAULT_BITCOIN_D_URL);
+const CoreBitcoinDaemonUrl = atom<string>("");
 const bitcoinDaemonUrlStoreKey = "bitcoinDaemonUrl";
 
 export const bitcoinDaemonUrlAtom = atom(
@@ -73,6 +73,8 @@ bitcoinDaemonUrlAtom.onMount = (setAtom) => {
   const bitcoinDaemonUrl = localStorage.getItem(bitcoinDaemonUrlStoreKey);
   if (bitcoinDaemonUrl) {
     if (!undefinedStringCheck(bitcoinDaemonUrl)) setAtom(bitcoinDaemonUrl);
+  } else {
+    setAtom(DEFAULT_BITCOIN_D_URL);
   }
 };
 

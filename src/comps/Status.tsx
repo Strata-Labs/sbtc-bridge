@@ -122,13 +122,16 @@ const Status = () => {
       // create search params for the url from the payload
       const searchParams = new URLSearchParams(emilyGetPayload as any);
 
-      const response = await fetch("/api/emilyDeposit", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        //body: JSON.stringify(emilyGetPayload),
-      });
+      const response = await fetch(
+        `/api/emilyDeposit?${searchParams.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          //body: JSON.stringify(emilyGetPayload),
+        }
+      );
 
       console.log("handleFetchFromEmily -> response", response);
 
@@ -141,145 +144,147 @@ const Status = () => {
     }
   };
   return (
-    <StatusContainer>
-      <>
-        <div className="w-full flex flex-row items-center justify-between">
-          <Heading>Transaction Status</Heading>
-        </div>
-        {txDetails ? (
-          <>
-            <div className="flex flex-col  gap-2">
-              <div className="flex flex-col gap-1">
-                <SubText>TxId</SubText>
-                <p className="text-black font-Matter font-semibold text-sm">
-                  {txDetails.txid}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1">
-                <SubText>Hash</SubText>
-                <p className="text-black font-Matter font-semibold text-sm">
-                  {txDetails.hash}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1">
-                <SubText>Size</SubText>
-                <p className="text-black font-Matter font-semibold text-sm">
-                  {txDetails.size}
-                </p>
-              </div>
+    <>
+      <StatusContainer>
+        <>
+          <div className="w-full flex flex-row items-center justify-between">
+            <Heading>Transaction Status</Heading>
+          </div>
+          {txDetails ? (
+            <>
+              <div className="flex flex-col  gap-2">
+                <div className="flex flex-col gap-1">
+                  <SubText>TxId</SubText>
+                  <p className="text-black font-Matter font-semibold text-sm">
+                    {txDetails.txid}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <SubText>Hash</SubText>
+                  <p className="text-black font-Matter font-semibold text-sm">
+                    {txDetails.hash}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <SubText>Size</SubText>
+                  <p className="text-black font-Matter font-semibold text-sm">
+                    {txDetails.size}
+                  </p>
+                </div>
 
-              <div className="flex flex-col gap-1">
-                <SubText>vSize</SubText>
-                <p className="text-black font-Matter break-all font-semibold text-sm">
-                  {txDetails.vsize}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1">
-                <SubText>Weight</SubText>
-                <p className="text-black font-Matter break-all font-semibold text-sm">
-                  {txDetails.weight}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1">
-                <SubText>LockTime</SubText>
-                <p className="text-black font-Matter break-all font-semibold text-sm">
-                  {txDetails.locktime}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1">
-                <SubText>Blockhash</SubText>
-                <p className="text-black font-Matter break-all font-semibold text-sm">
-                  {txDetails.blockhash}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1">
-                <SubText>Confirmations</SubText>
-                <p className="text-black font-Matter break-all font-semibold text-sm">
-                  {txDetails.confirmations}
-                </p>
-              </div>
-              <div className="flex flex-col gap-1">
-                <SubText>Blocktime</SubText>
-                <p className="text-black font-Matter break-all font-semibold text-sm">
-                  {txDetails.blocktime}
-                </p>
-              </div>
-              {
-                // vin
-                txDetails.vin.map((vin, index) => {
-                  return (
-                    <div className="flex flex-col m-2 gap-2" key={index}>
-                      <div className="flex flex-col gap-1">
-                        <SubText>V In</SubText>
-                        <p className="text-black font-Matter break-all font-semibold text-sm">
-                          {vin.txid}
-                        </p>
+                <div className="flex flex-col gap-1">
+                  <SubText>vSize</SubText>
+                  <p className="text-black font-Matter break-all font-semibold text-sm">
+                    {txDetails.vsize}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <SubText>Weight</SubText>
+                  <p className="text-black font-Matter break-all font-semibold text-sm">
+                    {txDetails.weight}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <SubText>LockTime</SubText>
+                  <p className="text-black font-Matter break-all font-semibold text-sm">
+                    {txDetails.locktime}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <SubText>Blockhash</SubText>
+                  <p className="text-black font-Matter break-all font-semibold text-sm">
+                    {txDetails.blockhash}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <SubText>Confirmations</SubText>
+                  <p className="text-black font-Matter break-all font-semibold text-sm">
+                    {txDetails.confirmations}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <SubText>Blocktime</SubText>
+                  <p className="text-black font-Matter break-all font-semibold text-sm">
+                    {txDetails.blocktime}
+                  </p>
+                </div>
+                {
+                  // vin
+                  txDetails.vin.map((vin, index) => {
+                    return (
+                      <div className="flex flex-col m-2 gap-2" key={index}>
+                        <div className="flex flex-col gap-1">
+                          <SubText>V In</SubText>
+                          <p className="text-black font-Matter break-all font-semibold text-sm">
+                            {vin.txid}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <SubText>Sequence</SubText>
+                          <p className="text-black font-Matter break-all font-semibold text-sm">
+                            {vin.sequence}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <SubText>Value</SubText>
+                          <p className="text-black font-Matter break-all font-semibold text-sm">
+                            {vin.scriptSig.hex}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <SubText>Sequence</SubText>
-                        <p className="text-black font-Matter break-all font-semibold text-sm">
-                          {vin.sequence}
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <SubText>Value</SubText>
-                        <p className="text-black font-Matter break-all font-semibold text-sm">
-                          {vin.scriptSig.hex}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })
-              }
-              {
-                // vout
-                txDetails.vout.map((vout, index) => {
-                  return (
-                    <div className="flex flex-col m-2 gap-2" key={index}>
-                      <div className="flex flex-col gap-1">
-                        <SubText>v Out</SubText>
-                        <p className="text-black font-Matter break-all font-semibold text-sm">
-                          {vout.n}
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <SubText>Script Pub Key</SubText>
-                        <p className="text-black font-Matter break-all font-semibold text-sm">
-                          {vout.scriptPubKey.hex}
-                        </p>
-                      </div>
+                    );
+                  })
+                }
+                {
+                  // vout
+                  txDetails.vout.map((vout, index) => {
+                    return (
+                      <div className="flex flex-col m-2 gap-2" key={index}>
+                        <div className="flex flex-col gap-1">
+                          <SubText>v Out</SubText>
+                          <p className="text-black font-Matter break-all font-semibold text-sm">
+                            {vout.n}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <SubText>Script Pub Key</SubText>
+                          <p className="text-black font-Matter break-all font-semibold text-sm">
+                            {vout.scriptPubKey.hex}
+                          </p>
+                        </div>
 
-                      <div className="flex flex-col gap-1">
-                        <SubText>Script Pub Key reqSig</SubText>
-                        <p className="text-black font-Matter break-all font-semibold text-sm">
-                          {vout.scriptPubKey.reqSigs}
-                        </p>
+                        <div className="flex flex-col gap-1">
+                          <SubText>Script Pub Key reqSig</SubText>
+                          <p className="text-black font-Matter break-all font-semibold text-sm">
+                            {vout.scriptPubKey.reqSigs}
+                          </p>
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          <SubText>Script Pub Key type</SubText>
+                          <p className="text-black font-Matter break-all font-semibold text-sm">
+                            {vout.scriptPubKey.type}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <SubText>Script Pub Key type</SubText>
-                        <p className="text-black font-Matter break-all font-semibold text-sm">
-                          {vout.scriptPubKey.type}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })
-              }
-              <div className="w-full flex-row flex justify-between items-center">
-                <SecondaryButton onClick={() => console.log()}>
-                  BACK
-                </SecondaryButton>
-                <PrimaryButton onClick={() => console.log()}>
-                  VIEW
-                </PrimaryButton>
+                    );
+                  })
+                }
+                <div className="w-full flex-row flex justify-between items-center">
+                  <SecondaryButton onClick={() => console.log()}>
+                    BACK
+                  </SecondaryButton>
+                  <PrimaryButton onClick={() => console.log()}>
+                    VIEW
+                  </PrimaryButton>
+                </div>
               </div>
-            </div>
-          </>
-        ) : (
-          <SubText>Transaction Type</SubText>
-        )}
-      </>
-    </StatusContainer>
+            </>
+          ) : (
+            <SubText>Failed Type</SubText>
+          )}
+        </>
+      </StatusContainer>
+    </>
   );
 };
 

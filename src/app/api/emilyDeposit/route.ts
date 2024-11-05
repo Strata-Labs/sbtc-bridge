@@ -13,10 +13,10 @@ export async function POST(req: NextRequest) {
     const body: CreateDepositRequestBody = await req.json();
 
     const paramsBody = {
-      bitcoin_txid: body.bitcoinTxid,
-      bitcoin_tx_output_index: body.bitcoinTxOutputIndex,
-      reclaim_script: body.reclaimScript,
-      deposit_script: body.depositScript,
+      bitcoinTxid: body.bitcoinTxid,
+      bitcoinTxOutputIndex: body.bitcoinTxOutputIndex,
+      reclaimScript: body.reclaimScript,
+      depositScript: body.depositScript,
     };
     // Forward the request to the Rust server
     const response = await fetch(`${body.url}/deposit`, {
@@ -73,9 +73,16 @@ interface fetchFromEmilyRequestBody {
 }
 export async function GET(req: NextRequest) {
   try {
-    const body: fetchFromEmilyRequestBody = await req.json();
+    //const body: fetchFromEmilyRequestBody = await req.json();
+    // get the search params from the request
+    const searchParams = req.nextUrl.searchParams;
+    const bitcoinTxid = searchParams.get("bitcoinTxid");
+    const vout = searchParams.get("vout");
+    const emilyUrl = searchParams.get("url");
 
-    const url = `${body.url}/deposit/${body.bitcoinTxid}/${body.vout}`;
+    // Construct the URL for the external request
+    const url = `${emilyUrl}/deposit/${bitcoinTxid}/${vout}`;
+    console.log("url", url);
     console.log("url", url);
 
     const response = await fetch(url, {
