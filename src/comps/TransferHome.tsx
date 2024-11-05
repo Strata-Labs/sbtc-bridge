@@ -18,6 +18,8 @@ import { ECPairFactory, ECPairAPI, TinySecp256k1Interface } from "ecpair";
 import { useState } from "react";
 import { SecondaryButton } from "./core/FlowButtons";
 import { useRouter } from "next/navigation";
+import { useAtom, useAtomValue } from "jotai";
+import { bitcoinDaemonUrlAtom } from "@/util/atoms";
 
 const ECPair: ECPairAPI = ECPairFactory(ecc);
 
@@ -57,7 +59,7 @@ export const TransferAction = () => {
   const [txId, setTxId] = useState<string | undefined>(undefined);
 
   const router = useRouter();
-
+  const bitcoinDaemonUrl = useAtomValue(bitcoinDaemonUrlAtom);
   const handleSubmit = async (value: any) => {
     console.log("value", value);
     try {

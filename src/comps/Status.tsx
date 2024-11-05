@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getRawTransaction } from "@/util/bitcoinClient";
 import { useAtom, useAtomValue } from "jotai";
-import { emilyUrlAtom } from "@/util/atoms";
+import { bitcoinDaemonUrlAtom, emilyUrlAtom } from "@/util/atoms";
 
 type BitcoinTransactionResponse = {
   txid: string;
@@ -73,6 +73,7 @@ const Status = () => {
   const searchParams = useSearchParams();
 
   const emilyUrl = useAtomValue(emilyUrlAtom);
+  const bitcoinDaemonUrl = useAtomValue(bitcoinDaemonUrlAtom);
 
   useEffect(() => {
     // get the txId from the query params
@@ -253,12 +254,14 @@ const Status = () => {
                               {vin.sequence}
                             </p>
                           </div>
-                          <div className="flex flex-col gap-1">
-                            <SubText>Value</SubText>
-                            <p className="text-black font-Matter break-all font-semibold text-sm">
-                              {vin.scriptSig.hex}
-                            </p>
-                          </div>
+                          {vin.scriptSig && vin.scriptSig.hex && (
+                            <div className="flex flex-col gap-1">
+                              <SubText>Value</SubText>
+                              <p className="text-black font-Matter break-all font-semibold text-sm">
+                                {vin.scriptSig.hex}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       );
                     })
