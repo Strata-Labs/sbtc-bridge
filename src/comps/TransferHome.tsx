@@ -92,10 +92,13 @@ export const TransferAction = () => {
           vout: utxo.vout,
           amount: utxo.amount,
           rawTxHex: rawTxHex.hex, // Store raw transaction hex for signing
+          height: utxo.height,
         });
         totalInput += utxo.amount;
         if (totalInput >= amount) break;
       }
+
+      inputs.sort((a: any, b: any) => a.height - b.height);
 
       if (totalInput < amount) throw new Error("Insufficient funds");
 
