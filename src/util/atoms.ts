@@ -18,6 +18,7 @@ const undefinedStringCheck = (value: string) => {
   - BitcoinDaemonUrl (cached)
   - SignerPubKey (cached)
   - EmilyUrl (cached)
+  - DepositMaxFee (cached)
 */
 
 const CoreBridgeSeedPhrase = atom<string>("DEPOSIT");
@@ -113,5 +114,23 @@ emilyUrlAtom.onMount = (setAtom) => {
   const emilyUrl = localStorage.getItem(emilyUrlStoreKey);
   if (emilyUrl) {
     if (!undefinedStringCheck(emilyUrl)) setAtom(emilyUrl);
+  }
+};
+
+const CoreDepositMaxFee = atom<number>(80000);
+const depositMaxFeeStoreKey = "depositMaxFee";
+
+export const depositMaxFeeAtom = atom(
+  (get) => get(CoreDepositMaxFee),
+  (_get, set, update: number) => {
+    localStorage.setItem(depositMaxFeeStoreKey, update.toString());
+    set(CoreDepositMaxFee, update);
+  }
+);
+
+depositMaxFeeAtom.onMount = (setAtom) => {
+  const depositMaxFee = localStorage.getItem(depositMaxFeeStoreKey);
+  if (depositMaxFee) {
+    if (!undefinedStringCheck(depositMaxFee)) setAtom(parseInt(depositMaxFee));
   }
 };

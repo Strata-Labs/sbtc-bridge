@@ -30,6 +30,7 @@ import {
   bitcoinDaemonUrlAtom,
   bridgeAddressAtom,
   bridgeSeedPhraseAtom,
+  depositMaxFeeAtom,
   emilyUrlAtom,
   signerPubKeyAtom,
 } from "@/util/atoms";
@@ -186,6 +187,38 @@ const SetSignerPubkey = () => {
   );
 };
 
+const MaxFeeAmountView = () => {
+  const [maxFee, setMaxFee] = useAtom(depositMaxFeeAtom);
+
+  const handleSubmit = (value: string | undefined) => {
+    if (value) {
+      // set value to local storage
+      // ensure that the value is a number
+      setMaxFee(parseInt(value));
+    }
+  };
+
+  return (
+    <>
+      <FlowContainer>
+        <>
+          <div className="w-full flex flex-row items-center justify-between">
+            <Heading>Deposit Max Fee</Heading>
+          </div>
+          <SubText>Max Fee {maxFee} </SubText>
+          <FlowForm
+            nameKey="maxFee"
+            type="text"
+            initialValue={maxFee + ""}
+            placeholder="Enter the Max Fee"
+            handleSubmit={(value) => handleSubmit(value)}
+          ></FlowForm>
+        </>
+      </FlowContainer>
+    </>
+  );
+};
+
 const GenerateBechWallet = () => {
   const bridgeSeedPhrase = useAtomValue(bridgeSeedPhraseAtom);
   const [bridgeAddress, setBridgeAddress] = useAtom(bridgeAddressAtom);
@@ -331,6 +364,8 @@ const DepositFlowConfirm = ({
 
   const emilyUrl = useAtomValue(emilyUrlAtom);
 
+  const maxFee = useAtomValue(depositMaxFeeAtom);
+
   const handleNextClick = async () => {
     try {
       console.log("DepositFlowConfirm - handle next step");
@@ -359,7 +394,7 @@ const DepositFlowConfirm = ({
       );
       const lockTime = 6000;
 
-      const maxFee = 80000;
+      const maxFee = maxFee;
 
       const senderSeedPhrase = bridgeSeedPhrase;
 
@@ -634,6 +669,7 @@ const DepositFlow = () => {
       <SetSeedPhraseForDeposit />
       <SetBitcoinDUrl />
       <SetEmilyUrl />
+      <MaxFeeAmountView />
     </>
   );
 };
