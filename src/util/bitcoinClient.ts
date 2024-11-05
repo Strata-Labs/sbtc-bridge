@@ -1,4 +1,6 @@
-import { bitcoinDaemonUrlAtom, store } from "./atoms";
+"use client";
+
+import { bitcoinDaemonUrlAtom, DEFAULT_BITCOIN_D_URL, store } from "./atoms";
 
 // Type definitions
 type RpcRequest = {
@@ -22,8 +24,10 @@ const rpcRequest = async (
   rpcMethod: string,
   params: any[] = []
 ): Promise<any> => {
-  const bitcoinDUrl = store.get(bitcoinDaemonUrlAtom);
-
+  let bitcoinDUrl = store.get(bitcoinDaemonUrlAtom);
+  if (bitcoinDUrl === "") {
+    bitcoinDUrl = DEFAULT_BITCOIN_D_URL;
+  }
   const response = await fetch("/api/bitcoind", {
     method: "POST",
     headers: {

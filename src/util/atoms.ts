@@ -56,7 +56,7 @@ bridgeAddressAtom.onMount = (setAtom) => {
   }
 };
 
-const DEFAULT_BITCOIN_D_URL = "http://bitcoin:18443";
+export const DEFAULT_BITCOIN_D_URL = "http://bitcoin:18443";
 
 const CoreBitcoinDaemonUrl = atom<string>("");
 const bitcoinDaemonUrlStoreKey = "bitcoinDaemonUrl";
