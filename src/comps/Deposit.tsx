@@ -359,7 +359,7 @@ const DepositFlowConfirm = ({
       );
       const lockTime = 6000;
 
-      const maxFee = 10000;
+      const maxFee = 80000;
 
       const senderSeedPhrase = bridgeSeedPhrase;
 
