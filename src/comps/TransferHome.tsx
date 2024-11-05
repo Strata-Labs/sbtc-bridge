@@ -83,6 +83,7 @@ export const TransferAction = () => {
         throw new Error(`No UTXOs available for address ${senderAddy}`);
 
       let totalInput = 0;
+      utxosRes.unspents.sort((a: any, b: any) => a.height - b.height);
       const inputs = [];
       for (const utxo of utxosRes.unspents) {
         const rawTxHex = await getRawTransaction(utxo.txid); // Fetch raw transaction hex
@@ -97,8 +98,6 @@ export const TransferAction = () => {
         totalInput += utxo.amount;
         if (totalInput >= amount) break;
       }
-
-      inputs.sort((a: any, b: any) => a.height - b.height);
 
       if (totalInput < amount) throw new Error("Insufficient funds");
 
