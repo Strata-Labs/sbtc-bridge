@@ -1,3 +1,5 @@
+"use client";
+
 import Faqs from "@/comps/Faqs";
 import Header from "@/comps/Header";
 import { SECTION } from "@/comps/HomeApp";

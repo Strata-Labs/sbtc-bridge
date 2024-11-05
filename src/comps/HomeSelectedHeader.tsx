@@ -71,6 +71,12 @@ const SelectedSection = ({ section, onClickSection }: SectionSelection) => {
         text="History"
         onClickSection={handleClickSection}
       />
+      <SectionAction
+        section={SECTION.TRANSFER}
+        activeSection={section}
+        text="Transfer"
+        onClickSection={handleClickSection}
+      />
     </div>
   );
 };

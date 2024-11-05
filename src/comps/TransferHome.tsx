@@ -1,3 +1,5 @@
+"use client";
+
 import {
   createRawTransaction,
   decodeRawTransaction,
@@ -13,6 +15,9 @@ import Header from "./Header";
 import * as bitcoin from "bitcoinjs-lib";
 import ecc from "@bitcoinerlab/secp256k1";
 import { ECPairFactory, ECPairAPI, TinySecp256k1Interface } from "ecpair";
+import { useState } from "react";
+import { SecondaryButton } from "./core/FlowButtons";
+import { useRouter } from "next/navigation";
 
 const ECPair: ECPairAPI = ECPairFactory(ecc);
 
@@ -48,7 +53,11 @@ const data: NameKeysInfo[] = [
   },
 ];
 const senderAddy = "miEJtNKa3ASpA19v5ZhvbKTEieYjLpzCYT";
-const TransferAction = () => {
+export const TransferAction = () => {
+  const [txId, setTxId] = useState<string | undefined>(undefined);
+
+  const router = useRouter();
+
   const handleSubmit = async (value: any) => {
     console.log("value", value);
     try {
@@ -136,6 +145,14 @@ const TransferAction = () => {
       console.log("err", err);
     }
   };
+  const handleViewTx = () => {
+    // route to /status?txid=txId
+
+    // window.location.href = `/status?txid=${txId}`;
+    if (!txId) return;
+
+    router.push(`/status?txId=${txId}`);
+  };
   return (
     <FlowContainer>
       <>
@@ -151,7 +168,13 @@ const TransferAction = () => {
         <FlowFormDynamic
           nameKeys={data}
           handleSubmit={(value) => handleSubmit(value)}
-        ></FlowFormDynamic>
+        >
+          {txId && (
+            <SecondaryButton onClick={() => handleViewTx()}>
+              View Tx
+            </SecondaryButton>
+          )}
+        </FlowFormDynamic>
       </>
     </FlowContainer>
   );
