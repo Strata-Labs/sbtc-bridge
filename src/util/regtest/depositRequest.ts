@@ -282,7 +282,6 @@ export const createDepositScriptP2TROutput = async (
 
     utxos.sort((a: any, b: any) => a.height - b.height);
     console.log("utxos", utxos);
-    throw new Error("stop");
     const psbt = new bitcoin.Psbt({ network });
 
     // Add UTXOs as inputs
