@@ -44,9 +44,30 @@ type BitcoinTransactionResponse = {
   blocktime: number;
 };
 
+type EmilyDepositResponse = {
+  bitcoinTxid: string;
+  bitcoinTxOutputIndex: number;
+  recipient: string;
+  amount: number;
+  lastUpdateHeight: number;
+  lastUpdateBlockHash: string;
+  status: "pending" | "confirmed" | "failed"; // Assuming possible statuses
+  statusMessage: string;
+  parameters: {
+    maxFee: number;
+    lockTime: number;
+  };
+  reclaimScript: string;
+  depositScript: string;
+};
+
 const Status = () => {
   const [txDetails, setTxDetails] =
     useState<BitcoinTransactionResponse | null>();
+
+  const [emilyDeposit, setEmilyDeposit] =
+    useState<EmilyDepositResponse | null>();
+
   // get the query params from the url
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -138,6 +159,11 @@ const Status = () => {
       if (!response.ok) {
         throw new Error("Error with the request");
       }
+
+      const responseData = await response.json();
+      console.log("handleFetchFromEmily -> responseData", responseData);
+
+      setEmilyDeposit(responseData);
     } catch (err) {
       console.log("err", err);
       window.alert("Error fetching transaction details");
@@ -145,145 +171,186 @@ const Status = () => {
   };
   return (
     <>
-      <StatusContainer>
+      {txDetails ? (
         <>
-          <div className="w-full flex flex-row items-center justify-between">
-            <Heading>Transaction Status</Heading>
-          </div>
-          {txDetails ? (
+          <StatusContainer>
             <>
+              <div className="w-full flex flex-row items-center justify-between">
+                <Heading>Transaction Status</Heading>
+              </div>
+
+              <>
+                <div className="flex flex-col  gap-2">
+                  <div className="flex flex-col gap-1">
+                    <SubText>TxId</SubText>
+                    <p className="text-black font-Matter font-semibold text-sm">
+                      {txDetails.txid}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <SubText>Hash</SubText>
+                    <p className="text-black font-Matter font-semibold text-sm">
+                      {txDetails.hash}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <SubText>Size</SubText>
+                    <p className="text-black font-Matter font-semibold text-sm">
+                      {txDetails.size}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <SubText>vSize</SubText>
+                    <p className="text-black font-Matter break-all font-semibold text-sm">
+                      {txDetails.vsize}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <SubText>Weight</SubText>
+                    <p className="text-black font-Matter break-all font-semibold text-sm">
+                      {txDetails.weight}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <SubText>LockTime</SubText>
+                    <p className="text-black font-Matter break-all font-semibold text-sm">
+                      {txDetails.locktime}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <SubText>Blockhash</SubText>
+                    <p className="text-black font-Matter break-all font-semibold text-sm">
+                      {txDetails.blockhash}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <SubText>Confirmations</SubText>
+                    <p className="text-black font-Matter break-all font-semibold text-sm">
+                      {txDetails.confirmations}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <SubText>Blocktime</SubText>
+                    <p className="text-black font-Matter break-all font-semibold text-sm">
+                      {txDetails.blocktime}
+                    </p>
+                  </div>
+                  {
+                    // vin
+                    txDetails.vin.map((vin, index) => {
+                      return (
+                        <div className="flex flex-col m-2 gap-2" key={index}>
+                          <div className="flex flex-col gap-1">
+                            <SubText>V In</SubText>
+                            <p className="text-black font-Matter break-all font-semibold text-sm">
+                              {vin.txid}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <SubText>Sequence</SubText>
+                            <p className="text-black font-Matter break-all font-semibold text-sm">
+                              {vin.sequence}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <SubText>Value</SubText>
+                            <p className="text-black font-Matter break-all font-semibold text-sm">
+                              {vin.scriptSig.hex}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  }
+                  {
+                    // vout
+                    txDetails.vout.map((vout, index) => {
+                      return (
+                        <div className="flex flex-col m-2 gap-2" key={index}>
+                          <div className="flex flex-col gap-1">
+                            <SubText>v Out</SubText>
+                            <p className="text-black font-Matter break-all font-semibold text-sm">
+                              {vout.n}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <SubText>Script Pub Key</SubText>
+                            <p className="text-black font-Matter break-all font-semibold text-sm">
+                              {vout.scriptPubKey.hex}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-col gap-1">
+                            <SubText>Script Pub Key reqSig</SubText>
+                            <p className="text-black font-Matter break-all font-semibold text-sm">
+                              {vout.scriptPubKey.reqSigs}
+                            </p>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <SubText>Script Pub Key type</SubText>
+                            <p className="text-black font-Matter break-all font-semibold text-sm">
+                              {vout.scriptPubKey.type}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })
+                  }
+                </div>
+              </>
+            </>
+          </StatusContainer>
+          {emilyDeposit && (
+            <StatusContainer>
+              <div className="w-full flex flex-row items-center justify-between">
+                <Heading>Emily Transaction Status Status</Heading>
+              </div>
+
               <div className="flex flex-col  gap-2">
                 <div className="flex flex-col gap-1">
-                  <SubText>TxId</SubText>
+                  <SubText>Recipient</SubText>
                   <p className="text-black font-Matter font-semibold text-sm">
-                    {txDetails.txid}
+                    {emilyDeposit.recipient}
                   </p>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <SubText>Hash</SubText>
+                  <SubText>Amount</SubText>
                   <p className="text-black font-Matter font-semibold text-sm">
-                    {txDetails.hash}
+                    {emilyDeposit.amount}
                   </p>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <SubText>Size</SubText>
+                  <SubText>Status</SubText>
                   <p className="text-black font-Matter font-semibold text-sm">
-                    {txDetails.size}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <SubText>vSize</SubText>
-                  <p className="text-black font-Matter break-all font-semibold text-sm">
-                    {txDetails.vsize}
+                    {emilyDeposit.status}
                   </p>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <SubText>Weight</SubText>
-                  <p className="text-black font-Matter break-all font-semibold text-sm">
-                    {txDetails.weight}
+                  <SubText>Status Message</SubText>
+                  <p className="text-black font-Matter font-semibold text-sm">
+                    {emilyDeposit.statusMessage}
                   </p>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <SubText>LockTime</SubText>
-                  <p className="text-black font-Matter break-all font-semibold text-sm">
-                    {txDetails.locktime}
+                  <SubText>Reclaim Script</SubText>
+                  <p className="text-black font-Matter font-semibold text-sm">
+                    {emilyDeposit.reclaimScript}
                   </p>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <SubText>Blockhash</SubText>
-                  <p className="text-black font-Matter break-all font-semibold text-sm">
-                    {txDetails.blockhash}
+                  <SubText>Deposit Script</SubText>
+                  <p className="text-black font-Matter font-semibold text-sm">
+                    {emilyDeposit.depositScript}
                   </p>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <SubText>Confirmations</SubText>
-                  <p className="text-black font-Matter break-all font-semibold text-sm">
-                    {txDetails.confirmations}
-                  </p>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <SubText>Blocktime</SubText>
-                  <p className="text-black font-Matter break-all font-semibold text-sm">
-                    {txDetails.blocktime}
-                  </p>
-                </div>
-                {
-                  // vin
-                  txDetails.vin.map((vin, index) => {
-                    return (
-                      <div className="flex flex-col m-2 gap-2" key={index}>
-                        <div className="flex flex-col gap-1">
-                          <SubText>V In</SubText>
-                          <p className="text-black font-Matter break-all font-semibold text-sm">
-                            {vin.txid}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <SubText>Sequence</SubText>
-                          <p className="text-black font-Matter break-all font-semibold text-sm">
-                            {vin.sequence}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <SubText>Value</SubText>
-                          <p className="text-black font-Matter break-all font-semibold text-sm">
-                            {vin.scriptSig.hex}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })
-                }
-                {
-                  // vout
-                  txDetails.vout.map((vout, index) => {
-                    return (
-                      <div className="flex flex-col m-2 gap-2" key={index}>
-                        <div className="flex flex-col gap-1">
-                          <SubText>v Out</SubText>
-                          <p className="text-black font-Matter break-all font-semibold text-sm">
-                            {vout.n}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <SubText>Script Pub Key</SubText>
-                          <p className="text-black font-Matter break-all font-semibold text-sm">
-                            {vout.scriptPubKey.hex}
-                          </p>
-                        </div>
-
-                        <div className="flex flex-col gap-1">
-                          <SubText>Script Pub Key reqSig</SubText>
-                          <p className="text-black font-Matter break-all font-semibold text-sm">
-                            {vout.scriptPubKey.reqSigs}
-                          </p>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <SubText>Script Pub Key type</SubText>
-                          <p className="text-black font-Matter break-all font-semibold text-sm">
-                            {vout.scriptPubKey.type}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })
-                }
-                <div className="w-full flex-row flex justify-between items-center">
-                  <SecondaryButton onClick={() => console.log()}>
-                    BACK
-                  </SecondaryButton>
-                  <PrimaryButton onClick={() => console.log()}>
-                    VIEW
-                  </PrimaryButton>
                 </div>
               </div>
-            </>
-          ) : (
-            <SubText>Failed Type</SubText>
+            </StatusContainer>
           )}
         </>
-      </StatusContainer>
+      ) : (
+        <SubText>Failed Type</SubText>
+      )}
     </>
   );
 };
