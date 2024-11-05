@@ -25,6 +25,13 @@ import {
   createDepositScript,
   createReclaimScript,
 } from "@/util/regtest/depositRequest";
+import { useAtom, useAtomValue } from "jotai";
+import {
+  bitcoinDaemonUrlAtom,
+  bridgeAddressAtom,
+  bridgeSeedPhraseAtom,
+  signerPubKeyAtom,
+} from "@/util/atoms";
 /* 
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -48,21 +55,13 @@ enum DEPOSIT_STEP {
 }
 
 const SetSeedPhraseForDeposit = () => {
-  const [seedPhraseComponentKey, setSeedPhraseComponentKey] = useState(0);
+  const [bridgeSeedPhrase, setBridgeSeedPhrase] = useAtom(bridgeSeedPhraseAtom);
 
-  useEffect(() => {
-    // ge the seed phrase from local storage
-    const seedPhrase = localStorage.getItem("seedPhrase");
-    if (seedPhrase) {
-      setSeedPhraseComponentKey(seedPhraseComponentKey + 1);
-    }
-  }, []);
   const handleSubmit = (value: string | undefined) => {
     if (value) {
       // set value to local storage
 
-      localStorage.setItem("seedPhrase", value);
-      setSeedPhraseComponentKey(seedPhraseComponentKey + 1);
+      setBridgeSeedPhrase(value);
     }
   };
 
@@ -77,51 +76,59 @@ const SetSeedPhraseForDeposit = () => {
           <FlowForm
             nameKey="seedPhrase"
             type="text"
+            initialValue={bridgeSeedPhrase}
             placeholder="Enter string to use as seed phrase"
             handleSubmit={(value) => handleSubmit(value)}
           ></FlowForm>
         </>
       </FlowContainer>
-      <GenerateBechWallet key={seedPhraseComponentKey} />
+      <GenerateBechWallet key={bridgeSeedPhrase} />
+    </>
+  );
+};
+
+const SetBitcoinDUrl = () => {
+  const [bitcoinDaemonUrl, setBitcoinDaemonUrl] = useAtom(bitcoinDaemonUrlAtom);
+
+  const handleSubmit = (value: string | undefined) => {
+    if (value) {
+      // set value to local storage
+
+      setBitcoinDaemonUrl(value);
+    }
+  };
+
+  return (
+    <>
+      <FlowContainer>
+        <>
+          <div className="w-full flex flex-row items-center justify-between">
+            <Heading>Set Bitcoin Dameon Url </Heading>
+          </div>
+          <SubText>Set the RPC url: {bitcoinDaemonUrl} </SubText>
+          <FlowForm
+            nameKey="rpcUrl"
+            type="text"
+            initialValue={bitcoinDaemonUrl}
+            placeholder="Enter string to use as rpc url"
+            handleSubmit={(value) => handleSubmit(value)}
+          ></FlowForm>
+        </>
+      </FlowContainer>
     </>
   );
 };
 
 type SetSignerPubkeyProps = {
-  handleUpdateSignerPubKey: (number: number) => void;
   signerPubComponentKey: number;
 };
-const SetSignerPubkey = ({
-  handleUpdateSignerPubKey,
-  signerPubComponentKey,
-}: SetSignerPubkeyProps) => {
-  const [signerPubKey, setSignerPubkey] = useState(
-    "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0"
-  );
-
-  useEffect(() => {
-    // ge the seed phrase from local storage
-    const signerPubKey = localStorage.getItem("signerPubKey");
-    if (signerPubKey) {
-      setSignerPubkey(signerPubKey);
-    } else {
-      // set 50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0 as default
-      localStorage.setItem(
-        "signerPubKey",
-        "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0"
-      );
-      setSignerPubkey(
-        "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0"
-      );
-    }
-  }, []);
+const SetSignerPubkey = ({ signerPubComponentKey }: SetSignerPubkeyProps) => {
+  const [signerPubKey, setSignerPubkey] = useAtom(signerPubKeyAtom);
 
   const handleSubmit = (value: string | undefined) => {
     if (value) {
-      handleUpdateSignerPubKey(signerPubComponentKey + 1);
       // set value to local storage
       setSignerPubkey(value);
-      localStorage.setItem("signerPubKey", value);
     }
   };
 
@@ -136,6 +143,7 @@ const SetSignerPubkey = ({
           <FlowForm
             nameKey="SignerPubKey"
             type="text"
+            initialValue={signerPubKey}
             placeholder="Enter the signer public key"
             handleSubmit={(value) => handleSubmit(value)}
           ></FlowForm>
@@ -146,49 +154,40 @@ const SetSignerPubkey = ({
 };
 
 const GenerateBechWallet = () => {
-  const [isValid, setIsValid] = useState(false);
-  const [value, setValue] = useState("");
+  const bridgeSeedPhrase = useAtomValue(bridgeSeedPhraseAtom);
+  const [bridgeAddress, setBridgeAddress] = useAtom(bridgeAddressAtom);
 
-  const handleSubmit = (value: string | undefined) => {
-    if (value) {
-      // set value to local storage
+  const handleSubmit = () => {
+    // set value to local storage
 
-      const seedPhrase = localStorage.getItem("seedPhrase");
+    if (bridgeSeedPhrase) {
+      const p2wsh = getP2WSH(bridgeSeedPhrase);
 
-      if (seedPhrase) {
-        const p2wsh = getP2WSH(seedPhrase);
+      if (p2wsh) {
+        console.log("p2wsh", p2wsh);
+        //setValue(p2wsh.address as any);
 
-        if (p2wsh) {
-          console.log("p2wsh", p2wsh);
-          setIsValid(true);
-          setValue(p2wsh.address as any);
-          // set value to local storage to fetch later
-          localStorage.setItem("senderPublicKey", p2wsh.address as any);
-        }
-      } else {
-        // window alert
-
-        window.alert("Please set the seed phrase first");
+        setBridgeAddress(p2wsh.address as any);
+        // set value to local storage to fetch later
       }
+    } else {
+      // window alert
+
+      window.alert("Please set the seed phrase first");
     }
   };
 
-  const seedPhrase = localStorage.getItem("seedPhrase") || "";
   return (
     <FlowContainer>
       <>
         <div className="w-full flex flex-row items-center justify-between">
           <Heading>Generate Address from Seed</Heading>
         </div>
-        <SubText>Seed Phrase: {seedPhrase} </SubText>
-        {value !== "" && <SubText>Address : {value} </SubText>}
+        <SubText>Seed Phrase: {bridgeSeedPhrase} </SubText>
+        {bridgeAddress !== "" && <SubText>Address : {bridgeAddress} </SubText>}
         <div className="flex-1" />
         <div className="w-full flex-row flex justify-between items-center">
-          {seedPhrase !== "" && (
-            <PrimaryButton onClick={() => handleSubmit(seedPhrase)}>
-              GENERATE
-            </PrimaryButton>
-          )}
+          <PrimaryButton onClick={() => handleSubmit()}>GENERATE</PrimaryButton>
         </div>
       </>
     </FlowContainer>
@@ -283,15 +282,18 @@ const DepositFlowConfirm = ({
   amount,
   stxAddress,
 }: DepositFlowConfirmProps) => {
+  const bridgeSeedPhrase = useAtomValue(bridgeSeedPhraseAtom);
+  const bridgeAddress = useAtomValue(bridgeAddressAtom);
+
+  const signerPubKey = useAtomValue(signerPubKeyAtom);
+
   const handleNextClick = async () => {
     try {
       console.log("DepositFlowConfirm - handle next step");
       console.log("createPTRAddress", createDepositTx);
 
       // serialize the stx address
-      const [version, hash] = c32addressDecode(
-        "SP2RZRSEQHCFPHSBHJTKNWT86W6VSK51M7BCMY06Q"
-      );
+      const [version, hash] = c32addressDecode("stxAddress");
       // Convert the version to a 1-byte Uint8Array
       const versionArray = new Uint8Array([version]);
 
@@ -308,11 +310,8 @@ const DepositFlowConfirm = ({
 
       const maxFee = 10000;
 
-      const senderSeedPhrase = localStorage.getItem("seedPhrase") || "";
+      const senderSeedPhrase = bridgeSeedPhrase;
 
-      //const recipientBytes = Buffer.from(hexToUint8Array(stxDepositAddress));
-
-      const signerPubKey = localStorage.getItem("signerPubKey") || "";
       // Create the reclaim script and convert to Buffer
       const reclaimScript = Buffer.from(
         createReclaimScript(lockTime, new Uint8Array([]))
@@ -323,10 +322,8 @@ const DepositFlowConfirm = ({
 
       const signerUint8Array = hexToUint8Array(signerPubKey);
 
-      const recipientBytes = Buffer.from(hexToUint8Array(stxAddress));
-
       const depositScript = Buffer.from(
-        createDepositScript(signerUint8Array, maxFee, recipientBytes)
+        createDepositScript(signerUint8Array, maxFee, serializedAddress)
       );
       // convert buffer to hex
       const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
@@ -392,19 +389,19 @@ const DepositFlowConfirm = ({
           <div className="flex flex-col gap-1">
             <SubText>Sender Seed Phrase</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {localStorage.getItem("seedPhrase") || "N/A"}
+              {bridgeSeedPhrase || "N/A"}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <SubText>Sender Address</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {localStorage.getItem("senderPublicKey") || "N/A"}
+              {bridgeAddress || "N/A"}
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <SubText>Signer PubKey</SubText>
             <p className="text-black font-Matter break-all font-semibold text-sm">
-              {localStorage.getItem("signerPubKey") || "N/A"}
+              {signerPubKey || "N/A"}
             </p>
           </div>
         </div>
@@ -499,7 +496,6 @@ const DepositFlow = () => {
   const [stxAddress, _setStxAddress] = useState("");
   const [amount, _setAmount] = useState(0);
   const [signerPubComponentKey, setSignerPubComponentKey] = useState(0);
-
   const [transactionInfo, setTransactionInfo] = useState<TransactionInfo>({
     hex: "",
     txId: "",
@@ -511,10 +507,6 @@ const DepositFlow = () => {
     setStep(newStep);
   };
 
-  const handleUpdateSignerPubKey = (number: number) => {
-    setSignerPubComponentKey(number);
-  };
-
   const setStxAddress = (address: string) => {
     _setStxAddress(address);
   };
@@ -522,6 +514,7 @@ const DepositFlow = () => {
   const setAmount = (amount: number) => {
     _setAmount(amount);
   };
+
   const renderStep = () => {
     switch (step) {
       case DEPOSIT_STEP.AMOUNT:
@@ -567,7 +560,6 @@ const DepositFlow = () => {
         }}
       />
       <SetSignerPubkey
-        handleUpdateSignerPubKey={handleUpdateSignerPubKey}
         signerPubComponentKey={signerPubComponentKey}
         key={signerPubComponentKey + "-SetSignerPubkey"}
       />
@@ -575,6 +567,7 @@ const DepositFlow = () => {
       <SetSeedPhraseForDeposit
         key={signerPubComponentKey + "-SetSeedPhraseForDeposit"}
       />
+      <SetBitcoinDUrl />
     </>
   );
 };
