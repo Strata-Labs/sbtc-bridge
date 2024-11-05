@@ -180,12 +180,7 @@ const Status = () => {
                           {vout.scriptPubKey.hex}
                         </p>
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <SubText>Script Pub Key Address</SubText>
-                        <p className="text-black font-Matter break-all font-semibold text-sm">
-                          {vout.scriptPubKey.addresses[0]}
-                        </p>
-                      </div>
+
                       <div className="flex flex-col gap-1">
                         <SubText>Script Pub Key reqSig</SubText>
                         <p className="text-black font-Matter break-all font-semibold text-sm">

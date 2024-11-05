@@ -59,3 +59,69 @@ export const FlowForm = ({
     </form>
   );
 };
+export type NameKeysInfo = {
+  [key: string]: string;
+  nameKey: string;
+  initValue: string;
+  placeholder: string;
+  type: "text" | "number";
+};
+type FlowFormDynamicProps = {
+  nameKeys: NameKeysInfo[];
+  handleSubmit: (values: any) => void;
+  children?: React.ReactNode;
+};
+export const FlowFormDynamic = ({
+  nameKeys,
+  handleSubmit,
+
+  children,
+}: FlowFormDynamicProps) => {
+  const formik = useFormik({
+    initialValues: nameKeys.reduce(
+      (acc: { [key: string]: string }, { nameKey, initValue }) => {
+        acc[nameKey] = initValue;
+        return acc;
+      },
+      {}
+    ),
+
+    onSubmit: (values) => {
+      console.log(values);
+      handleSubmit(values);
+    },
+  });
+
+  return (
+    <form
+      className="w-full flex flex-1 flex-col gap-14 justify-end"
+      onSubmit={formik.handleSubmit}
+    >
+      {nameKeys.map(({ nameKey, placeholder, type }) => (
+        <div key={nameKey} className="relative ">
+          <input
+            type={type}
+            name={nameKey}
+            placeholder={placeholder}
+            value={formik.values[nameKey]}
+            onChange={formik.handleChange}
+            className={`w-full py-2 border-b-2 bg-transparent text-xl text-black focus:outline-none placeholder-gray-300 ${
+              formik.isValid ? "border-orange" : "border-midGray"
+            } transition-colors duration-500`}
+          />
+        </div>
+      ))}
+
+      <div className="w-full flex-row flex justify-between items-center">
+        {children}
+        <PrimaryButton
+          type="submit"
+          onClick={formik.handleSubmit}
+          isValid={formik.isValid}
+        >
+          NEXT
+        </PrimaryButton>
+      </div>
+    </form>
+  );
+};
