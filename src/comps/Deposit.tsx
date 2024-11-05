@@ -394,8 +394,6 @@ const DepositFlowConfirm = ({
       );
       const lockTime = 6000;
 
-      const maxFee = maxFee;
-
       const senderSeedPhrase = bridgeSeedPhrase;
 
       // Create the reclaim script and convert to Buffer
