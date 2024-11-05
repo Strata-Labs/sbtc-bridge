@@ -342,10 +342,10 @@ const DepositFlowConfirm = ({
 
       console.log("testThing", testThing);
       const emilyReqPayload = {
-        bitcoin_txid: testThing.txId,
-        bitcoin_tx_output_index: 0,
-        reclaim_script: reclaimScriptHex,
-        deposit_script: depositScriptHexPreHash,
+        bitcoinTxid: testThing.txid,
+        bitcoinTxOutputIndex: 0,
+        reclaimScript: reclaimScriptHex,
+        depositScript: depositScriptHexPreHash,
       };
 
       // make emily post request
@@ -356,6 +356,10 @@ const DepositFlowConfirm = ({
         },
         body: JSON.stringify(emilyReqPayload),
       });
+
+      if (!response.ok) {
+        throw new Error("Error with the request");
+      }
 
       setStep(DEPOSIT_STEP.REVIEW);
     } catch (error) {

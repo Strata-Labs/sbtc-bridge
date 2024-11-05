@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 interface CreateDepositRequestBody {
-  bitcoin_txid: string;
-  bitcoin_tx_output_index: number;
-  reclaim_script: string;
-  deposit_script: string;
+  bitcoinTxid: string;
+  bitcoinTxOutputIndex: number;
+  redeem: string;
+  deposit: string;
 }
 
 const RUST_SERVER_URL = "http://localhost:3031/deposit"; // Change this to the actual Rust server URL
