@@ -59,12 +59,12 @@ const SelectedSection = ({ section, onClickSection }: SectionSelection) => {
         text="Deposit"
         onClickSection={handleClickSection}
       />
-      <SectionAction
+      {/* <SectionAction
         section={SECTION.WITHDRAW}
         activeSection={section}
         text="Withdraw"
         onClickSection={handleClickSection}
-      />
+      /> */}
       <SectionAction
         section={SECTION.HISTORY}
         activeSection={section}
@@ -75,6 +75,12 @@ const SelectedSection = ({ section, onClickSection }: SectionSelection) => {
         section={SECTION.TRANSFER}
         activeSection={section}
         text="Transfer"
+        onClickSection={handleClickSection}
+      />
+      <SectionAction
+        section={SECTION.SETTINGS}
+        activeSection={section}
+        text="Settings"
         onClickSection={handleClickSection}
       />
     </div>

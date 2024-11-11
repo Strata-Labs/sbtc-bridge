@@ -18,6 +18,12 @@ import * as bip341 from "bitcoinjs-lib/src/payments/bip341";
 
 import { tapTreeToList } from "bitcoinjs-lib/src/psbt/bip371";
 
+const NUMS_X_COORDINATE = new Uint8Array([
+  0x50, 0x92, 0x9b, 0x74, 0xc1, 0xa0, 0x49, 0x54, 0xb7, 0x8b, 0x4b, 0x60, 0x35,
+  0xe9, 0x7a, 0x5e, 0x07, 0x8a, 0x5a, 0x0f, 0x28, 0xec, 0x96, 0xd5, 0x47, 0xbf,
+  0xee, 0x9a, 0xce, 0x80, 0x3a, 0xc0,
+]);
+
 // You need to provide the ECC library. The ECC library must implement
 // all the methods of the `TinySecp256k1Interface` interface.
 import ecc from "@bitcoinerlab/secp256k1";
@@ -138,6 +144,113 @@ function toXOnly(pubkey: Buffer): Buffer {
   return pubkey.subarray(1, 33);
 }
 
+export const createDepositAddress = (
+  stxAddress: Uint8Array,
+  signerPubKey: string,
+  maxFee: number,
+  lockTime: number
+): string => {
+  const internalPubkey = hexToUint8Array(signerPubKey);
+
+  console.log("bip341,again ", bip341);
+  const network = bitcoin.networks.regtest;
+
+  // Create the reclaim script and convert to Buffer
+  const reclaimScript = Buffer.from(
+    createReclaimScript(lockTime, new Uint8Array([]))
+  );
+
+  const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
+  console.log("reclaimScriptHex", reclaimScriptHex);
+
+  // Create the deposit script and convert to Buffer
+  console.log("stxDepositAddress", stxAddress);
+  const recipientBytes = stxAddress;
+  const depositScript = Buffer.from(
+    createDepositScript(internalPubkey, maxFee, recipientBytes)
+  );
+  // convert buffer to hex
+  const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
+  console.log("depositScriptHexPreHash", depositScriptHexPreHash);
+  console.log("depositScript", depositScript);
+
+  //  Hash the leaf scripts using tapLeafHash
+  const depositScriptHash = bip341.tapleafHash({ output: depositScript });
+  console.log("depositScriptHash", depositScriptHash);
+  const depositScriptHashHex = uint8ArrayToHexString(depositScriptHash);
+  console.log("depositScriptHashHex", depositScriptHashHex);
+
+  const reclaimScriptHash = bip341.tapleafHash({ output: reclaimScript });
+  console.log("reclaimScriptHash", reclaimScriptHash);
+  const reclaimScriptHashHex = uint8ArrayToHexString(reclaimScriptHash);
+  console.log("reclaimScriptHashHex", reclaimScriptHashHex);
+  // Combine the leaf hashes into a Merkle root using tapBranch
+  const merkleRoot = bip341.toHashTree([
+    { output: depositScript },
+    { output: reclaimScript },
+  ]);
+
+  const scriptTree: Taptree = [
+    {
+      output: depositScript,
+    },
+    {
+      output: reclaimScript,
+    },
+  ];
+
+  console.log("merkleRoot", merkleRoot);
+
+  const merkleRootHex = uint8ArrayToHexString(merkleRoot.hash);
+  console.log("merkleRootHex", merkleRootHex);
+  // Create an internal public key (replace with actual internal public key if available)
+
+  console.log("internalPubkey", internalPubkey);
+  // Create the final taproot public key by tweaking internalPubkey with merkleRoot
+
+  console.log("merkleRoot.hash", merkleRoot.hash);
+  // Step 1: Generate the tweak
+
+  const tweak = bip341.tapTweakHash(NUMS_X_COORDINATE, merkleRoot.hash);
+
+  console.log("tweak", tweak);
+  const tweakHex = uint8ArrayToHexString(tweak);
+  console.log("tweakHex", tweakHex);
+  // Step 2: Apply the tweak to the internal public key to get the tweaked Taproot output key
+
+  const taprootPubKey = bip341.tweakKey(NUMS_X_COORDINATE, tweak);
+  console.log("taprootPubKey", taprootPubKey);
+
+  if (taprootPubKey === null) {
+    throw new Error("Failed to tweak the internal public key.");
+  }
+  const taprootPubKeyHex = uint8ArrayToHexString(taprootPubKey.x);
+
+  console.log("taprootPubKeyHex", taprootPubKeyHex);
+
+  // Step 1: Convert the Taproot public key to a P2TR address
+  const p2tr: any = bitcoin.payments.p2tr({
+    internalPubkey: NUMS_X_COORDINATE, // The tweaked Taproot public key
+    network: bitcoin.networks.regtest, // Use the correct network (mainnet or testnet)
+    scriptTree: scriptTree,
+  });
+
+  // key: toXOnly(keypair.publicKey),
+  // Validate the output script is correct (P2TR has a specific witness program structure)
+  const outputScript = p2tr.output;
+  if (outputScript) {
+    const isValid = outputScript.length === 34 && outputScript[0] === 0x51; // P2TR is version 1 witness program
+    console.log("P2TR Output Script:", outputScript.toString("hex"));
+    console.log("Is valid P2TR output:", isValid);
+  } else {
+    console.error("Failed to generate P2TR output.");
+  }
+
+  console.log("p2tr 0x01", p2tr.address);
+
+  return p2tr.address;
+};
+
 export const createDepositScriptP2TROutput = async (
   senderPrivKeyWIF: string,
   senderAddress: string,
@@ -230,12 +343,8 @@ export const createDepositScriptP2TROutput = async (
     console.log("merkleRoot.hash", merkleRoot.hash);
     // Step 1: Generate the tweak
 
-    const NUMS_X_COORDINATE = new Uint8Array([
-      0x50, 0x92, 0x9b, 0x74, 0xc1, 0xa0, 0x49, 0x54, 0xb7, 0x8b, 0x4b, 0x60,
-      0x35, 0xe9, 0x7a, 0x5e, 0x07, 0x8a, 0x5a, 0x0f, 0x28, 0xec, 0x96, 0xd5,
-      0x47, 0xbf, 0xee, 0x9a, 0xce, 0x80, 0x3a, 0xc0,
-    ]);
     const tweak = bip341.tapTweakHash(NUMS_X_COORDINATE, merkleRoot.hash);
+
     console.log("tweak", tweak);
     const tweakHex = uint8ArrayToHexString(tweak);
     console.log("tweakHex", tweakHex);

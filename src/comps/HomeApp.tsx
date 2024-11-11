@@ -8,6 +8,7 @@ import SelectedSection from "./HomeSelectedHeader";
 import DepositFlow from "./Deposit";
 import HistoryView from "./HistoryView";
 import TransferApp, { TransferAction } from "./TransferHome";
+import DevEnvSettings from "./DevEnvSettings";
 
 export enum SECTION {
   DEPOSIT = "DEPOSIT",
@@ -15,6 +16,7 @@ export enum SECTION {
   HISTORY = "HISTORY",
   STATUS = "STATUS",
   TRANSFER = "TRANSFER",
+  SETTINGS = "SETTINGS",
 }
 
 const COLORS = {
@@ -33,6 +35,7 @@ sectionsMap.set(SECTION.DEPOSIT, { title: "Deposit" });
 sectionsMap.set(SECTION.WITHDRAW, { title: "Withdraw" });
 sectionsMap.set(SECTION.HISTORY, { title: "History" });
 sectionsMap.set(SECTION.TRANSFER, { title: "Transfer" });
+sectionsMap.set(SECTION.SETTINGS, { title: "Settings" });
 
 const HomeApp = () => {
   const [selectedSection, setSelectedSection] = useState<SECTION>(
@@ -58,7 +61,7 @@ const HomeApp = () => {
         {selectedSection === SECTION.WITHDRAW && <p>Coming Soon :)</p>}
         {selectedSection === SECTION.HISTORY && <HistoryView />}
         {selectedSection === SECTION.TRANSFER && <TransferAction />}
-
+        {selectedSection === SECTION.SETTINGS && <DevEnvSettings />}
         <Faqs />
       </div>
     </>

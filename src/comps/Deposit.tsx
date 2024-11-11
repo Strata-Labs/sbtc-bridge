@@ -22,7 +22,9 @@ import {
   uint8ArrayToHexString,
 } from "@/util/regtest/wallet";
 import {
+  createDepositAddress,
   createDepositScript,
+  createDepositScriptP2TROutput,
   createReclaimScript,
 } from "@/util/regtest/depositRequest";
 import { useAtom, useAtomValue } from "jotai";
@@ -33,6 +35,7 @@ import {
   depositMaxFeeAtom,
   emilyUrlAtom,
   signerPubKeyAtom,
+  userDataAtom,
 } from "@/util/atoms";
 import { decodeRawTransaction, sendRawTransaction } from "@/util/bitcoinClient";
 import { useRouter } from "next/navigation";
@@ -58,7 +61,7 @@ enum DEPOSIT_STEP {
   REVIEW,
 }
 
-const SetSeedPhraseForDeposit = () => {
+export const SetSeedPhraseForDeposit = () => {
   const [bridgeSeedPhrase, setBridgeSeedPhrase] = useAtom(bridgeSeedPhraseAtom);
 
   const handleSubmit = (value: string | undefined) => {
@@ -91,7 +94,7 @@ const SetSeedPhraseForDeposit = () => {
   );
 };
 
-const SetBitcoinDUrl = () => {
+export const SetBitcoinDUrl = () => {
   const [bitcoinDaemonUrl, setBitcoinDaemonUrl] = useAtom(bitcoinDaemonUrlAtom);
 
   const handleSubmit = (value: string | undefined) => {
@@ -123,7 +126,7 @@ const SetBitcoinDUrl = () => {
   );
 };
 
-const SetEmilyUrl = () => {
+export const SetEmilyUrl = () => {
   const [emilyUrl, setEmilyUrl] = useAtom(emilyUrlAtom);
 
   const handleSubmit = (value: string | undefined) => {
@@ -156,7 +159,7 @@ const SetEmilyUrl = () => {
 };
 
 type SetSignerPubkeyProps = {};
-const SetSignerPubkey = () => {
+export const SetSignerPubkey = () => {
   const [signerPubKey, setSignerPubkey] = useAtom(signerPubKeyAtom);
 
   const handleSubmit = (value: string | undefined) => {
@@ -187,7 +190,7 @@ const SetSignerPubkey = () => {
   );
 };
 
-const MaxFeeAmountView = () => {
+export const MaxFeeAmountView = () => {
   const [maxFee, setMaxFee] = useAtom(depositMaxFeeAtom);
 
   const handleSubmit = (value: string | undefined) => {
@@ -366,8 +369,13 @@ const DepositFlowConfirm = ({
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
 
+  const userData = useAtomValue(userDataAtom);
+
   const handleNextClick = async () => {
     try {
+      if (userData === null) {
+        throw new Error("User data is not set");
+      }
       console.log("DepositFlowConfirm - handle next step");
       console.log("createPTRAddress", createDepositTx);
 
@@ -411,7 +419,14 @@ const DepositFlowConfirm = ({
       );
       // convert buffer to hex
       const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
+      const p2trAddress = createDepositAddress(
+        serializedAddress,
+        signerPubKey,
+        maxFee,
+        lockTime
+      );
 
+      /*
       const txHex = await createDepositTx(
         serializedAddress,
         senderSeedPhrase,
@@ -420,13 +435,43 @@ const DepositFlowConfirm = ({
         maxFee,
         lockTime
       );
+      */
 
-      const decodedTx = await decodeRawTransaction(txHex);
-      console.log("decodedTx", decodedTx);
+      // check the wallet provider from user data
+      let txId = "";
+      let txHex = "";
+
+      if (userData.profile.walletProvider === "hiro-wallet") {
+        console.log("leahter send walelt info");
+        console.log("amount", amount);
+        console.log("p2trAddress", p2trAddress);
+        console.log(window.LeatherProvider);
+        const response = await window.LeatherProvider.request("sendTransfer", {
+          recipients: [
+            {
+              address: p2trAddress,
+              amount: amount,
+            },
+          ],
+          network: "devnet",
+        });
+
+        console.log("response", response);
+        if (response.result) {
+          txId = response.result.txId;
+        }
+      } else if (userData.profile.walletProvider === "xverse") {
+        // get the txId from the xverse wallet
+      } else {
+        throw new Error("Wallet provider not supported");
+      }
 
       console.log("testThing", txHex);
+      if (txId === "") {
+        throw new Error("Error with the transaction");
+      }
       const emilyReqPayload = {
-        bitcoinTxid: decodedTx.txid,
+        bitcoinTxid: txId,
         bitcoinTxOutputIndex: 0,
         reclaimScript: reclaimScriptHex,
         depositScript: depositScriptHexPreHash,
@@ -446,13 +491,10 @@ const DepositFlowConfirm = ({
         throw new Error("Error with the request");
       }
 
-      const id = await sendRawTransaction(txHex);
-      console.log("id", id);
-
       setStep(DEPOSIT_STEP.REVIEW);
       handleUpdatingTransactionInfo({
         hex: txHex,
-        txId: id,
+        txId: txId,
       });
     } catch (error) {
       console.log("error", error);
@@ -662,12 +704,6 @@ const DepositFlow = () => {
           margin: "16px 0",
         }}
       />
-      <SetSignerPubkey />
-
-      <SetSeedPhraseForDeposit />
-      <SetBitcoinDUrl />
-      <SetEmilyUrl />
-      <MaxFeeAmountView />
     </>
   );
 };

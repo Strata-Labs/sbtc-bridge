@@ -1,6 +1,7 @@
 "use client";
 
 import { atom, createStore } from "jotai";
+import { AppConfig, UserSession, UserData } from "@stacks/connect";
 
 export const store = createStore();
 
@@ -19,6 +20,10 @@ const undefinedStringCheck = (value: string) => {
   - SignerPubKey (cached)
   - EmilyUrl (cached)
   - DepositMaxFee (cached)
+  - ENV
+  - showConnectWallet
+  - userData 
+  - 
 */
 
 const CoreBridgeSeedPhrase = atom<string>("DEPOSIT");
@@ -134,3 +139,34 @@ depositMaxFeeAtom.onMount = (setAtom) => {
     if (!undefinedStringCheck(depositMaxFee)) setAtom(parseInt(depositMaxFee));
   }
 };
+
+enum ENV {
+  MAINNET = "MAINNET",
+  TESTNET = "TESTNET",
+  DEVENV = "DEVENV",
+}
+
+const CoreENV = atom<ENV>(ENV.DEVENV);
+
+export const envAtom = atom(
+  (get) => get(CoreENV),
+  (_get, set, update: ENV) => {
+    set(CoreENV, update);
+  }
+);
+
+export const isConnectedAtom = atom<boolean>(false);
+export const setIsConnectedAtom = atom(null, (_get, set, update: boolean) => {
+  set(isConnectedAtom, update);
+});
+
+const CoreShowConnectWallet = atom<boolean>(false);
+// this is in a global state so that it can be called from anywhere outside of just the header button
+export const showConnectWalletAtom = atom(
+  (get) => get(CoreShowConnectWallet),
+  (_get, set, update: boolean) => {
+    set(CoreShowConnectWallet, update);
+  }
+);
+
+export const userDataAtom = atom<UserData | null>(null);
