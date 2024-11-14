@@ -2,9 +2,7 @@ export {};
 
 declare global {
   interface Window {
-    XverseProviders?: {
-      StacksProvider?: any; // Replace `any` with the actual type if you know it
-    };
+    XverseProviders?: any;
     LeatherProvider?: any; // Replace `any` with the actual type if you know it
   }
 }

@@ -2,21 +2,13 @@ import * as bitcoin from "bitcoinjs-lib";
 import { ECPairFactory, ECPairAPI, TinySecp256k1Interface } from "ecpair";
 
 import { listUnspent, scanTxOutSet } from "../bitcoinClient";
-import {
-  BitcoinNetwork,
-  createUnspendableTaprootKey,
-  getP2pkh,
-  getP2TR,
-  getPrivateKeyFromP2tr,
-  hexToUint8Array,
-  privateKeyToWIF,
-  uint8ArrayToHexString,
-} from "./wallet";
+import { hexToUint8Array, uint8ArrayToHexString } from "./wallet";
 import { Taptree } from "bitcoinjs-lib/src/types";
 
 import * as bip341 from "bitcoinjs-lib/src/payments/bip341";
 
-import { tapTreeToList } from "bitcoinjs-lib/src/psbt/bip371";
+import ecc from "@bitcoinerlab/secp256k1";
+const ECPair: ECPairAPI = ECPairFactory(ecc);
 
 const NUMS_X_COORDINATE = new Uint8Array([
   0x50, 0x92, 0x9b, 0x74, 0xc1, 0xa0, 0x49, 0x54, 0xb7, 0x8b, 0x4b, 0x60, 0x35,
@@ -26,8 +18,7 @@ const NUMS_X_COORDINATE = new Uint8Array([
 
 // You need to provide the ECC library. The ECC library must implement
 // all the methods of the `TinySecp256k1Interface` interface.
-import ecc from "@bitcoinerlab/secp256k1";
-const ECPair: ECPairAPI = ECPairFactory(ecc);
+
 //depositRequest.ts;
 
 // Helper function to convert a little-endian 8-byte number to big-endian
@@ -55,32 +46,21 @@ export const createDepositScript = (
   // Convert the little-endian maxFee to big-endian
   const BEmaxFee = flipEndian(LEmaxFee);
 
-  console.log("opDropData", opDropData);
-
   // concat bemaxfee and opdropdata
   const opDropDataTogether = new Uint8Array(
     BEmaxFee.length + opDropData.length
   );
-  console.log("BEmaxFee", BEmaxFee);
   opDropDataTogether.set(BEmaxFee);
-  console.log("opDropData", opDropData);
   opDropDataTogether.set(opDropData, BEmaxFee.length);
-
-  console.log("signersPubKey", signersPubKey);
-
-  console.log("opDropDataTogether", opDropDataTogether);
 
   const ting = bitcoin.script.compile([
     opDropDataTogether,
     bitcoin.opcodes.OP_DROP, // OP_DROP
-    //bitcoin.script.number.encode(signersPubKey.length), // Push the signer public key length
     signersPubKey, // Push the signer's public key
     bitcoin.opcodes.OP_CHECKSIG, // OP_CHECKSIG
   ]);
 
-  console.log("ting", ting);
   const hexOfTing = uint8ArrayToHexString(ting);
-  console.log("hexOfTing", hexOfTing);
   return ting;
 };
 //the max fee is 8 bytes, big endian
@@ -151,9 +131,6 @@ export const createDepositAddress = (
   lockTime: number
 ): string => {
   const internalPubkey = hexToUint8Array(signerPubKey);
-
-  console.log("bip341,again ", bip341);
-  const network = bitcoin.networks.regtest;
 
   // Create the reclaim script and convert to Buffer
   const reclaimScript = Buffer.from(
@@ -229,26 +206,41 @@ export const createDepositAddress = (
   console.log("taprootPubKeyHex", taprootPubKeyHex);
 
   // Step 1: Convert the Taproot public key to a P2TR address
-  const p2tr: any = bitcoin.payments.p2tr({
+  const p2tr = bitcoin.payments.p2tr({
     internalPubkey: NUMS_X_COORDINATE, // The tweaked Taproot public key
-    network: bitcoin.networks.regtest, // Use the correct network (mainnet or testnet)
+    network: bitcoin.networks.regtest,
     scriptTree: scriptTree,
-  });
+  }) as bitcoin.Payment;
+
+  // ensure
 
   // key: toXOnly(keypair.publicKey),
   // Validate the output script is correct (P2TR has a specific witness program structure)
   const outputScript = p2tr.output;
   if (outputScript) {
     const isValid = outputScript.length === 34 && outputScript[0] === 0x51; // P2TR is version 1 witness program
-    console.log("P2TR Output Script:", outputScript.toString("hex"));
-    console.log("Is valid P2TR output:", isValid);
+    if (!isValid) {
+      throw new Error("P2TR output is invalid.");
+    }
   } else {
-    console.error("Failed to generate P2TR output.");
+    throw new Error("Failed to generate P2TR output.");
   }
 
   console.log("p2tr 0x01", p2tr.address);
+  if (p2tr === undefined) {
+    throw new Error("Output is undefined");
+  }
 
-  return p2tr.address;
+  if (p2tr?.address === undefined) {
+    console.log("Address is undefined");
+  }
+
+  if ("address" in p2tr && typeof p2tr.address === "string") {
+    console.log("Address exists:", p2tr.address);
+    return p2tr.address;
+  } else {
+    throw new Error("Could not create address");
+  }
 };
 
 export const createDepositScriptP2TROutput = async (
@@ -282,103 +274,15 @@ export const createDepositScriptP2TROutput = async (
       13. extract the raw transaction
 
     */
-    const internalPubkey = hexToUint8Array(signersPublicKey);
 
-    console.log("bip341,again ", bip341);
     const network = bitcoin.networks.regtest;
 
-    // Create the reclaim script and convert to Buffer
-    const reclaimScript = Buffer.from(
-      createReclaimScript(lockTime, new Uint8Array([]))
+    const p2trAddress = createDepositAddress(
+      stxDepositAddress,
+      signersPublicKey,
+      maxFee,
+      lockTime
     );
-
-    const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
-    console.log("reclaimScriptHex", reclaimScriptHex);
-
-    // Create the deposit script and convert to Buffer
-    console.log("stxDepositAddress", stxDepositAddress);
-    const recipientBytes = stxDepositAddress;
-    const depositScript = Buffer.from(
-      createDepositScript(internalPubkey, maxFee, recipientBytes)
-    );
-    // convert buffer to hex
-    const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
-    console.log("depositScriptHexPreHash", depositScriptHexPreHash);
-    console.log("depositScript", depositScript);
-
-    //  Hash the leaf scripts using tapLeafHash
-    const depositScriptHash = bip341.tapleafHash({ output: depositScript });
-    console.log("depositScriptHash", depositScriptHash);
-    const depositScriptHashHex = uint8ArrayToHexString(depositScriptHash);
-    console.log("depositScriptHashHex", depositScriptHashHex);
-
-    const reclaimScriptHash = bip341.tapleafHash({ output: reclaimScript });
-    console.log("reclaimScriptHash", reclaimScriptHash);
-    const reclaimScriptHashHex = uint8ArrayToHexString(reclaimScriptHash);
-    console.log("reclaimScriptHashHex", reclaimScriptHashHex);
-    // Combine the leaf hashes into a Merkle root using tapBranch
-    const merkleRoot = bip341.toHashTree([
-      { output: depositScript },
-      { output: reclaimScript },
-    ]);
-
-    const scriptTree: Taptree = [
-      {
-        output: depositScript,
-      },
-      {
-        output: reclaimScript,
-      },
-    ];
-
-    console.log("merkleRoot", merkleRoot);
-
-    const merkleRootHex = uint8ArrayToHexString(merkleRoot.hash);
-    console.log("merkleRootHex", merkleRootHex);
-    // Create an internal public key (replace with actual internal public key if available)
-
-    console.log("internalPubkey", internalPubkey);
-    // Create the final taproot public key by tweaking internalPubkey with merkleRoot
-
-    console.log("merkleRoot.hash", merkleRoot.hash);
-    // Step 1: Generate the tweak
-
-    const tweak = bip341.tapTweakHash(NUMS_X_COORDINATE, merkleRoot.hash);
-
-    console.log("tweak", tweak);
-    const tweakHex = uint8ArrayToHexString(tweak);
-    console.log("tweakHex", tweakHex);
-    // Step 2: Apply the tweak to the internal public key to get the tweaked Taproot output key
-
-    const taprootPubKey = bip341.tweakKey(NUMS_X_COORDINATE, tweak);
-    console.log("taprootPubKey", taprootPubKey);
-
-    if (taprootPubKey === null) {
-      throw new Error("Failed to tweak the internal public key.");
-    }
-    const taprootPubKeyHex = uint8ArrayToHexString(taprootPubKey.x);
-
-    console.log("taprootPubKeyHex", taprootPubKeyHex);
-
-    // Step 1: Convert the Taproot public key to a P2TR address
-    const p2tr: any = bitcoin.payments.p2tr({
-      internalPubkey: NUMS_X_COORDINATE, // The tweaked Taproot public key
-      network: bitcoin.networks.regtest, // Use the correct network (mainnet or testnet)
-      scriptTree: scriptTree,
-    });
-
-    // key: toXOnly(keypair.publicKey),
-    // Validate the output script is correct (P2TR has a specific witness program structure)
-    const outputScript = p2tr.output;
-    if (outputScript) {
-      const isValid = outputScript.length === 34 && outputScript[0] === 0x51; // P2TR is version 1 witness program
-      console.log("P2TR Output Script:", outputScript.toString("hex"));
-      console.log("Is valid P2TR output:", isValid);
-    } else {
-      console.error("Failed to generate P2TR output.");
-    }
-
-    console.log("p2tr 0x01", p2tr.address);
 
     // Fetch UTXOs for the sender address
     const utxos: any = [];
@@ -416,16 +320,10 @@ export const createDepositScriptP2TROutput = async (
       if (totalInput >= BigInt(amount) + BigInt(maxFee)) break;
     }
 
-    if (p2tr === undefined && p2tr.address === undefined) {
-      throw new Error("Output is undefined");
-    }
-
-    console.log("we made it here p2tr", p2tr);
-
     // Add output for the deposit
     psbt.addOutput({
       value: BigInt(amount),
-      address: p2tr.address, // Use the P2TR output script
+      address: p2trAddress, // Use the P2TR output script
     });
 
     // Calculate change and add change output if necessary

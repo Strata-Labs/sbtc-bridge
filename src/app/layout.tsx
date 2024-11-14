@@ -1,6 +1,5 @@
 "use client";
 
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Connect } from "@stacks/connect-react";
 
@@ -11,11 +10,6 @@ import { store } from "@/util/atoms";
 import { useWallet, WalletContextProvider } from "@/util/WalletContext";
 
 const inter = Inter({ subsets: ["latin"] });
-
-// export const metadata: Metadata = {
-//   title: "sBTC Bridge",
-//   description: "sBTC Bridge",
-// };
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const { options } = useWallet();

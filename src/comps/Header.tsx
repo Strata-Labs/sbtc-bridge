@@ -39,11 +39,50 @@ const Header = () => {
 
   const renderUserWalletInf = () => {
     // show the first 4 and last 4 of their stx wallet and their segiwt address
+    if (userData === null) {
+      return (
+        <button
+          onClick={() => handleSignOut()}
+          className="   px-4 py-2 rounded-md border-2 border-orange"
+        >
+          <h3 className="font-Matter text-xs text-orange font-semibold	 tracking-wide">
+            DISCONNECT WALLET
+          </h3>
+        </button>
+      );
+    }
+
+    // ensure the profile is not undefined
+    if (userData?.profile === undefined) {
+      return (
+        <button
+          onClick={() => handleSignOut()}
+          className="   px-4 py-2 rounded-md border-2 border-orange"
+        >
+          <h3 className="font-Matter text-xs text-orange font-semibold	 tracking-wide">
+            DISCONNECT WALLET
+          </h3>
+        </button>
+      );
+    }
+
+    // ensure p2wpkh is not undefined
+    console.log(userData);
+    if (userData?.profile.btcAddress === undefined) {
+      return (
+        <button
+          onClick={() => handleSignOut()}
+          className="   px-4 py-2 rounded-md border-2 border-orange"
+        >
+          <h3 className="font-Matter text-xs text-orange font-semibold	 tracking-wide">
+            DISCONNECT WALLET
+          </h3>
+        </button>
+      );
+    }
     const stxAddress = userData?.profile.stxAddress.testnet;
     const segWitAddress = userData?.profile.btcAddress.p2wpkh.testnet;
-    if (userData === null) {
-      return;
-    }
+
     return (
       <>
         <h4 className="font-Matter text-xs tracking-wide">

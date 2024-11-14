@@ -441,7 +441,10 @@ const DepositFlowConfirm = ({
       let txId = "";
       let txHex = "";
 
-      if (userData.profile.walletProvider === "hiro-wallet") {
+      if (
+        userData.profile.walletProvider === "hiro-wallet" ||
+        userData.profile.walletProvider === "leather"
+      ) {
         console.log("leahter send walelt info");
         console.log("amount", amount);
         console.log("p2trAddress", p2trAddress);
@@ -453,7 +456,7 @@ const DepositFlowConfirm = ({
               amount: amount,
             },
           ],
-          network: "devnet",
+          network: "testnet",
         });
 
         console.log("response", response);
@@ -462,6 +465,22 @@ const DepositFlowConfirm = ({
         }
       } else if (userData.profile.walletProvider === "xverse") {
         // get the txId from the xverse wallet
+        if (!window.XverseProviders) {
+          throw new Error("XverseProviders not found");
+        }
+        const response = await window.XverseProviders.request("sendTransfer", {
+          recipients: [
+            {
+              address: p2trAddress,
+              amount: Number(amount),
+            },
+          ],
+        });
+        if (response.status === "success") {
+          // handle success
+          txId = response.txId;
+        } else {
+        }
       } else {
         throw new Error("Wallet provider not supported");
       }
@@ -521,24 +540,6 @@ const DepositFlowConfirm = ({
             <SubText>Stacks address to transfer to</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
               {stxAddress}
-            </p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <SubText>Sender Seed Phrase</SubText>
-            <p className="text-black font-Matter font-semibold text-sm">
-              {bridgeSeedPhrase || "N/A"}
-            </p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <SubText>Sender Address</SubText>
-            <p className="text-black font-Matter font-semibold text-sm">
-              {bridgeAddress || "N/A"}
-            </p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <SubText>Signer PubKey</SubText>
-            <p className="text-black font-Matter break-all font-semibold text-sm">
-              {signerPubKey || "N/A"}
             </p>
           </div>
         </div>

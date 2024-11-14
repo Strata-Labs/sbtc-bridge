@@ -44,6 +44,7 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
       if (provider) {
         doOpenAuth(true, undefined, provider);
       } else {
+        throw new Error("Provider not found");
       }
     } catch (error) {
       console.error("Error during authentication process:", error);
