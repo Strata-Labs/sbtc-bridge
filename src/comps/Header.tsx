@@ -39,6 +39,7 @@ const Header = () => {
 
   const renderUserWalletInf = () => {
     // show the first 4 and last 4 of their stx wallet and their segiwt address
+    console.log("userdata", userData);
     if (userData === null) {
       return (
         <button
@@ -80,9 +81,8 @@ const Header = () => {
         </button>
       );
     }
-    const stxAddress = userData?.profile.stxAddress.testnet;
-    const segWitAddress = userData?.profile.btcAddress.p2wpkh.testnet;
-
+    const stxAddress = "";
+    const segWitAddress = "";
     return (
       <>
         <h4 className="font-Matter text-xs tracking-wide">

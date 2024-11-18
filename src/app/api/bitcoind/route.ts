@@ -46,7 +46,7 @@ type RpcResponse = {
 const rpcUser = "devnet";
 const rpcPassword = "devnet";
 
-const rpcHandlerCore = async (
+export const rpcHandlerCore = async (
   method: RpcMethods,
   params: RpcRequestParams,
   bitcoinDUrl: string
@@ -57,6 +57,7 @@ const rpcHandlerCore = async (
       "Basic " + Buffer.from(`${rpcUser}:${rpcPassword}`).toString("base64"),
   };
 
+  console.log("rpcHandlerCore -> params", params);
   console.log("rpcHandlerCore - bitcoinDUrl", bitcoinDUrl);
   const body = JSON.stringify({
     jsonrpc: "1.0",
@@ -98,7 +99,15 @@ export async function POST(req: NextRequest) {
     }
 
     const result = await rpcHandlerCore(rpcMethod, params, bitcoinDUrl);
-    return NextResponse.json({ result }, { status: 200 });
+    return NextResponse.json(
+      { result },
+      {
+        status: 200,
+        headers: {
+          "Access-Control-Allow-Origin": "*", // Adjust the origin as needed
+        },
+      }
+    );
   } catch (error) {
     return NextResponse.json(
       {

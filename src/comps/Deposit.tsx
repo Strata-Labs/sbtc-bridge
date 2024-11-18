@@ -449,15 +449,21 @@ const DepositFlowConfirm = ({
         console.log("amount", amount);
         console.log("p2trAddress", p2trAddress);
         console.log(window.LeatherProvider);
-        const response = await window.LeatherProvider.request("sendTransfer", {
+
+        const sendParams = {
           recipients: [
             {
               address: p2trAddress,
               amount: amount,
             },
           ],
-          network: "testnet",
-        });
+          network: "localSbtcDevenv",
+        };
+        console.log("send params", sendParams);
+        const response = await window.LeatherProvider.request(
+          "sendTransfer",
+          sendParams
+        );
 
         console.log("response", response);
         if (response.result) {
