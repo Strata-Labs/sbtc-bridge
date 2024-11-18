@@ -467,7 +467,8 @@ const DepositFlowConfirm = ({
 
         console.log("response", response);
         if (response.result) {
-          txId = response.result.txId;
+          const _txId = response.result.txid.replace(/^"|"$/g, ""); // Remove leading and trailing quotes
+          txId = _txId;
         }
       } else if (userData.profile.walletProvider === "xverse") {
         // get the txId from the xverse wallet
@@ -495,6 +496,8 @@ const DepositFlowConfirm = ({
       if (txId === "") {
         throw new Error("Error with the transaction");
       }
+
+      console.log("txId", txId);
       const emilyReqPayload = {
         bitcoinTxid: txId,
         bitcoinTxOutputIndex: 0,
