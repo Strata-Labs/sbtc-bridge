@@ -4,7 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Import your Bitcoin RPC logic
 
-const BASE_PROXY_URL = "http://localhost:8083/api/v1/";
+const BASE_PROXY_URL =
+  process.env.NEXT_PUBLIC_MEMPOOL_API_URL || "http://localhost:8083/api/v1/";
 
 enum RpcMethods {
   generateToAddress = "generatetoaddress",
@@ -122,7 +123,7 @@ export async function POST(req: NextRequest) {
     const res = await rpcHandlerCore(
       RpcMethods.sendRawTransaction,
       [body],
-      "http://localhost:18443"
+      process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443"
     );
 
     console.log("res", res);
@@ -162,7 +163,7 @@ export async function GET(req: NextRequest) {
       const result = await rpcHandlerCore(
         RpcMethods.scantxoutset,
         args,
-        "http://localhost:18443"
+        process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443"
       );
 
       console.log("result", result);
