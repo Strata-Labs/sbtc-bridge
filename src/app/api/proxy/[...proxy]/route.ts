@@ -48,8 +48,8 @@ type RpcResponse = {
   result: any; // this eventually will be a genric type based on the rpcMethod
 };
 
-const rpcUser = "devnet";
-const rpcPassword = "devnet";
+const rpcUser = process.env.NEXT_PUBLIC_BITCOIN_RPC_USER_NAME || "devnet";
+const rpcPassword = process.env.NEXT_PUBLIC_BITCOIN_RPC_PASSWORD || "devnet";
 
 export const rpcHandlerCore = async (
   method: RpcMethods,
