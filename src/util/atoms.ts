@@ -62,9 +62,10 @@ bridgeAddressAtom.onMount = (setAtom) => {
   }
 };
 
-export const DEFAULT_BITCOIN_D_URL = "http://bitcoin:18443/";
+export const DEFAULT_BITCOIN_D_URL =
+  process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443";
 
-const CoreBitcoinDaemonUrl = atom<string>("");
+const CoreBitcoinDaemonUrl = atom<string>(DEFAULT_BITCOIN_D_URL);
 const bitcoinDaemonUrlStoreKey = "bitcoinDaemonUrl";
 
 export const bitcoinDaemonUrlAtom = atom(
@@ -77,10 +78,11 @@ export const bitcoinDaemonUrlAtom = atom(
 
 bitcoinDaemonUrlAtom.onMount = (setAtom) => {
   const bitcoinDaemonUrl = localStorage.getItem(bitcoinDaemonUrlStoreKey);
-  if (bitcoinDaemonUrl) {
+  if (
+    bitcoinDaemonUrl &&
+    bitcoinDaemonUrl !== process.env.NEXT_PUBLIC_BITCOIND_URL
+  ) {
     if (!undefinedStringCheck(bitcoinDaemonUrl)) setAtom(bitcoinDaemonUrl);
-  } else {
-    setAtom(DEFAULT_BITCOIN_D_URL);
   }
 };
 
@@ -104,7 +106,9 @@ signerPubKeyAtom.onMount = (setAtom) => {
   }
 };
 
-const CoreEmilyUrl = atom<string>("http://localhost:3031");
+const CoreEmilyUrl = atom<string>(
+  process.env.EMILY_URL || "http://localhost:3031"
+);
 const emilyUrlStoreKey = "emilyUrl";
 
 export const emilyUrlAtom = atom(
@@ -117,7 +121,8 @@ export const emilyUrlAtom = atom(
 
 emilyUrlAtom.onMount = (setAtom) => {
   const emilyUrl = localStorage.getItem(emilyUrlStoreKey);
-  if (emilyUrl) {
+
+  if (emilyUrl && emilyUrl === process.env.EMILY_URL) {
     if (!undefinedStringCheck(emilyUrl)) setAtom(emilyUrl);
   }
 };

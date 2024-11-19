@@ -37,69 +37,16 @@ const Header = () => {
     }
   }, []);
 
-  const renderUserWalletInf = () => {
-    // show the first 4 and last 4 of their stx wallet and their segiwt address
-    console.log("userdata", userData);
-    if (userData === null) {
-      return (
-        <button
-          onClick={() => handleSignOut()}
-          className="   px-4 py-2 rounded-md border-2 border-orange"
-        >
-          <h3 className="font-Matter text-xs text-orange font-semibold	 tracking-wide">
-            DISCONNECT WALLET
-          </h3>
-        </button>
-      );
-    }
-
-    // ensure the profile is not undefined
-    if (userData?.profile === undefined) {
-      return (
-        <button
-          onClick={() => handleSignOut()}
-          className="   px-4 py-2 rounded-md border-2 border-orange"
-        >
-          <h3 className="font-Matter text-xs text-orange font-semibold	 tracking-wide">
-            DISCONNECT WALLET
-          </h3>
-        </button>
-      );
-    }
-
-    // ensure p2wpkh is not undefined
-    console.log(userData);
-    if (userData?.profile.btcAddress === undefined) {
-      return (
-        <button
-          onClick={() => handleSignOut()}
-          className="   px-4 py-2 rounded-md border-2 border-orange"
-        >
-          <h3 className="font-Matter text-xs text-orange font-semibold	 tracking-wide">
-            DISCONNECT WALLET
-          </h3>
-        </button>
-      );
-    }
-    const stxAddress = "";
-    const segWitAddress = "";
+  const renderUserWalletInfo = () => {
     return (
-      <>
-        <h4 className="font-Matter text-xs tracking-wide">
-          {stxAddress.slice(0, 4)}...{stxAddress.slice(-4)}
-        </h4>
-        <h4 className="font-Matter text-xs tracking-wide">
-          {segWitAddress.slice(0, 4)}...{segWitAddress.slice(-4)}
-        </h4>
-        <button
-          onClick={() => handleSignOut()}
-          className="   px-4 py-2 rounded-md border-2 border-orange"
-        >
-          <h3 className="font-Matter text-xs text-orange font-semibold	 tracking-wide">
-            DISCONNECT WALLET
-          </h3>
-        </button>
-      </>
+      <button
+        onClick={() => handleSignOut()}
+        className="   px-4 py-2 rounded-md border-2 border-orange"
+      >
+        <h3 className="font-Matter text-xs text-orange font-semibold	 tracking-wide">
+          DISCONNECT WALLET
+        </h3>
+      </button>
     );
   };
   return (
@@ -125,7 +72,7 @@ const Header = () => {
             <h5 className="font-Matter text-xs tracking-wide ">LEARN MORE</h5>
             <h4 className="font-Matter text-xs tracking-wide ">HISTORY</h4>
             {isConnected ? (
-              renderUserWalletInf()
+              renderUserWalletInfo()
             ) : (
               <button
                 onClick={() => setShowConnectWallet(true)}
