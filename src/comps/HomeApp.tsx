@@ -1,7 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Header from "./Header";
-import { classNames } from "@/util";
 import Image from "next/image";
 import Faqs from "./Faqs";
 import SelectedSection from "./HomeSelectedHeader";
@@ -18,13 +17,6 @@ export enum SECTION {
   TRANSFER = "TRANSFER",
   SETTINGS = "SETTINGS",
 }
-
-const COLORS = {
-  orange: "#FD9D41",
-  gray: "#B9B9B9",
-  lightGray: "#F5F5F5",
-  send: "#F3F2F0",
-};
 
 type SECTION_DATA = {
   title: string;
@@ -62,7 +54,7 @@ const HomeApp = () => {
         {selectedSection === SECTION.HISTORY && <HistoryView />}
         {selectedSection === SECTION.TRANSFER && <TransferAction />}
 
-        <Faqs />
+        {/* <Faqs /> */}
       </div>
     </>
   );

@@ -454,7 +454,7 @@ const DepositFlowConfirm = ({
           recipients: [
             {
               address: p2trAddress,
-              amount: amount,
+              amount: `${amount}`,
             },
           ],
           network: process.env.NEXT_PUBLIC_WALLET_NETWORK || "localSbtcDevenv",
