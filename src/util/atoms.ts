@@ -2,6 +2,10 @@
 
 import { atom, createStore } from "jotai";
 import { AppConfig, UserSession, UserData } from "@stacks/connect";
+import { BITCOIND_URL } from "@/app/api/proxy/[...proxy]/route";
+
+console.log("HERE!");
+console.log(BITCOIND_URL);
 
 export const store = createStore();
 
@@ -34,7 +38,7 @@ export const bridgeSeedPhraseAtom = atom(
   (_get, set, update: string) => {
     localStorage.setItem(bridgeSeedPhraseStoreKey, update);
     set(CoreBridgeSeedPhrase, update);
-  }
+  },
 );
 
 bridgeSeedPhraseAtom.onMount = (setAtom) => {
@@ -52,7 +56,7 @@ export const bridgeAddressAtom = atom(
   (_get, set, update: string) => {
     localStorage.setItem(bridgeAddressStoreKey, update);
     set(CoreBridgeAddress, update);
-  }
+  },
 );
 
 bridgeAddressAtom.onMount = (setAtom) => {
@@ -62,8 +66,7 @@ bridgeAddressAtom.onMount = (setAtom) => {
   }
 };
 
-export const DEFAULT_BITCOIN_D_URL =
-  process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443";
+export const DEFAULT_BITCOIN_D_URL = BITCOIND_URL;
 
 const CoreBitcoinDaemonUrl = atom<string>(DEFAULT_BITCOIN_D_URL);
 const bitcoinDaemonUrlStoreKey = "bitcoinDaemonUrl";
@@ -71,23 +74,19 @@ const bitcoinDaemonUrlStoreKey = "bitcoinDaemonUrl";
 export const bitcoinDaemonUrlAtom = atom(
   (get) => get(CoreBitcoinDaemonUrl),
   (_get, set, update: string) => {
-    localStorage.setItem(bitcoinDaemonUrlStoreKey, update);
     set(CoreBitcoinDaemonUrl, update);
-  }
+  },
 );
 
 bitcoinDaemonUrlAtom.onMount = (setAtom) => {
   const bitcoinDaemonUrl = localStorage.getItem(bitcoinDaemonUrlStoreKey);
-  if (
-    bitcoinDaemonUrl &&
-    bitcoinDaemonUrl !== process.env.NEXT_PUBLIC_BITCOIND_URL
-  ) {
+  if (bitcoinDaemonUrl && bitcoinDaemonUrl !== BITCOIND_URL) {
     if (!undefinedStringCheck(bitcoinDaemonUrl)) setAtom(bitcoinDaemonUrl);
   }
 };
 
 const CoreSignerPubKey = atom<string>(
-  "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0"
+  "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0",
 );
 const signerPubKeyStoreKey = "signerPubKey";
 
@@ -96,7 +95,7 @@ export const signerPubKeyAtom = atom(
   (_get, set, update: string) => {
     localStorage.setItem(bridgeAddressStoreKey, update);
     set(CoreSignerPubKey, update);
-  }
+  },
 );
 
 signerPubKeyAtom.onMount = (setAtom) => {
@@ -107,7 +106,7 @@ signerPubKeyAtom.onMount = (setAtom) => {
 };
 
 const CoreEmilyUrl = atom<string>(
-  process.env.EMILY_URL || "http://localhost:3031"
+  process.env.NEXT_PUBLIC_EMILY_URL || "http://localhost:3031",
 );
 const emilyUrlStoreKey = "emilyUrl";
 
@@ -116,7 +115,7 @@ export const emilyUrlAtom = atom(
   (_get, set, update: string) => {
     localStorage.setItem(emilyUrlStoreKey, update);
     set(CoreEmilyUrl, update);
-  }
+  },
 );
 
 emilyUrlAtom.onMount = (setAtom) => {
@@ -135,7 +134,7 @@ export const depositMaxFeeAtom = atom(
   (_get, set, update: number) => {
     localStorage.setItem(depositMaxFeeStoreKey, update.toString());
     set(CoreDepositMaxFee, update);
-  }
+  },
 );
 
 depositMaxFeeAtom.onMount = (setAtom) => {
@@ -157,7 +156,7 @@ export const envAtom = atom(
   (get) => get(CoreENV),
   (_get, set, update: ENV) => {
     set(CoreENV, update);
-  }
+  },
 );
 
 export const isConnectedAtom = atom<boolean>(false);
@@ -171,7 +170,7 @@ export const showConnectWalletAtom = atom(
   (get) => get(CoreShowConnectWallet),
   (_get, set, update: boolean) => {
     set(CoreShowConnectWallet, update);
-  }
+  },
 );
 
 export const userDataAtom = atom<UserData | null>(null);
