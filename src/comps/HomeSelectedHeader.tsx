@@ -77,12 +77,12 @@ const SelectedSection = ({ section, onClickSection }: SectionSelection) => {
         text="Transfer"
         onClickSection={handleClickSection}
       />
-      <SectionAction
+      {/* <SectionAction
         section={SECTION.SETTINGS}
         activeSection={section}
         text="Settings"
         onClickSection={handleClickSection}
-      />
+      /> */}
     </div>
   );
 };

@@ -702,7 +702,7 @@ const DepositFlow = () => {
           />
         );
       default:
-        return <div> test</div>;
+        return <div> Something went wrong</div>;
     }
   };
 

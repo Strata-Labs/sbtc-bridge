@@ -61,7 +61,7 @@ const HomeApp = () => {
         {selectedSection === SECTION.WITHDRAW && <p>Coming Soon :)</p>}
         {selectedSection === SECTION.HISTORY && <HistoryView />}
         {selectedSection === SECTION.TRANSFER && <TransferAction />}
-        {selectedSection === SECTION.SETTINGS && <DevEnvSettings />}
+
         <Faqs />
       </div>
     </>
