@@ -457,7 +457,7 @@ const DepositFlowConfirm = ({
               amount: amount,
             },
           ],
-          network: "localSbtcDevenv",
+          network: process.env.NEXT_PUBLIC_WALLET_NETWORK || "localSbtcDevenv",
         };
         console.log("send params", sendParams);
         const response = await window.LeatherProvider.request(
