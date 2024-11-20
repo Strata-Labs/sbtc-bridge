@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Header from "./Header";
 import Image from "next/image";
 import Faqs from "./Faqs";
@@ -87,7 +87,7 @@ const HomeApp = () => {
         {selectedSection === SECTION.HISTORY && <HistoryView />}
         {selectedSection === SECTION.TRANSFER && <TransferAction />}
 
-        <Faqs />
+        {/* <Faqs /> */}
       </div>
     </>
   );
