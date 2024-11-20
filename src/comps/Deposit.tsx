@@ -363,7 +363,7 @@ const DepositFlowConfirm = ({
   const bridgeSeedPhrase = useAtomValue(bridgeSeedPhraseAtom);
   const bridgeAddress = useAtomValue(bridgeAddressAtom);
 
-  const signerPubKey = useAtomValue(signerPubKeyAtom);
+  const signerPubKey = process.env.NEXT_PUBLIC_SIGNER_AGGREGATE_KEY || "";
 
   const emilyUrl = useAtomValue(emilyUrlAtom);
 
