@@ -32,7 +32,10 @@ const readOnlyHelper = async ({
   //setLoading(true);
   try {
     const call = await fetchCallReadOnlyFunction(options);
+
+    console.log("call", call);
     const result = cvToJSON(call);
+    console.log("result", result);
 
     return result.value;
   } catch (err: any) {
