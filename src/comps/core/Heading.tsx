@@ -2,7 +2,9 @@ type TextProps = {
   children: React.ReactNode;
 };
 export const Heading = ({ children }: TextProps) => {
-  return <h1 className="text-2xl font-Matter font-normal">{children}</h1>;
+  return (
+    <h1 className="text-3xl text-black font-Matter font-normal">{children}</h1>
+  );
 };
 
 export const SubText = ({ children }: TextProps) => {

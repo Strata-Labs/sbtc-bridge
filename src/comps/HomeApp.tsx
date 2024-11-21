@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import Header from "./Header";
-import { classNames } from "@/util";
 import Image from "next/image";
 import Faqs from "./Faqs";
 import SelectedSection from "./HomeSelectedHeader";
 import DepositFlow from "./Deposit";
 import HistoryView from "./HistoryView";
 import TransferApp, { TransferAction } from "./TransferHome";
+import DevEnvSettings from "./DevEnvSettings";
 
 export enum SECTION {
   DEPOSIT = "DEPOSIT",
@@ -15,14 +15,8 @@ export enum SECTION {
   HISTORY = "HISTORY",
   STATUS = "STATUS",
   TRANSFER = "TRANSFER",
+  SETTINGS = "SETTINGS",
 }
-
-const COLORS = {
-  orange: "#FD9D41",
-  gray: "#B9B9B9",
-  lightGray: "#F5F5F5",
-  send: "#F3F2F0",
-};
 
 type SECTION_DATA = {
   title: string;
@@ -33,12 +27,46 @@ sectionsMap.set(SECTION.DEPOSIT, { title: "Deposit" });
 sectionsMap.set(SECTION.WITHDRAW, { title: "Withdraw" });
 sectionsMap.set(SECTION.HISTORY, { title: "History" });
 sectionsMap.set(SECTION.TRANSFER, { title: "Transfer" });
+sectionsMap.set(SECTION.SETTINGS, { title: "Settings" });
 
 const HomeApp = () => {
   const [selectedSection, setSelectedSection] = useState<SECTION>(
     SECTION.DEPOSIT
   );
 
+  useEffect(() => {
+    // emily cors test
+  }, []);
+  const emilyTest = async () => {
+    try {
+      const paramsBody = {
+        bitcoinTxid: "",
+        bitcoinTxOutputIndex: "",
+        reclaimScript: "",
+        depositScript: "",
+      };
+      const body = "";
+      // Forward the request to the Rust server
+      const response = await fetch(`${body}/deposit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(paramsBody),
+      });
+
+      // If Rust server responds with an error status
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        console.log(errorResponse);
+      }
+
+      // Return the success response from Rust server
+      const responseData = await response.json();
+    } catch (err) {
+      console.log(err);
+    }
+  };
   const selectedSectionData = sectionsMap.get(selectedSection);
 
   if (selectedSectionData === undefined) {
@@ -59,7 +87,7 @@ const HomeApp = () => {
         {selectedSection === SECTION.HISTORY && <HistoryView />}
         {selectedSection === SECTION.TRANSFER && <TransferAction />}
 
-        <Faqs />
+        {/* <Faqs /> */}
       </div>
     </>
   );

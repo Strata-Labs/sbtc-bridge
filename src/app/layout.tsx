@@ -1,15 +1,20 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Inter } from "next/font/google";
+import { Connect } from "@stacks/connect-react";
+
 import "./globals.css";
 
 import { Provider } from "jotai";
 import { store } from "@/util/atoms";
+import { useWallet, WalletContextProvider } from "@/util/WalletContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "sBTC Bridge",
-  description: "sBTC Bridge",
+const Layout = ({ children }: { children: React.ReactNode }) => {
+  const { options } = useWallet();
+
+  return <Connect authOptions={options}>{children}</Connect>;
 };
 
 export default function RootLayout({
@@ -20,7 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Provider store={store}>
-        <body className={inter.className}>{children}</body>
+        <WalletContextProvider>
+          <Layout>
+            <body className={inter.className}>{children}</body>
+          </Layout>
+        </WalletContextProvider>
       </Provider>
     </html>
   );
