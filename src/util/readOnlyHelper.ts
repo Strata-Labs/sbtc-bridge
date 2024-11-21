@@ -14,10 +14,10 @@ const readOnlyHelper = async ({
   stacksNetwork,
   walletAddress,
 }: ReadOnlyHelperProps) => {
-  console.log("walletAddress", walletAddress);
   const options: ReadOnlyFunctionOptions = {
     contractAddress: process.env.NEXT_PUBLIC_SBTC_CONTRACT_ADDRESS || "",
     contractName: process.env.NEXT_PUBLIC_SBTC_CONTRACT_NAME || "",
+
     functionName: functionName,
     //'get-current-aggregate-pubkey',
     functionArgs: [],
@@ -25,13 +25,10 @@ const readOnlyHelper = async ({
     senderAddress: walletAddress,
   };
 
-  console.log("options", options);
   //setLoading(true);
   try {
     const call = await fetchCallReadOnlyFunction(options);
-    console.log("call", call);
     const result = cvToJSON(call);
-    console.log("result", result);
 
     return result.value;
   } catch (err: any) {
