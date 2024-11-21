@@ -169,3 +169,9 @@ export const userDataAtom = atom<UserData | null>(null);
 export const walletAddressAtom = atom<string | null>(null);
 
 export const stacksNetworkAtom = atom<StacksNetwork>(STACKS_TESTNET);
+
+export enum STACKS_ENV {
+  MAINNET = "MAINNET",
+  TESTNET = "TESTNET",
+}
+export const stacksEnvAtom = atom<STACKS_ENV>(STACKS_ENV.TESTNET);

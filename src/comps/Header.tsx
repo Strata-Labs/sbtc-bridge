@@ -3,21 +3,29 @@ import Link from "next/link";
 import { AppConfig, UserSession } from "@stacks/connect";
 import { useEffect, useState } from "react";
 
+import { STACKS_MAINNET, STACKS_TESTNET } from "@stacks/network";
+
 const appConfig = new AppConfig(["store_write"]);
 const userSession = new UserSession({ appConfig });
 import { AnimatePresence } from "framer-motion";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import {
   isConnectedAtom,
   showConnectWalletAtom,
+  STACKS_ENV,
+  stacksEnvAtom,
   userDataAtom,
+  walletAddressAtom,
 } from "@/util/atoms";
 
 import ConnectWallet from "./ConnectWallet";
 import { useWallet } from "@/util/WalletContext";
+import readOnlyHelper from "@/util/readOnlyHelper";
 
 const Header = () => {
   const [userData, setUserData] = useAtom(userDataAtom);
+  const [walletAddress, setWalletAddress] = useAtom(walletAddressAtom);
+  const stacksEnv = useAtomValue(stacksEnvAtom);
 
   const { handleSignOut } = useWallet();
 
@@ -32,10 +40,51 @@ const Header = () => {
   useEffect(() => {
     if (userSession.isUserSignedIn()) {
       const userData = userSession.loadUserData();
-      setUserData(userData);
-      setIsConnected(true);
+      console.log("userData", userData);
+
+      let stxWalletAddress = "";
+      if (stacksEnv === STACKS_ENV.TESTNET) {
+        // check what wallet provider
+        if (
+          userData.profile.walletProvider === "leather" ||
+          userData.profile.walletProvider === "hiro"
+        ) {
+          stxWalletAddress = userData.profile.stxAddress;
+        }
+      }
+
+      if (stxWalletAddress) {
+        setUserData(userData);
+        setIsConnected(true);
+        setWalletAddress(stxWalletAddress);
+      } else {
+        // show notification something went wrong getting wallet address
+      }
     }
   }, []);
+
+  useEffect(() => {
+    if (isConnected && walletAddress) {
+      fetchSignerAggregateAddress();
+    }
+  }, [isConnected, walletAddress]);
+
+  const fetchSignerAggregateAddress = async () => {
+    try {
+      console.log("process.env", process.env);
+      const stacksNetwork =
+        stacksEnv === STACKS_ENV.TESTNET ? STACKS_TESTNET : STACKS_MAINNET;
+      const readOnlyHelperRes = await readOnlyHelper({
+        stacksNetwork: stacksNetwork,
+        walletAddress: walletAddress || "",
+        functionName: "get-current-aggregate-pubkey",
+      });
+
+      console.log("readOnlyHelperRes", readOnlyHelperRes);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const renderUserWalletInfo = () => {
     return (
