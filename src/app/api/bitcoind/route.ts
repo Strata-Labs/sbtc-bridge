@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
       {
         status: 200,
         headers: {
-          "Access-Control-Allow-Origin": "*", // Adjust the origin as needed
+          "Access-Control-Allow-Origin": "*",
         },
       }
     );
