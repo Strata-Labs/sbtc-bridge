@@ -69,12 +69,12 @@ const Header = () => {
             </div>
           </Link>
           <div className="flex flex-row gap-10 items-center">
-            <h5 className="font-Matter text-xs text-black tracking-wide ">
+            {/* <h5 className="font-Matter text-xs text-black tracking-wide ">
               LEARN MORE
             </h5>
             <h4 className="font-Matter text-xs text-black tracking-wide ">
               HISTORY
-            </h4>
+            </h4> */}
             {isConnected ? (
               renderUserWalletInfo()
             ) : (
