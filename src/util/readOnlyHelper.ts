@@ -1,5 +1,5 @@
 import { fetchCallReadOnlyFunction } from "@stacks/transactions";
-import { cvToJSON } from "@stacks/transactions";
+import { cvToJSON, ReadOnlyFunctionOptions } from "@stacks/transactions";
 
 import { StacksNetwork } from "@stacks/network";
 
@@ -14,9 +14,10 @@ const readOnlyHelper = async ({
   stacksNetwork,
   walletAddress,
 }: ReadOnlyHelperProps) => {
-  const options = {
-    contractAddress: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-    contractName: process.env.NEXT_PUBLIC_CONTRACT_NAME,
+  console.log("walletAddress", walletAddress);
+  const options: ReadOnlyFunctionOptions = {
+    contractAddress: process.env.NEXT_PUBLIC_SBTC_CONTRACT_ADDRESS || "",
+    contractName: process.env.NEXT_PUBLIC_SBTC_CONTRACT_NAME || "",
     functionName: functionName,
     //'get-current-aggregate-pubkey',
     functionArgs: [],
@@ -27,11 +28,12 @@ const readOnlyHelper = async ({
   console.log("options", options);
   //setLoading(true);
   try {
-    const call = await fetchCallReadOnlyFunction(options as any);
-    const result = cvToJSON(call).value;
-    console.log("result: ", result);
+    const call = await fetchCallReadOnlyFunction(options);
+    console.log("call", call);
+    const result = cvToJSON(call);
+    console.log("result", result);
 
-    return result;
+    return result.value;
   } catch (err: any) {
     console.log("error: ", options, err);
     throw new Error(err);

@@ -35,6 +35,8 @@ const HomeApp = () => {
   );
 
   useEffect(() => {
+    console.log("process.env", process.env);
+
     // emily cors test
   }, []);
   const emilyTest = async () => {

@@ -8,10 +8,11 @@ import { STACKS_MAINNET, STACKS_TESTNET } from "@stacks/network";
 const appConfig = new AppConfig(["store_write"]);
 const userSession = new UserSession({ appConfig });
 import { AnimatePresence } from "framer-motion";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   isConnectedAtom,
   showConnectWalletAtom,
+  signerPubKeyAtom,
   STACKS_ENV,
   stacksEnvAtom,
   userDataAtom,
@@ -21,11 +22,14 @@ import {
 import ConnectWallet from "./ConnectWallet";
 import { useWallet } from "@/util/WalletContext";
 import readOnlyHelper from "@/util/readOnlyHelper";
+import { hexToUint8Array, uint8ArrayToHexString } from "@/util/regtest/wallet";
 
 const Header = () => {
   const [userData, setUserData] = useAtom(userDataAtom);
   const [walletAddress, setWalletAddress] = useAtom(walletAddressAtom);
   const stacksEnv = useAtomValue(stacksEnvAtom);
+
+  const setSignerPubkey = useSetAtom(signerPubKeyAtom);
 
   const { handleSignOut } = useWallet();
 
@@ -49,7 +53,7 @@ const Header = () => {
           userData.profile.walletProvider === "leather" ||
           userData.profile.walletProvider === "hiro"
         ) {
-          stxWalletAddress = userData.profile.stxAddress;
+          stxWalletAddress = userData.profile.stxAddress.testnet;
         }
       }
 
@@ -80,7 +84,22 @@ const Header = () => {
         functionName: "get-current-aggregate-pubkey",
       });
 
-      console.log("readOnlyHelperRes", readOnlyHelperRes);
+      const uint8FormatRes = hexToUint8Array(readOnlyHelperRes);
+
+      console.log("uint8FormatRes", uint8FormatRes);
+
+      // remove the first byte of test
+
+      const xOnlyuInt = uint8FormatRes.slice(1);
+
+      console.log("xOnlyuInt", xOnlyuInt);
+
+      // convert uint8array to hex
+      const xOnlyHex = uint8ArrayToHexString(xOnlyuInt);
+
+      console.log("xOnlyHex", xOnlyHex);
+
+      setSignerPubkey(xOnlyHex);
     } catch (err) {
       console.error(err);
     }
