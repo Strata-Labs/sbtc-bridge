@@ -1,5 +1,7 @@
 import { useFormik } from "formik";
 import { PrimaryButton } from "./FlowButtons";
+import { useAtomValue, useSetAtom } from "jotai";
+import { isConnectedAtom, showConnectWalletAtom } from "@/util/atoms";
 // this is supposed to be as reusable as possible given all the flows are very similar in order and action
 type FlowFormProps = {
   nameKey: string;
@@ -19,6 +21,9 @@ export const FlowForm = ({
   type,
   children,
 }: FlowFormProps) => {
+  const isConnected = useAtomValue(isConnectedAtom);
+  const setShowConnectWallet = useSetAtom(showConnectWalletAtom);
+
   const formik = useFormik({
     initialValues: {
       [nameKey]: initialValue,
@@ -48,13 +53,24 @@ export const FlowForm = ({
       </div>
       <div className="w-full flex-row flex justify-between items-center">
         {children}
-        <PrimaryButton
-          type="submit"
-          onClick={formik.handleSubmit}
-          isValid={formik.isValid}
-        >
-          NEXT
-        </PrimaryButton>
+        {isConnected ? (
+          <PrimaryButton
+            type="submit"
+            onClick={formik.handleSubmit}
+            isValid={formik.isValid}
+          >
+            NEXT
+          </PrimaryButton>
+        ) : (
+          <button
+            onClick={() => setShowConnectWallet(true)}
+            className=" bg-orange  px-4 py-2 rounded-md"
+          >
+            <h3 className="font-Matter text-xs font-semibold	 tracking-wide">
+              CONNECT WALLET
+            </h3>
+          </button>
+        )}
       </div>
     </form>
   );

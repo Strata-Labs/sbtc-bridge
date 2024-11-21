@@ -10,14 +10,18 @@ import React, {
 
 import { AppConfig, UserSession, UserData } from "@stacks/connect";
 import { AuthOptions } from "@stacks/connect-react";
-import { useAtom } from "jotai";
-import { isConnectedAtom, showConnectWalletAtom, userDataAtom } from "./atoms";
+import { useAtom, useSetAtom } from "jotai";
+import {
+  isConnectedAtom,
+  showConnectWalletAtom,
+  userDataAtom,
+  walletAddressAtom,
+} from "./atoms";
 
 interface WalletContextProps {
   options: AuthOptions;
   handleWalletConnected: (address: string) => void;
   handleSignOut: () => void;
-  userSession: UserSession;
 }
 
 const appConfig = new AppConfig(["store_write"]);
@@ -26,11 +30,10 @@ const userSession = new UserSession({ appConfig });
 const WalletContext = createContext<WalletContextProps | undefined>(undefined);
 
 const WalletContextProvider = ({ children }: { children: ReactNode }) => {
-  const [isConnected, setIsConnected] = useAtom(isConnectedAtom);
-  const [showConnectWallet, setShowConnectWallet] = useAtom(
-    showConnectWalletAtom
-  );
-  const [userData, setUserData] = useAtom(userDataAtom);
+  const setIsConnected = useSetAtom(isConnectedAtom);
+  const setShowConnectWallet = useSetAtom(showConnectWalletAtom);
+  const setUserData = useSetAtom(userDataAtom);
+  const setWalletAddress = useSetAtom(walletAddressAtom);
 
   const handleSignOut = () => {
     userSession.signUserOut("/");
@@ -60,10 +63,9 @@ const WalletContextProvider = ({ children }: { children: ReactNode }) => {
       value={{
         options: authOptions,
         handleWalletConnected: (address: string) => {
-          //setWalletAddress(address);
+          setWalletAddress(address);
         },
         handleSignOut,
-        userSession,
       }}
     >
       {children}

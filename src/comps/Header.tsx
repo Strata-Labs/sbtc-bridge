@@ -56,7 +56,7 @@ const Header = () => {
           style={{
             maxWidth: "1200px",
           }}
-          className="flex-1  flex-row flex items-center justify-between"
+          className="flex-1 px-4 flex-row flex items-center justify-between"
         >
           <Link href="/">
             <div className="">

@@ -71,12 +71,12 @@ const SelectedSection = ({ section, onClickSection }: SectionSelection) => {
         text="History"
         onClickSection={handleClickSection}
       />
-      <SectionAction
+      {/* <SectionAction
         section={SECTION.TRANSFER}
         activeSection={section}
         text="Transfer"
         onClickSection={handleClickSection}
-      />
+      /> */}
       {/* <SectionAction
         section={SECTION.SETTINGS}
         activeSection={section}

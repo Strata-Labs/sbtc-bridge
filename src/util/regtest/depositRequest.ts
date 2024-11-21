@@ -1,7 +1,7 @@
 import * as bitcoin from "bitcoinjs-lib";
-import { ECPairFactory, ECPairAPI, TinySecp256k1Interface } from "ecpair";
+import { ECPairFactory, ECPairAPI } from "ecpair";
 
-import { listUnspent, scanTxOutSet } from "../bitcoinClient";
+import { scanTxOutSet } from "../bitcoinClient";
 import { hexToUint8Array, uint8ArrayToHexString } from "./wallet";
 import { Taptree } from "bitcoinjs-lib/src/types";
 
@@ -16,9 +16,6 @@ const NUMS_X_COORDINATE = new Uint8Array([
   0xee, 0x9a, 0xce, 0x80, 0x3a, 0xc0,
 ]);
 
-// You need to provide the ECC library. The ECC library must implement
-// all the methods of the `TinySecp256k1Interface` interface.
-
 //depositRequest.ts;
 
 // Helper function to convert a little-endian 8-byte number to big-endian
@@ -31,22 +28,23 @@ const flipEndian = (buffer: Uint8Array): Uint8Array => {
 };
 
 export const createDepositScript = (
-  signersPubKey: Uint8Array, // Use Uint8Array instead of Buffer
+  signersPubKey: Uint8Array,
   maxFee: number,
-  recipientBytes: Uint8Array // Use Uint8Array instead of Buffer
+  recipientBytes: Uint8Array
 ) => {
-  const opDropData = recipientBytes; // Ensure recipientBytes is a Uint8Array
+  const opDropData = recipientBytes;
 
   // maxFee should be BE its in LE rn
 
   // Convert maxFee to LE buffer (as an 8-byte buffer)
   const LEmaxFee = Buffer.alloc(8);
-  LEmaxFee.writeUInt32LE(maxFee, 0); // We use UInt32LE for writing the fee
+  // We use UInt32LE for writing the fee
+  LEmaxFee.writeUInt32LE(maxFee, 0);
 
   // Convert the little-endian maxFee to big-endian
   const BEmaxFee = flipEndian(LEmaxFee);
 
-  // concat bemaxfee and opdropdata
+  // Concat maxfee and opdropdata
   const opDropDataTogether = new Uint8Array(
     BEmaxFee.length + opDropData.length
   );
@@ -55,9 +53,9 @@ export const createDepositScript = (
 
   const ting = bitcoin.script.compile([
     opDropDataTogether,
-    bitcoin.opcodes.OP_DROP, // OP_DROP
-    signersPubKey, // Push the signer's public key
-    bitcoin.opcodes.OP_CHECKSIG, // OP_CHECKSIG
+    bitcoin.opcodes.OP_DROP,
+    signersPubKey,
+    bitcoin.opcodes.OP_CHECKSIG,
   ]);
 
   const hexOfTing = uint8ArrayToHexString(ting);
@@ -67,7 +65,7 @@ export const createDepositScript = (
 
 export const createReclaimScript = (
   lockTime: number,
-  additionalScriptBytes: Uint8Array // Use Uint8Array for additional script data
+  additionalScriptBytes: Uint8Array
 ): Uint8Array => {
   const { script, opcodes } = bitcoin;
 
@@ -75,7 +73,7 @@ export const createReclaimScript = (
   const lockTimeEncoded = script.number.encode(lockTime);
 
   // Combine the script elements into a single Uint8Array
-  const lockTimeArray = new Uint8Array(lockTimeEncoded); // Convert Buffer to Uint8Array
+  const lockTimeArray = new Uint8Array(lockTimeEncoded);
   const opCheckSequenceVerify = new Uint8Array([
     opcodes.OP_CHECKSEQUENCEVERIFY,
   ]);
@@ -90,8 +88,8 @@ export const createReclaimScript = (
   const reclaimScript = new Uint8Array(totalLength);
 
   // Set each part of the script
-  reclaimScript.set(lockTimeArray, 0); // Set lock time
-  reclaimScript.set(opCheckSequenceVerify, lockTimeArray.length); // Set OP_CHECKSEQUENCEVERIFY
+  reclaimScript.set(lockTimeArray, 0);
+  reclaimScript.set(opCheckSequenceVerify, lockTimeArray.length);
   reclaimScript.set(
     additionalScriptBytes,
     lockTimeArray.length + opCheckSequenceVerify.length
@@ -104,25 +102,6 @@ export const createReclaimScript = (
   ]);
   return buildScript;
 };
-
-type DepositRequest = {
-  senderPrivKeyWIF: string;
-  receiverAddress: string;
-  amount: number;
-  signersPublicKey: Uint8Array;
-  maxFee: number;
-  lockTime: number;
-  senderAddress: string;
-};
-
-// convert uint8array to buffer
-const uint8ArrayToBuffer = (uint8Array: Uint8Array) => {
-  return Buffer.from(uint8Array);
-};
-
-function toXOnly(pubkey: Buffer): Buffer {
-  return pubkey.subarray(1, 33);
-}
 
 export const createDepositAddress = (
   stxAddress: Uint8Array,
@@ -138,27 +117,21 @@ export const createDepositAddress = (
   );
 
   const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
-  console.log("reclaimScriptHex", reclaimScriptHex);
 
   // Create the deposit script and convert to Buffer
-  console.log("stxDepositAddress", stxAddress);
+
   const recipientBytes = stxAddress;
   const depositScript = Buffer.from(
     createDepositScript(internalPubkey, maxFee, recipientBytes)
   );
   // convert buffer to hex
   const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
-  console.log("depositScriptHexPreHash", depositScriptHexPreHash);
-  console.log("depositScript", depositScript);
 
   //  Hash the leaf scripts using tapLeafHash
   const depositScriptHash = bip341.tapleafHash({ output: depositScript });
-  console.log("depositScriptHash", depositScriptHash);
   const depositScriptHashHex = uint8ArrayToHexString(depositScriptHash);
-  console.log("depositScriptHashHex", depositScriptHashHex);
 
   const reclaimScriptHash = bip341.tapleafHash({ output: reclaimScript });
-  console.log("reclaimScriptHash", reclaimScriptHash);
   const reclaimScriptHashHex = uint8ArrayToHexString(reclaimScriptHash);
   console.log("reclaimScriptHashHex", reclaimScriptHashHex);
   // Combine the leaf hashes into a Merkle root using tapBranch

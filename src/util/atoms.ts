@@ -18,6 +18,7 @@ const undefinedStringCheck = (value: string) => {
 // atoms directory
 /* 
   - Stacks Network (not cached)
+  - Wallet Address (not cached)
   - BridgeSeedPhrase (cached)
   - BridgeAddress (cached)
   - BitcoinDaemonUrl (cached)
@@ -29,7 +30,6 @@ const undefinedStringCheck = (value: string) => {
   - userData 
   - 
 */
-export const stacksNetworkAtom = atom<StacksNetwork>(STACKS_TESTNET);
 
 const CoreBridgeSeedPhrase = atom<string>("DEPOSIT");
 const bridgeSeedPhraseStoreKey = "bridgeSeedPhrase";
@@ -161,17 +161,11 @@ export const envAtom = atom(
 );
 
 export const isConnectedAtom = atom<boolean>(false);
-export const setIsConnectedAtom = atom(null, (_get, set, update: boolean) => {
-  set(isConnectedAtom, update);
-});
 
-const CoreShowConnectWallet = atom<boolean>(false);
-// this is in a global state so that it can be called from anywhere outside of just the header button
-export const showConnectWalletAtom = atom(
-  (get) => get(CoreShowConnectWallet),
-  (_get, set, update: boolean) => {
-    set(CoreShowConnectWallet, update);
-  }
-);
+export const showConnectWalletAtom = atom<boolean>(false);
 
 export const userDataAtom = atom<UserData | null>(null);
+
+export const walletAddressAtom = atom<string | null>(null);
+
+export const stacksNetworkAtom = atom<StacksNetwork>(STACKS_TESTNET);

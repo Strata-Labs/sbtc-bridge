@@ -94,9 +94,7 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
                     width={48}
                     alt={provider.name}
                   />
-                  <p className="ml-4 text-marble-900 font-bold">
-                    {provider.name}
-                  </p>
+                  <p className="ml-4 text-black font-bold">{provider.name}</p>
                 </div>
                 <ArrowRightIcon className="h-6 w-6" />
               </div>
