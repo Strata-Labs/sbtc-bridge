@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BASE_PROXY_URL =
   process.env.NEXT_PUBLIC_MEMPOOL_API_URL || "http://localhost:8083/api/v1/";
-export const BITCOIND_URL =
+const BITCOIND_URL =
   process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443";
 
 enum RpcMethods {
@@ -53,10 +53,10 @@ type RpcResponse = {
 const rpcUser = process.env.NEXT_PUBLIC_BITCOIN_RPC_USER_NAME || "devnet";
 const rpcPassword = process.env.NEXT_PUBLIC_BITCOIN_RPC_PASSWORD || "devnet";
 
-export const rpcHandlerCore = async (
+const rpcHandlerCore = async (
   method: RpcMethods,
   params: RpcRequestParams,
-  bitcoinDUrl: string,
+  bitcoinDUrl: string
 ): Promise<any> => {
   const headers = {
     "Content-Type": "application/json",
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
     const res = await rpcHandlerCore(
       RpcMethods.sendRawTransaction,
       [body],
-      BITCOIND_URL,
+      BITCOIND_URL
     );
 
     console.log("res", res);
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
     console.error("Error in POST handler:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -165,7 +165,7 @@ export async function GET(req: NextRequest) {
       const result = await rpcHandlerCore(
         RpcMethods.scantxoutset,
         args,
-        BITCOIND_URL,
+        BITCOIND_URL
       );
 
       console.log("result", result);
@@ -199,7 +199,7 @@ export async function GET(req: NextRequest) {
     console.error("Error in GET handler:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

@@ -46,7 +46,7 @@ type RpcResponse = {
 const rpcUser = process.env.NEXT_PUBLIC_BITCOIN_RPC_USER_NAME || "devnet";
 const rpcPassword = process.env.NEXT_PUBLIC_BITCOIN_RPC_PASSWORD || "devnet";
 
-export const rpcHandlerCore = async (
+const rpcHandlerCore = async (
   method: RpcMethods,
   params: RpcRequestParams,
   bitcoinDUrl: string

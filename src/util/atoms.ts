@@ -2,11 +2,13 @@
 
 import { atom, createStore } from "jotai";
 import { AppConfig, UserSession, UserData } from "@stacks/connect";
-import { BITCOIND_URL } from "@/app/api/proxy/[...proxy]/route";
 
 import { StacksNetwork, STACKS_TESTNET } from "@stacks/network";
 
 export const store = createStore();
+
+const BITCOIND_URL =
+  process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443";
 
 const undefinedStringCheck = (value: string) => {
   if (value === "undefined") {
