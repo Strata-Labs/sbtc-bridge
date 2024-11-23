@@ -119,6 +119,11 @@ const Header = () => {
   };
   return (
     <>
+      {process.env.NODE_ENV !== 'production' && (
+        <div className="w-screen bg-red-500 text-white text-center py-2">
+          This is a testnet release
+        </div>
+      )}
       <header className="w-screen py-6 flex items-center justify-center">
         <div
           style={{

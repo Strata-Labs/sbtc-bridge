@@ -1,6 +1,6 @@
 {
   "name": "sbtc-bridge",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "repository": "https://github.com/stacks-network/sbtc-bridge",
   "author": "<brgarciarivas@gmail.com>",
   "license": "MIT",
