@@ -334,11 +334,3 @@ export const createDepositScriptP2TROutput = async (
     throw new Error(err);
   }
 };
-
-/*
-1e00000000000003e8051aaf3f91f38aa21ade7e9f95efdbc4201eeb4cf0f87520e89877c40fd5b1ef12c3389f6921cb2c00d4fede6564c01ca759d413aab0b312ac
-
-
-1e00000000000003e8051aaf3f91f38aa21ade7e9f95efdbc4201eeb4cf0f875201e2cd43aa1993fa0c794bdb6d46bf020b8ac8e94b4ba8ef0afdf4bc7e7c69a18ac
-
-*/

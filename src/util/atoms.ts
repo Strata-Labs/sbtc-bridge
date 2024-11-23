@@ -5,6 +5,10 @@ import { AppConfig, UserSession, UserData } from "@stacks/connect";
 import { BITCOIND_URL } from "@/app/api/proxy/[...proxy]/route";
 
 import { StacksNetwork, STACKS_TESTNET } from "@stacks/network";
+import {
+  NotificationEventType,
+  NotificationStatusType,
+} from "@/comps/Notifications";
 
 export const store = createStore();
 
@@ -169,3 +173,16 @@ export const userDataAtom = atom<UserData | null>(null);
 export const walletAddressAtom = atom<string | null>(null);
 
 export const stacksNetworkAtom = atom<StacksNetwork>(STACKS_TESTNET);
+
+export const eventsAtom = atom<NotificationEventType[]>([
+  {
+    id: "1",
+    title: "Welcome to Stacks Bridge",
+    type: NotificationStatusType.SUCCESS,
+  },
+  {
+    id: "2",
+    title: "Welcome to Stacks Bridge",
+    type: NotificationStatusType.SUCCESS,
+  },
+]);
