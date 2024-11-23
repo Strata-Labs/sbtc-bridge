@@ -34,11 +34,13 @@ import {
   bridgeSeedPhraseAtom,
   depositMaxFeeAtom,
   emilyUrlAtom,
+  eventsAtom,
   signerPubKeyAtom,
   userDataAtom,
 } from "@/util/atoms";
 import { decodeRawTransaction, sendRawTransaction } from "@/util/bitcoinClient";
 import { useRouter } from "next/navigation";
+import { NotificationStatusType } from "./Notifications";
 /* 
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -362,6 +364,7 @@ const DepositFlowConfirm = ({
 }: DepositFlowConfirmProps) => {
   const bridgeSeedPhrase = useAtomValue(bridgeSeedPhraseAtom);
   const bridgeAddress = useAtomValue(bridgeAddressAtom);
+  const [events, setEvents] = useAtom(eventsAtom);
 
   const signerPubKey = process.env.NEXT_PUBLIC_SIGNER_AGGREGATE_KEY || "";
 
@@ -372,6 +375,7 @@ const DepositFlowConfirm = ({
   const userData = useAtomValue(userDataAtom);
 
   const handleNextClick = async () => {
+    const _events = [...events];
     try {
       if (userData === null) {
         throw new Error("User data is not set");
@@ -487,6 +491,14 @@ const DepositFlowConfirm = ({
           // handle success
           txId = response.txId;
         } else {
+          // handle error
+          _events.push({
+            id: _events.length + 1 + "",
+            type: NotificationStatusType.ERROR,
+            title: `Issue with Transaction`,
+          });
+
+          throw new Error("Error with the transaction");
         }
       } else {
         throw new Error("Wallet provider not supported");
@@ -494,6 +506,12 @@ const DepositFlowConfirm = ({
 
       console.log("testThing", txHex);
       if (txId === "") {
+        _events.push({
+          id: _events.length + 1 + "",
+          type: NotificationStatusType.ERROR,
+          title: `Issue with Transaction`,
+        });
+
         throw new Error("Error with the transaction");
       }
 
@@ -516,9 +534,20 @@ const DepositFlowConfirm = ({
       });
 
       if (!response.ok) {
+        _events.push({
+          id: _events.length + 1 + "",
+          type: NotificationStatusType.ERROR,
+          title: `Issue with Request to Emily`,
+        });
+
         throw new Error("Error with the request");
       }
 
+      _events.push({
+        id: _events.length + 1 + "",
+        type: NotificationStatusType.SUCCESS,
+        title: `Successful Deposit request`,
+      });
       setStep(DEPOSIT_STEP.REVIEW);
       handleUpdatingTransactionInfo({
         hex: txHex,
@@ -526,6 +555,8 @@ const DepositFlowConfirm = ({
       });
     } catch (error) {
       console.log("error", error);
+    } finally {
+      setEvents(_events);
     }
   };
   const handlePrevClick = () => {

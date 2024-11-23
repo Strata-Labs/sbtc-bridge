@@ -27,11 +27,11 @@ const COLOR_DATA = {
   },
   [NotificationStatusType.ERROR]: {
     text: "#FD9D41",
-    background: "rgba(253, 157, 65, 0.1)",
+    background: "#FFF5EB",
   },
   [NotificationStatusType.WARNING]: {
     text: "#FD9D41",
-    background: "rgba(253, 157, 65, 0.1)",
+    background: "#FFF5EB",
   },
 };
 
