@@ -7,8 +7,10 @@ import { StacksNetwork, STACKS_TESTNET } from "@stacks/network";
 
 export const store = createStore();
 
-const BITCOIND_URL =
+export const BITCOIND_URL =
   process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443";
+
+const DEFAULT_BITCOIN_D_URL = BITCOIND_URL;
 
 const undefinedStringCheck = (value: string) => {
   if (value === "undefined") {
@@ -68,8 +70,6 @@ bridgeAddressAtom.onMount = (setAtom) => {
     if (!undefinedStringCheck(bridgeAddress)) setAtom(bridgeAddress);
   }
 };
-
-export const DEFAULT_BITCOIN_D_URL = BITCOIND_URL;
 
 const CoreBitcoinDaemonUrl = atom<string>(DEFAULT_BITCOIN_D_URL);
 const bitcoinDaemonUrlStoreKey = "bitcoinDaemonUrl";
