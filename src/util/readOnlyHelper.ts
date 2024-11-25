@@ -28,6 +28,7 @@ const readOnlyHelper = async ({
     senderAddress: walletAddress,
   };
 
+  console.log("options", options);
   //setLoading(true);
   try {
     const call = await fetchCallReadOnlyFunction(options);

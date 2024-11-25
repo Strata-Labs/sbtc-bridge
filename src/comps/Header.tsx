@@ -8,6 +8,7 @@ import { STACKS_MAINNET, STACKS_TESTNET } from "@stacks/network";
 const appConfig = new AppConfig(["store_write"]);
 const userSession = new UserSession({ appConfig });
 import { AnimatePresence } from "framer-motion";
+
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import {
   isConnectedAtom,
