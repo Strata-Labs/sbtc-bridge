@@ -1,6 +1,4 @@
-import { BITCOIND_URL } from "@/util/atoms";
 
-import { i } from "framer-motion/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -125,7 +123,7 @@ export async function POST(req: NextRequest) {
     const res = await rpcHandlerCore(
       RpcMethods.sendRawTransaction,
       [body],
-      BITCOIND_URL
+      process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443"
     );
 
     console.log("res", res);
@@ -165,7 +163,11 @@ export async function GET(req: NextRequest) {
       const result = await rpcHandlerCore(
         RpcMethods.scantxoutset,
         args,
+<<<<<<< HEAD
         BITCOIND_URL
+=======
+        process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443"
+>>>>>>> a3c2f6a (feat - add env variable for bitcoin proxy)
       );
 
       console.log("result", result);
