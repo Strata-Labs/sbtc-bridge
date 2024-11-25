@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./Header";
 import Image from "next/image";
 import Faqs from "./Faqs";

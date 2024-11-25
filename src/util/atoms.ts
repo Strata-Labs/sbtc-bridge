@@ -34,7 +34,6 @@ const undefinedStringCheck = (value: string) => {
   - userData 
   - 
 */
-export const stacksNetworkAtom = atom<StacksNetwork>(STACKS_TESTNET);
 
 const CoreBridgeSeedPhrase = atom<string>("DEPOSIT");
 const bridgeSeedPhraseStoreKey = "bridgeSeedPhrase";
@@ -176,3 +175,4 @@ export enum STACKS_ENV {
   TESTNET = "TESTNET",
 }
 export const stacksEnvAtom = atom<STACKS_ENV>(STACKS_ENV.TESTNET);
+export const stacksNetworkAtom = atom<StacksNetwork>(STACKS_TESTNET);
