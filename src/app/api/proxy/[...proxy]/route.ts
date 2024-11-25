@@ -1,4 +1,3 @@
-
 import { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -163,11 +162,7 @@ export async function GET(req: NextRequest) {
       const result = await rpcHandlerCore(
         RpcMethods.scantxoutset,
         args,
-<<<<<<< HEAD
-        BITCOIND_URL
-=======
         process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443"
->>>>>>> a3c2f6a (feat - add env variable for bitcoin proxy)
       );
 
       console.log("result", result);
