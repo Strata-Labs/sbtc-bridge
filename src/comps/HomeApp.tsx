@@ -87,7 +87,7 @@ const HomeApp = () => {
         {selectedSection === SECTION.HISTORY && <HistoryView />}
         {selectedSection === SECTION.TRANSFER && <TransferAction />}
 
-        {/* <Faqs /> */}
+        <Faqs />
       </div>
     </>
   );

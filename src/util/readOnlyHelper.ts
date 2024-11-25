@@ -1,5 +1,8 @@
-import { fetchCallReadOnlyFunction } from "@stacks/transactions";
-import { cvToJSON, ReadOnlyFunctionOptions } from "@stacks/transactions";
+import {
+  fetchCallReadOnlyFunction,
+  cvToJSON,
+  ReadOnlyFunctionOptions,
+} from "@stacks/transactions";
 
 import { StacksNetwork } from "@stacks/network";
 

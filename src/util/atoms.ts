@@ -34,6 +34,7 @@ const undefinedStringCheck = (value: string) => {
   - userData 
   - 
 */
+export const stacksNetworkAtom = atom<StacksNetwork>(STACKS_TESTNET);
 
 const CoreBridgeSeedPhrase = atom<string>("DEPOSIT");
 const bridgeSeedPhraseStoreKey = "bridgeSeedPhrase";
@@ -169,8 +170,6 @@ export const showConnectWalletAtom = atom<boolean>(false);
 export const userDataAtom = atom<UserData | null>(null);
 
 export const walletAddressAtom = atom<string | null>(null);
-
-export const stacksNetworkAtom = atom<StacksNetwork>(STACKS_TESTNET);
 
 export enum STACKS_ENV {
   MAINNET = "MAINNET",

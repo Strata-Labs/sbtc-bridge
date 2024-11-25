@@ -77,6 +77,7 @@ const SelectedSection = ({ section, onClickSection }: SectionSelection) => {
         text="Transfer"
         onClickSection={handleClickSection}
       /> */}
+
       {/* <SectionAction
         section={SECTION.SETTINGS}
         activeSection={section}
