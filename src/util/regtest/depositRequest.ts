@@ -16,8 +16,6 @@ const NUMS_X_COORDINATE = new Uint8Array([
   0xee, 0x9a, 0xce, 0x80, 0x3a, 0xc0,
 ]);
 
-//depositRequest.ts;
-
 // Helper function to convert a little-endian 8-byte number to big-endian
 const flipEndian = (buffer: Uint8Array): Uint8Array => {
   const flipped = new Uint8Array(buffer.length);
@@ -45,6 +43,7 @@ export const createDepositScript = (
   const BEmaxFee = flipEndian(LEmaxFee);
 
   // Concat maxfee and opdropdata
+
   const opDropDataTogether = new Uint8Array(
     BEmaxFee.length + opDropData.length
   );
@@ -58,7 +57,6 @@ export const createDepositScript = (
     bitcoin.opcodes.OP_CHECKSIG,
   ]);
 
-  const hexOfTing = uint8ArrayToHexString(ting);
   return ting;
 };
 //the max fee is 8 bytes, big endian
@@ -334,11 +332,3 @@ export const createDepositScriptP2TROutput = async (
     throw new Error(err);
   }
 };
-
-/*
-1e00000000000003e8051aaf3f91f38aa21ade7e9f95efdbc4201eeb4cf0f87520e89877c40fd5b1ef12c3389f6921cb2c00d4fede6564c01ca759d413aab0b312ac
-
-
-1e00000000000003e8051aaf3f91f38aa21ade7e9f95efdbc4201eeb4cf0f875201e2cd43aa1993fa0c794bdb6d46bf020b8ac8e94b4ba8ef0afdf4bc7e7c69a18ac
-
-*/
