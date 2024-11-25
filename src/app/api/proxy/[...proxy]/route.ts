@@ -1,4 +1,5 @@
 import { BITCOIND_URL } from "@/util/atoms";
+
 import { i } from "framer-motion/client";
 import { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
@@ -55,7 +56,7 @@ const rpcPassword = process.env.NEXT_PUBLIC_BITCOIN_RPC_PASSWORD || "devnet";
 const rpcHandlerCore = async (
   method: RpcMethods,
   params: RpcRequestParams,
-  bitcoinDUrl: string,
+  bitcoinDUrl: string
 ): Promise<any> => {
   const headers = {
     "Content-Type": "application/json",
@@ -124,7 +125,7 @@ export async function POST(req: NextRequest) {
     const res = await rpcHandlerCore(
       RpcMethods.sendRawTransaction,
       [body],
-      BITCOIND_URL,
+      BITCOIND_URL
     );
 
     console.log("res", res);
@@ -134,7 +135,7 @@ export async function POST(req: NextRequest) {
     console.error("Error in POST handler:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -164,7 +165,7 @@ export async function GET(req: NextRequest) {
       const result = await rpcHandlerCore(
         RpcMethods.scantxoutset,
         args,
-        BITCOIND_URL,
+        BITCOIND_URL
       );
 
       console.log("result", result);
@@ -198,7 +199,7 @@ export async function GET(req: NextRequest) {
     console.error("Error in GET handler:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
