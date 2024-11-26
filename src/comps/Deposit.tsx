@@ -43,7 +43,10 @@ import { useRouter } from "next/navigation";
 import { NotificationStatusType } from "./Notifications";
 import { createAddress } from "@stacks/transactions";
 
-/* 
+import { DepositStatus, useDepositStatus } from "@/hooks/use-deposit-status";
+import { InfoAlert } from "@/comps/alerts/info";
+import { SuccessAlert } from "@/comps/alerts/success";
+/*
   deposit flow has 3 steps
   1) enter amount you want to deposit
   - can change in what denomination you want to make deposit(satoshi, btc, usd)
@@ -53,9 +56,9 @@ import { createAddress } from "@stacks/transactions";
   - view payment status in history
 */
 
-/* 
-  each step will have it's own custom configuration about how to deal with this data and basic parsing 
-  - we should create bulding blocks by not try to create dynamic views 
+/*
+  each step will have it's own custom configuration about how to deal with this data and basic parsing
+  - we should create bulding blocks by not try to create dynamic views
 */
 
 enum DEPOSIT_STEP {
@@ -264,10 +267,10 @@ const GenerateBechWallet = () => {
   );
 };
 
-/* 
+/*
   basic structure of a flow step
   1) heading with sometime a action item to the right of the heading
-  2) subtext to give context to the user with the possibility of tags 
+  2) subtext to give context to the user with the possibility of tags
   3) form to collect data or the final step which is usually reviewing all data before submitting (or even revewing post submission)
   4) buttons to navigate between steps
 */
@@ -675,6 +678,8 @@ const DepositFlowReview = ({
     // go to status?txid=transactionInfo.txId
     router.push(`/status?txId=${transactionInfo.txId}`);
   };
+
+  const depositStatus = useDepositStatus(transactionInfo.txId);
   return (
     <FlowContainer>
       <>
@@ -695,14 +700,19 @@ const DepositFlowReview = ({
             </p>
           </div>
         </div>
-        <div className="flex flex-1 ">
-          <div className="w-full p-4 bg-lightOrange h-10 rounded-lg flex flex-row items-center justify-center gap-2">
-            <InformationCircleIcon className="h-6 w-6 text-orange" />
-            <p className="text-orange font-Matter font-semibold text-sm">
-              Please give the transaction some time to confirm
-            </p>
+        {depositStatus === DepositStatus.PendingConfirmation && (
+          <InfoAlert>Processing your bitcoin transfer...</InfoAlert>
+        )}
+        {depositStatus === DepositStatus.PendingMint && (
+          <div className="flex flex-col gap-3">
+            <SuccessAlert>Bitcoin transfer successful!</SuccessAlert>
+            <InfoAlert>Your sBTC tokens are being minted...</InfoAlert>
           </div>
-        </div>
+        )}
+        {depositStatus === DepositStatus.Completed && (
+          <SuccessAlert>sBTC minted successfully!</SuccessAlert>
+        )}
+
         <div className="w-full flex-row flex justify-between items-center">
           <PrimaryButton onClick={() => handleNextClick()}>
             VIEW TX INFO
