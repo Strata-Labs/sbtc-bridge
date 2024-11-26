@@ -338,7 +338,7 @@ const DepositFlowAddress = ({
       }
 
       // check if valid for network
-      const validAddress = createAddress(address);
+      createAddress(address);
 
       return true;
     } catch (err) {
