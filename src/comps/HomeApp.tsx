@@ -1,13 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import Header from "./Header";
-import Image from "next/image";
 import Faqs from "./Faqs";
 import SelectedSection from "./HomeSelectedHeader";
 import DepositFlow from "./Deposit";
 import HistoryView from "./HistoryView";
-import TransferApp, { TransferAction } from "./TransferHome";
-import DevEnvSettings from "./DevEnvSettings";
+import { TransferAction } from "./TransferHome";
 import LandingAnimation from "./core/LandingAnimation";
 
 export enum SECTION {

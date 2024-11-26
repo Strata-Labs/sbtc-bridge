@@ -1,11 +1,11 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { classNames } from "@/util";
 import { c32addressDecode } from "c32check";
 
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { Menu, MenuButton, MenuItems } from "@headlessui/react";
 import {
   ChevronDownIcon,
   InformationCircleIcon,
@@ -24,7 +24,6 @@ import {
 import {
   createDepositAddress,
   createDepositScript,
-  createDepositScriptP2TROutput,
   createReclaimScript,
 } from "@/util/regtest/depositRequest";
 import { useAtom, useAtomValue } from "jotai";
@@ -38,7 +37,6 @@ import {
   signerPubKeyAtom,
   userDataAtom,
 } from "@/util/atoms";
-import { decodeRawTransaction, sendRawTransaction } from "@/util/bitcoinClient";
 import { useRouter } from "next/navigation";
 import { NotificationStatusType } from "./Notifications";
 /* 

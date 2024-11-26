@@ -1,8 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
-import Header from "./Header";
-import { classNames } from "@/util";
-import Image from "next/image";
+import { useState } from "react";
 
 type FAQItemProps = {
   question: string;

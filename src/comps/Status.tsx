@@ -3,11 +3,11 @@
 import { useRouter } from "next/navigation";
 import { StatusContainer } from "./core/FlowContainer";
 import { Heading, SubText } from "./core/Heading";
-import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
+import { PrimaryButton } from "./core/FlowButtons";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getRawTransaction } from "@/util/bitcoinClient";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue } from "jotai";
 import { bitcoinDaemonUrlAtom, emilyUrlAtom } from "@/util/atoms";
 
 type BitcoinTransactionResponse = {

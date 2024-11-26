@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import React, { createContext, useContext, ReactNode } from "react";
 
 import { AppConfig, UserSession, UserData } from "@stacks/connect";
 import { AuthOptions } from "@stacks/connect-react";

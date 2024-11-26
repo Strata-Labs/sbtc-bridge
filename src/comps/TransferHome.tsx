@@ -1,29 +1,26 @@
 "use client";
 
 import {
-  createRawTransaction,
-  decodeRawTransaction,
   getRawTransaction,
   scanTxOutSet,
   sendRawTransaction,
-  signRawTransactionWithWallet,
 } from "@/util/bitcoinClient";
 import { FlowContainer } from "./core/FlowContainer";
-import { FlowForm, FlowFormDynamic, NameKeysInfo } from "./core/Form";
+import { FlowFormDynamic, NameKeysInfo } from "./core/Form";
 import { Heading, SubText } from "./core/Heading";
 import Header from "./Header";
 import * as bitcoin from "bitcoinjs-lib";
 import ecc from "@bitcoinerlab/secp256k1";
-import { ECPairFactory, ECPairAPI, TinySecp256k1Interface } from "ecpair";
+import { ECPairFactory, ECPairAPI } from "ecpair";
 import { useState } from "react";
 import { SecondaryButton } from "./core/FlowButtons";
 import { useRouter } from "next/navigation";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue } from "jotai";
 import { bitcoinDaemonUrlAtom } from "@/util/atoms";
 
 const ECPair: ECPairAPI = ECPairFactory(ecc);
 
-const network = bitcoin.networks.regtest; // Change to 'testnet' if using Testnet
+const network = bitcoin.networks.regtest;
 
 const TransferApp = () => {
   return (

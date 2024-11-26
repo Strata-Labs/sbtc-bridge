@@ -1,13 +1,9 @@
 "use client";
 
 import { atom, createStore } from "jotai";
-import { AppConfig, UserSession, UserData } from "@stacks/connect";
-
+import { UserData } from "@stacks/connect";
 import { StacksNetwork, STACKS_TESTNET } from "@stacks/network";
-import {
-  NotificationEventType,
-  NotificationStatusType,
-} from "@/comps/Notifications";
+import { NotificationEventType } from "@/comps/Notifications";
 
 export const store = createStore();
 

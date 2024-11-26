@@ -1,12 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { AppConfig, UserSession } from "@stacks/connect";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 const appConfig = new AppConfig(["store_write"]);
 const userSession = new UserSession({ appConfig });
 import { AnimatePresence } from "framer-motion";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import {
   eventsAtom,
   isConnectedAtom,
@@ -19,7 +19,7 @@ import { useWallet } from "@/util/WalletContext";
 import { NotificationStatusType } from "./Notifications";
 
 const Header = () => {
-  const [userData, setUserData] = useAtom(userDataAtom);
+  const setUserData = useSetAtom(userDataAtom);
   const [events, setEvents] = useAtom(eventsAtom);
 
   const { handleSignOut } = useWallet();
@@ -32,7 +32,6 @@ const Header = () => {
 
   useEffect(() => {
     if (userSession.isUserSignedIn()) {
-      console.log("userSession.isUserSignedIn()");
       const userData = userSession.loadUserData();
       setUserData(userData);
       setIsConnected(true);
@@ -45,7 +44,6 @@ const Header = () => {
         title: `Welcome to sBTC Bridge`,
       });
 
-      console.log("_events", _events);
       setEvents(_events);
     }
   }, []);

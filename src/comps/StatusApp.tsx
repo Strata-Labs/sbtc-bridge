@@ -3,8 +3,8 @@
 import Faqs from "@/comps/Faqs";
 import Header from "@/comps/Header";
 import { SECTION } from "@/comps/HomeApp";
-import SelectedSection, { SectionAction } from "@/comps/HomeSelectedHeader";
-import { useEffect, useState } from "react";
+import { SectionAction } from "@/comps/HomeSelectedHeader";
+import { useState } from "react";
 import Status from "./Status";
 
 type SECTION_DATA = {
