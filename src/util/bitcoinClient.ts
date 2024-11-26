@@ -1,6 +1,6 @@
 "use client";
 
-import { bitcoinDaemonUrlAtom, DEFAULT_BITCOIN_D_URL, store } from "./atoms";
+import { bitcoinDaemonUrlAtom, BITCOIND_URL, store } from "./atoms";
 
 // Type definitions
 type RpcRequest = {
@@ -22,11 +22,11 @@ type ListTransactionsParams = {
 // Generic function to make API requests to your Bitcoin RPC API route
 const rpcRequest = async (
   rpcMethod: string,
-  params: any[] = []
+  params: any[] = [],
 ): Promise<any> => {
   let bitcoinDUrl = store.get(bitcoinDaemonUrlAtom);
   if (bitcoinDUrl === "") {
-    bitcoinDUrl = DEFAULT_BITCOIN_D_URL;
+    bitcoinDUrl = BITCOIND_URL;
   }
   const response = await fetch("/api/bitcoind", {
     method: "POST",
@@ -57,7 +57,7 @@ export const createWallet = async (walletName: string): Promise<any> => {
 // Function to generate blocks to an address
 export const generateToAddress = async (
   address: string,
-  nblocks = 1
+  nblocks = 1,
 ): Promise<any> => {
   return await rpcRequest("generatetoaddress", [nblocks, address]);
 };
@@ -66,7 +66,7 @@ export const generateToAddress = async (
 export const listUnspent = async (
   minconf = 1,
   maxconf = 9999999,
-  addresses: string[] = []
+  addresses: string[] = [],
 ): Promise<any> => {
   return await rpcRequest("listunspent", [minconf, maxconf, addresses]);
 };
@@ -74,14 +74,14 @@ export const listUnspent = async (
 // Function to create a raw transaction
 export const createRawTransaction = async (
   inputs: any[],
-  outputs: any
+  outputs: any,
 ): Promise<any> => {
   return await rpcRequest("createrawtransaction", [inputs, outputs]);
 };
 
 // Function to sign a raw transaction
 export const signRawTransactionWithWallet = async (
-  hex: string
+  hex: string,
 ): Promise<any> => {
   return await rpcRequest("signrawtransactionwithwallet", [hex]);
 };
@@ -123,7 +123,7 @@ export const getAddressInfo = async (address: string): Promise<any> => {
 
 // Function to create a descriptor wallet
 export const createDescriptorWallet = async (
-  walletName: string
+  walletName: string,
 ): Promise<any> => {
   return await rpcRequest("createwallet", [
     walletName,
