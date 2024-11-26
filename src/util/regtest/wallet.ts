@@ -1,6 +1,5 @@
 import bitcoin, { networks, payments, initEccLib } from "bitcoinjs-lib";
 import { HDKey } from "@scure/bip32";
-import { sha256 } from "@noble/hashes/sha256";
 import * as crypto from "crypto";
 import bs58check from "bs58check";
 import ecc from "@bitcoinerlab/secp256k1";

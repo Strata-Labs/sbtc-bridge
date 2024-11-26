@@ -1,9 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
-import Header from "./Header";
+
 import { classNames } from "@/util";
-import Image from "next/image";
-import Faqs from "./Faqs";
+
 import { SECTION } from "./HomeApp";
 
 const sectionTextStyle = (isActive: boolean) =>

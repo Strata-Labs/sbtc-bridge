@@ -1,7 +1,6 @@
 import {
   createTaprootAddress,
   createWallet,
-  decodeRawTransaction,
   generateToAddress,
   getBlockChainInfo,
   getNewAddress,
@@ -9,26 +8,16 @@ import {
   listTransactions,
   listUnspent,
   listWallets,
-  sendRawTransaction,
   testMempoolAccept,
   unloadWallet,
 } from "../bitcoinClient";
 import {
   BitcoinNetwork,
-  createUnspendableTaprootKey,
-  getP2TR,
   getP2WSH,
   getPrivateKeysFromSeed,
-  hexToUint8Array,
   privateKeyToWIF,
-  uint8ArrayToHexString,
 } from "./wallet";
 import { createDepositScriptP2TROutput } from "./depositRequest";
-import { mineAndCheckId } from "./walletManagement";
-import { c32addressDecode } from "c32check";
-
-const loadedWalletAddress = "bcrt1qgvg8arxt83wyny36g7elnz8mq37rgvwh6d6s52";
-const secondWallet = "bcrt1qqtw6azqvurzrrhyrwzlknd5rve4pkgnas3sgc9";
 
 export const startUpFaucet = async () => {
   try {

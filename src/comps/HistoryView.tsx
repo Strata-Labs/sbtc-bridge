@@ -6,44 +6,59 @@ import { FlowForm } from "./core/Form";
 import { Heading, SubText } from "./core/Heading";
 import { scanTxOutSet } from "@/util/bitcoinClient";
 import { HistoryTx, HistoryTxProps } from "./Status";
+import { useAtom } from "jotai";
+import { eventsAtom } from "@/util/atoms";
+import { NotificationStatusType } from "./Notifications";
 
 const HistoryView = () => {
-  const [history, setHistory] = useState<HistoryTxProps[]>([
-    // {
-    //   txid: "asdfasdfasdfasdfasdf",
-    //   vout: 0,
-    //   scriptPubKey: "",
-    //   desc: "",
-    //   amount: 0,
-    //   height: 0,
-    // },
-  ]);
+  const [events, setEvents] = useAtom(eventsAtom);
+
+  const [history, setHistory] = useState<HistoryTxProps[]>([]);
 
   const [totalBitcoinHeld, setTotalBitcoinHeld] = useState<number>(0);
 
   const handleSubmit = async (value: string | undefined) => {
+    const _events = [...events];
     try {
       if (value) {
         // call the bitcoin api to get the history of address
-        console.log("value", value);
+
         const history = await scanTxOutSet(value);
         if (history) {
           if (history.unspents === 0) {
-            window.alert("No history found for this address");
+            //window.alert("No history found for this address");
+
+            _events.push({
+              id: _events.length + 1 + "",
+              type: NotificationStatusType.ERROR,
+              title: `No history found for this address`,
+            });
+
+            setEvents(_events);
           }
           const totalBalance = history.unspents.reduce(
             (acc: number, utxo: HistoryTxProps) => acc + utxo.amount,
             0
           );
-          console.log("history", history);
+
           setHistory(history.unspents);
           setTotalBitcoinHeld(totalBalance);
         } else {
-          window.alert("Failed to get history for this address");
+          _events.push({
+            id: _events.length + 1 + "",
+            type: NotificationStatusType.ERROR,
+            title: `Could not get history`,
+          });
+          setEvents(_events);
         }
       }
     } catch (err: any) {
-      console.log("err", err);
+      _events.push({
+        id: _events.length + 1 + "",
+        type: NotificationStatusType.ERROR,
+        title: `Could not get history`,
+      });
+      setEvents(_events);
       throw new Error(err);
     }
   };
@@ -68,6 +83,7 @@ const HistoryView = () => {
           ></FlowForm>
         </>
       </FlowContainer>
+      <div className="mb-5" />
       {history.map((tx, index) => {
         return (
           <HistoryTx

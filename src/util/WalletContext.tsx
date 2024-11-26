@@ -1,22 +1,18 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import React, { createContext, useContext, ReactNode } from "react";
 
 import { AppConfig, UserSession, UserData } from "@stacks/connect";
 import { AuthOptions } from "@stacks/connect-react";
 import { useAtom, useSetAtom } from "jotai";
 import {
+  eventsAtom,
   isConnectedAtom,
   showConnectWalletAtom,
   userDataAtom,
   walletAddressAtom,
 } from "./atoms";
+import { NotificationStatusType } from "@/comps/Notifications";
 
 interface WalletContextProps {
   options: AuthOptions;
@@ -35,11 +31,22 @@ const WalletContextProvider = ({ children }: { children: ReactNode }) => {
   const setUserData = useSetAtom(userDataAtom);
   const setWalletAddress = useSetAtom(walletAddressAtom);
 
+  const [events, setEvents] = useAtom(eventsAtom);
+
   const handleSignOut = () => {
-    userSession.signUserOut("/");
+    userSession.signUserOut();
     setIsConnected(false);
     setUserData(null);
     //setWalletAddress("");
+
+    const _events = [...events];
+    _events.push({
+      id: _events.length + 1 + "",
+      type: NotificationStatusType.SUCCESS,
+      title: `Wallet disconnected`,
+    });
+
+    setEvents(_events);
   };
 
   const authOptions: AuthOptions = {
@@ -51,6 +58,16 @@ const WalletContextProvider = ({ children }: { children: ReactNode }) => {
       setIsConnected(true);
       setShowConnectWallet(false);
       setUserData(userData);
+
+      // add event to show user connected
+      const _events = [...events];
+      _events.push({
+        id: _events.length + 1 + "",
+        type: NotificationStatusType.SUCCESS,
+        title: `Welcome to sBTC Bridge`,
+      });
+
+      setEvents(_events);
     },
     appDetails: {
       name: "sBTC Bridge",

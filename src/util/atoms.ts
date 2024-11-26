@@ -1,9 +1,9 @@
 "use client";
 
 import { atom, createStore } from "jotai";
-import { AppConfig, UserSession, UserData } from "@stacks/connect";
-
+import { UserData } from "@stacks/connect";
 import { StacksNetwork, STACKS_TESTNET } from "@stacks/network";
+import { NotificationEventType } from "@/comps/Notifications";
 
 export const store = createStore();
 
@@ -147,13 +147,13 @@ depositMaxFeeAtom.onMount = (setAtom) => {
   }
 };
 
-enum ENV {
+export enum ENV {
   MAINNET = "MAINNET",
   TESTNET = "TESTNET",
   DEVENV = "DEVENV",
 }
 
-const CoreENV = atom<ENV>(ENV.DEVENV);
+const CoreENV = atom<ENV>(ENV.TESTNET);
 
 export const envAtom = atom(
   (get) => get(CoreENV),
@@ -171,3 +171,5 @@ export const userDataAtom = atom<UserData | null>(null);
 export const walletAddressAtom = atom<string | null>(null);
 
 export const stacksNetworkAtom = atom<StacksNetwork>(STACKS_TESTNET);
+
+export const eventsAtom = atom<NotificationEventType[]>([]);

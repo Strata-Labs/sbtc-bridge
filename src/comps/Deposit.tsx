@@ -1,11 +1,11 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { classNames } from "@/util";
 import { c32addressDecode } from "c32check";
 
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import { Menu, MenuButton, MenuItems } from "@headlessui/react";
 import {
   ChevronDownIcon,
   InformationCircleIcon,
@@ -24,7 +24,6 @@ import {
 import {
   createDepositAddress,
   createDepositScript,
-  createDepositScriptP2TROutput,
   createReclaimScript,
 } from "@/util/regtest/depositRequest";
 import { useAtom, useAtomValue } from "jotai";
@@ -34,11 +33,16 @@ import {
   bridgeSeedPhraseAtom,
   depositMaxFeeAtom,
   emilyUrlAtom,
+  ENV,
+  envAtom,
+  eventsAtom,
   signerPubKeyAtom,
   userDataAtom,
 } from "@/util/atoms";
-import { decodeRawTransaction, sendRawTransaction } from "@/util/bitcoinClient";
 import { useRouter } from "next/navigation";
+import { NotificationStatusType } from "./Notifications";
+import { createAddress } from "@stacks/transactions";
+
 import { DepositStatus, useDepositStatus } from "@/hooks/use-deposit-status";
 import { InfoAlert } from "@/comps/alerts/info";
 import { SuccessAlert } from "@/comps/alerts/success";
@@ -236,9 +240,6 @@ const GenerateBechWallet = () => {
       const p2wsh = getP2WSH(bridgeSeedPhrase);
 
       if (p2wsh) {
-        console.log("p2wsh", p2wsh);
-        //setValue(p2wsh.address as any);
-
         setBridgeAddress(p2wsh.address as any);
         // set value to local storage to fetch later
       }
@@ -313,10 +314,53 @@ const DepositFlowAddress = ({
   setStep,
   setStxAddress,
 }: DepositFlowAddressProps) => {
+  const stacksNetwork = useAtomValue(envAtom);
+
+  const [events, setEvents] = useAtom(eventsAtom);
+
+  const validateStxAddress = (address: string) => {
+    // validate the address
+
+    try {
+      // check length
+      if (address.length < 38 || address.length > 41) {
+        return false;
+      }
+
+      const MAINNET_PREFIX = ["SP", "SM"];
+      const TESTNET_PREFIX = ["ST", "SN"];
+      const validPrefix =
+        stacksNetwork === ENV.MAINNET ? MAINNET_PREFIX : TESTNET_PREFIX;
+
+      if (!validPrefix.some((prefix) => address.startsWith(prefix))) {
+        return false;
+      }
+
+      // check if valid for network
+      createAddress(address);
+
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
   const handleSubmit = (value: string | undefined) => {
     if (value) {
-      setStxAddress(value);
-      setStep(DEPOSIT_STEP.CONFIRM);
+      // ensure that the value is a valid stacks address based on the network and length
+      if (validateStxAddress(value)) {
+        setStxAddress(value);
+        setStep(DEPOSIT_STEP.CONFIRM);
+      } else {
+        const _events = [...events];
+
+        _events.push({
+          id: _events.length + 1 + "",
+          type: NotificationStatusType.ERROR,
+          title: `Invalid Stacks Address`,
+        });
+
+        setEvents(_events);
+      }
     }
   };
   return (
@@ -365,6 +409,7 @@ const DepositFlowConfirm = ({
 }: DepositFlowConfirmProps) => {
   const bridgeSeedPhrase = useAtomValue(bridgeSeedPhraseAtom);
   const bridgeAddress = useAtomValue(bridgeAddressAtom);
+  const [events, setEvents] = useAtom(eventsAtom);
 
   const signerPubKey = process.env.NEXT_PUBLIC_SIGNER_AGGREGATE_KEY || "";
 
@@ -375,6 +420,7 @@ const DepositFlowConfirm = ({
   const userData = useAtomValue(userDataAtom);
 
   const handleNextClick = async () => {
+    const _events = [...events];
     try {
       if (userData === null) {
         throw new Error("User data is not set");
@@ -392,7 +438,7 @@ const DepositFlowConfirm = ({
 
       // Combine the version and hash into a single Uint8Array
       const serializedAddress = new Uint8Array(
-        1 + versionArray.length + hashArray.length,
+        1 + versionArray.length + hashArray.length
       );
       serializedAddress.set(hexToUint8Array("0x05"), 0);
       serializedAddress.set(versionArray, 1);
@@ -401,7 +447,7 @@ const DepositFlowConfirm = ({
       console.log("serializedAddress", serializedAddress);
       console.log(
         "serializedAddressHex",
-        uint8ArrayToHexString(serializedAddress),
+        uint8ArrayToHexString(serializedAddress)
       );
       const lockTime = 6000;
 
@@ -409,7 +455,7 @@ const DepositFlowConfirm = ({
 
       // Create the reclaim script and convert to Buffer
       const reclaimScript = Buffer.from(
-        createReclaimScript(lockTime, new Uint8Array([])),
+        createReclaimScript(lockTime, new Uint8Array([]))
       );
 
       const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
@@ -418,7 +464,7 @@ const DepositFlowConfirm = ({
       const signerUint8Array = hexToUint8Array(signerPubKey);
 
       const depositScript = Buffer.from(
-        createDepositScript(signerUint8Array, maxFee, serializedAddress),
+        createDepositScript(signerUint8Array, maxFee, serializedAddress)
       );
       // convert buffer to hex
       const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
@@ -426,7 +472,7 @@ const DepositFlowConfirm = ({
         serializedAddress,
         signerPubKey,
         maxFee,
-        lockTime,
+        lockTime
       );
 
       /*
@@ -465,7 +511,7 @@ const DepositFlowConfirm = ({
         console.log("send params", sendParams);
         const response = await window.LeatherProvider.request(
           "sendTransfer",
-          sendParams,
+          sendParams
         );
 
         console.log("response", response);
@@ -490,6 +536,14 @@ const DepositFlowConfirm = ({
           // handle success
           txId = response.txId;
         } else {
+          // handle error
+          _events.push({
+            id: _events.length + 1 + "",
+            type: NotificationStatusType.ERROR,
+            title: `Issue with Transaction`,
+          });
+
+          throw new Error("Error with the transaction");
         }
       } else {
         throw new Error("Wallet provider not supported");
@@ -497,6 +551,12 @@ const DepositFlowConfirm = ({
 
       console.log("testThing", txHex);
       if (txId === "") {
+        _events.push({
+          id: _events.length + 1 + "",
+          type: NotificationStatusType.ERROR,
+          title: `Issue with Transaction`,
+        });
+
         throw new Error("Error with the transaction");
       }
 
@@ -519,9 +579,20 @@ const DepositFlowConfirm = ({
       });
 
       if (!response.ok) {
+        _events.push({
+          id: _events.length + 1 + "",
+          type: NotificationStatusType.ERROR,
+          title: `Issue with Request to Emily`,
+        });
+
         throw new Error("Error with the request");
       }
 
+      _events.push({
+        id: _events.length + 1 + "",
+        type: NotificationStatusType.SUCCESS,
+        title: `Successful Deposit request`,
+      });
       setStep(DEPOSIT_STEP.REVIEW);
       handleUpdatingTransactionInfo({
         hex: txHex,
@@ -529,6 +600,8 @@ const DepositFlowConfirm = ({
       });
     } catch (error) {
       console.log("error", error);
+    } finally {
+      setEvents(_events);
     }
   };
   const handlePrevClick = () => {
@@ -822,7 +895,7 @@ const DepositAmount = () => {
             <p
               className={classNames(
                 " text-lg tracking-wider font-Matter font-semibold",
-                isValid ? "text-black" : "text-black",
+                isValid ? "text-black" : "text-black"
               )}
             >
               NEXT
