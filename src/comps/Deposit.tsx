@@ -237,9 +237,6 @@ const GenerateBechWallet = () => {
       const p2wsh = getP2WSH(bridgeSeedPhrase);
 
       if (p2wsh) {
-        console.log("p2wsh", p2wsh);
-        //setValue(p2wsh.address as any);
-
         setBridgeAddress(p2wsh.address as any);
         // set value to local storage to fetch later
       }
@@ -332,7 +329,6 @@ const DepositFlowAddress = ({
       const validPrefix =
         stacksNetwork === ENV.MAINNET ? MAINNET_PREFIX : TESTNET_PREFIX;
 
-      console.log("validPrefix", validPrefix);
       if (!validPrefix.some((prefix) => address.startsWith(prefix))) {
         return false;
       }
