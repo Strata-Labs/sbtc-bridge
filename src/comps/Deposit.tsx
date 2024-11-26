@@ -33,12 +33,16 @@ import {
   bridgeSeedPhraseAtom,
   depositMaxFeeAtom,
   emilyUrlAtom,
+  ENV,
+  envAtom,
   eventsAtom,
   signerPubKeyAtom,
   userDataAtom,
 } from "@/util/atoms";
 import { useRouter } from "next/navigation";
 import { NotificationStatusType } from "./Notifications";
+import { createAddress } from "@stacks/transactions";
+
 /* 
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -310,10 +314,54 @@ const DepositFlowAddress = ({
   setStep,
   setStxAddress,
 }: DepositFlowAddressProps) => {
+  const stacksNetwork = useAtomValue(envAtom);
+
+  const [events, setEvents] = useAtom(eventsAtom);
+
+  const validateStxAddress = (address: string) => {
+    // validate the address
+
+    try {
+      // check length
+      if (address.length < 38 || address.length > 41) {
+        return false;
+      }
+
+      const MAINNET_PREFIX = ["SP", "SM"];
+      const TESTNET_PREFIX = ["ST", "SN"];
+      const validPrefix =
+        stacksNetwork === ENV.MAINNET ? MAINNET_PREFIX : TESTNET_PREFIX;
+
+      console.log("validPrefix", validPrefix);
+      if (!validPrefix.some((prefix) => address.startsWith(prefix))) {
+        return false;
+      }
+
+      // check if valid for network
+      const validAddress = createAddress(address);
+
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
   const handleSubmit = (value: string | undefined) => {
     if (value) {
-      setStxAddress(value);
-      setStep(DEPOSIT_STEP.CONFIRM);
+      // ensure that the value is a valid stacks address based on the network and length
+      if (validateStxAddress(value)) {
+        setStxAddress(value);
+        setStep(DEPOSIT_STEP.CONFIRM);
+      } else {
+        const _events = [...events];
+
+        _events.push({
+          id: _events.length + 1 + "",
+          type: NotificationStatusType.ERROR,
+          title: `Invalid Stacks Address`,
+        });
+
+        setEvents(_events);
+      }
     }
   };
   return (

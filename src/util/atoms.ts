@@ -147,13 +147,13 @@ depositMaxFeeAtom.onMount = (setAtom) => {
   }
 };
 
-enum ENV {
+export enum ENV {
   MAINNET = "MAINNET",
   TESTNET = "TESTNET",
   DEVENV = "DEVENV",
 }
 
-const CoreENV = atom<ENV>(ENV.DEVENV);
+const CoreENV = atom<ENV>(ENV.TESTNET);
 
 export const envAtom = atom(
   (get) => get(CoreENV),
