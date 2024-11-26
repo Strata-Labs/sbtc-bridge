@@ -1,8 +1,7 @@
-import { BITCOIND_URL } from "@/util/atoms";
-import { i } from "framer-motion/client";
-import { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
 
+const BITCOIND_URL =
+  process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443";
 // Import your Bitcoin RPC logic
 
 const BASE_PROXY_URL =
