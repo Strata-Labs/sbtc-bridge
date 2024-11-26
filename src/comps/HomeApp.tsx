@@ -8,6 +8,7 @@ import DepositFlow from "./Deposit";
 import HistoryView from "./HistoryView";
 import TransferApp, { TransferAction } from "./TransferHome";
 import DevEnvSettings from "./DevEnvSettings";
+import LandingAnimation from "./core/LandingAnimation";
 
 export enum SECTION {
   DEPOSIT = "DEPOSIT",
@@ -76,7 +77,7 @@ const HomeApp = () => {
   return (
     <>
       <Header />
-      <div className="flex flex-1 flex-col w-full px-5 gap-6 items-center pt-5">
+      <LandingAnimation>
         <SelectedSection
           section={selectedSection}
           onClickSection={(section) => setSelectedSection(section)}
@@ -86,9 +87,8 @@ const HomeApp = () => {
         {selectedSection === SECTION.WITHDRAW && <p>Coming Soon :)</p>}
         {selectedSection === SECTION.HISTORY && <HistoryView />}
         {selectedSection === SECTION.TRANSFER && <TransferAction />}
-
-        <Faqs />
-      </div>
+      </LandingAnimation>
+      <Faqs />
     </>
   );
 };
