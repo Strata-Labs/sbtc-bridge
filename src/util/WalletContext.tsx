@@ -2,17 +2,17 @@
 
 import React, { createContext, useContext, ReactNode } from "react";
 
-import { AppConfig, UserSession, UserData } from "@stacks/connect";
+import { AppConfig, UserSession } from "@stacks/connect";
 import { AuthOptions } from "@stacks/connect-react";
-import { useAtom, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import {
-  eventsAtom,
   isConnectedAtom,
   showConnectWalletAtom,
   userDataAtom,
   walletAddressAtom,
 } from "./atoms";
 import { NotificationStatusType } from "@/comps/Notifications";
+import { useNotifications } from "@/hooks/use-notifications";
 
 interface WalletContextProps {
   options: AuthOptions;
@@ -31,7 +31,7 @@ const WalletContextProvider = ({ children }: { children: ReactNode }) => {
   const setUserData = useSetAtom(userDataAtom);
   const setWalletAddress = useSetAtom(walletAddressAtom);
 
-  const [events, setEvents] = useAtom(eventsAtom);
+  const { notify } = useNotifications();
 
   const handleSignOut = () => {
     userSession.signUserOut();
@@ -39,14 +39,10 @@ const WalletContextProvider = ({ children }: { children: ReactNode }) => {
     setUserData(null);
     //setWalletAddress("");
 
-    const _events = [...events];
-    _events.push({
-      id: _events.length + 1 + "",
+    notify({
       type: NotificationStatusType.SUCCESS,
-      title: `Wallet disconnected`,
+      message: `Wallet disconnected`,
     });
-
-    setEvents(_events);
   };
 
   const authOptions: AuthOptions = {
@@ -60,14 +56,11 @@ const WalletContextProvider = ({ children }: { children: ReactNode }) => {
       setUserData(userData);
 
       // add event to show user connected
-      const _events = [...events];
-      _events.push({
-        id: _events.length + 1 + "",
-        type: NotificationStatusType.SUCCESS,
-        title: `Welcome to sBTC Bridge`,
-      });
 
-      setEvents(_events);
+      notify({
+        type: NotificationStatusType.SUCCESS,
+        message: `Welcome to sBTC Bridge`,
+      });
     },
     appDetails: {
       name: "sBTC Bridge",

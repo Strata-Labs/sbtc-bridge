@@ -46,6 +46,8 @@ import { createAddress } from "@stacks/transactions";
 import { DepositStatus, useDepositStatus } from "@/hooks/use-deposit-status";
 import { InfoAlert } from "@/comps/alerts/info";
 import { SuccessAlert } from "@/comps/alerts/success";
+import { useShortAddress } from "@/hooks/use-short-address";
+import { useNotifications } from "@/hooks/use-notifications";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -316,8 +318,7 @@ const DepositFlowAddress = ({
 }: DepositFlowAddressProps) => {
   const stacksNetwork = useAtomValue(envAtom);
 
-  const [events, setEvents] = useAtom(eventsAtom);
-
+  const { notify } = useNotifications();
   const validateStxAddress = (address: string) => {
     // validate the address
 
@@ -351,15 +352,10 @@ const DepositFlowAddress = ({
         setStxAddress(value);
         setStep(DEPOSIT_STEP.CONFIRM);
       } else {
-        const _events = [...events];
-
-        _events.push({
-          id: _events.length + 1 + "",
+        notify({
           type: NotificationStatusType.ERROR,
-          title: `Invalid Stacks Address`,
+          message: `Invalid Stacks Address`,
         });
-
-        setEvents(_events);
       }
     }
   };
@@ -409,8 +405,7 @@ const DepositFlowConfirm = ({
 }: DepositFlowConfirmProps) => {
   const bridgeSeedPhrase = useAtomValue(bridgeSeedPhraseAtom);
   const bridgeAddress = useAtomValue(bridgeAddressAtom);
-  const [events, setEvents] = useAtom(eventsAtom);
-
+  const { notify } = useNotifications();
   const signerPubKey = process.env.NEXT_PUBLIC_SIGNER_AGGREGATE_KEY || "";
 
   const emilyUrl = useAtomValue(emilyUrlAtom);
@@ -420,7 +415,6 @@ const DepositFlowConfirm = ({
   const userData = useAtomValue(userDataAtom);
 
   const handleNextClick = async () => {
-    const _events = [...events];
     try {
       if (userData === null) {
         throw new Error("User data is not set");
@@ -438,7 +432,7 @@ const DepositFlowConfirm = ({
 
       // Combine the version and hash into a single Uint8Array
       const serializedAddress = new Uint8Array(
-        1 + versionArray.length + hashArray.length
+        1 + versionArray.length + hashArray.length,
       );
       serializedAddress.set(hexToUint8Array("0x05"), 0);
       serializedAddress.set(versionArray, 1);
@@ -447,7 +441,7 @@ const DepositFlowConfirm = ({
       console.log("serializedAddress", serializedAddress);
       console.log(
         "serializedAddressHex",
-        uint8ArrayToHexString(serializedAddress)
+        uint8ArrayToHexString(serializedAddress),
       );
       const lockTime = 6000;
 
@@ -455,7 +449,7 @@ const DepositFlowConfirm = ({
 
       // Create the reclaim script and convert to Buffer
       const reclaimScript = Buffer.from(
-        createReclaimScript(lockTime, new Uint8Array([]))
+        createReclaimScript(lockTime, new Uint8Array([])),
       );
 
       const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
@@ -464,7 +458,7 @@ const DepositFlowConfirm = ({
       const signerUint8Array = hexToUint8Array(signerPubKey);
 
       const depositScript = Buffer.from(
-        createDepositScript(signerUint8Array, maxFee, serializedAddress)
+        createDepositScript(signerUint8Array, maxFee, serializedAddress),
       );
       // convert buffer to hex
       const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
@@ -472,7 +466,7 @@ const DepositFlowConfirm = ({
         serializedAddress,
         signerPubKey,
         maxFee,
-        lockTime
+        lockTime,
       );
 
       /*
@@ -509,13 +503,13 @@ const DepositFlowConfirm = ({
           network: process.env.NEXT_PUBLIC_WALLET_NETWORK || "sbtcTestnet",
         };
         console.log("send params", sendParams);
-        const response = await window.LeatherProvider.request(
+        const response = await window.LeatherProvider?.request(
           "sendTransfer",
-          sendParams
+          sendParams,
         );
 
         console.log("response", response);
-        if (response.result) {
+        if (response && response.result) {
           const _txId = response.result.txid.replace(/^"|"$/g, ""); // Remove leading and trailing quotes
           txId = _txId;
         }
@@ -537,10 +531,9 @@ const DepositFlowConfirm = ({
           txId = response.txId;
         } else {
           // handle error
-          _events.push({
-            id: _events.length + 1 + "",
+          notify({
             type: NotificationStatusType.ERROR,
-            title: `Issue with Transaction`,
+            message: `Issue with Transaction`,
           });
 
           throw new Error("Error with the transaction");
@@ -551,10 +544,9 @@ const DepositFlowConfirm = ({
 
       console.log("testThing", txHex);
       if (txId === "") {
-        _events.push({
-          id: _events.length + 1 + "",
+        notify({
           type: NotificationStatusType.ERROR,
-          title: `Issue with Transaction`,
+          message: `Issue with Transaction`,
         });
 
         throw new Error("Error with the transaction");
@@ -579,19 +571,17 @@ const DepositFlowConfirm = ({
       });
 
       if (!response.ok) {
-        _events.push({
-          id: _events.length + 1 + "",
+        notify({
           type: NotificationStatusType.ERROR,
-          title: `Issue with Request to Emily`,
+          message: `Issue with Request to Emily`,
         });
 
         throw new Error("Error with the request");
       }
 
-      _events.push({
-        id: _events.length + 1 + "",
+      notify({
         type: NotificationStatusType.SUCCESS,
-        title: `Successful Deposit request`,
+        message: `Successful Deposit request`,
       });
       setStep(DEPOSIT_STEP.REVIEW);
       handleUpdatingTransactionInfo({
@@ -601,7 +591,6 @@ const DepositFlowConfirm = ({
     } catch (error) {
       console.log("error", error);
     } finally {
-      setEvents(_events);
     }
   };
   const handlePrevClick = () => {
@@ -624,14 +613,14 @@ const DepositFlowConfirm = ({
           <div className="flex flex-col gap-1">
             <SubText>Stacks address to transfer to</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {stxAddress}
+              {useShortAddress(stxAddress)}
             </p>
           </div>
         </div>
         <div className="flex flex-1 ">
           <div className="w-full p-4 bg-lightOrange h-10 rounded-lg flex flex-row items-center justify-center gap-2">
             <InformationCircleIcon className="h-6 w-6 text-orange" />
-            <p className="text-orange font-Matter font-semibold text-sm">
+            <p className="text-orange font-Matter font-semibold text-sm break-keep">
               Please verify the information before proceeding
             </p>
           </div>
@@ -696,31 +685,33 @@ const DepositFlowReview = ({
           <div className="flex flex-col gap-1">
             <SubText>Stacks address to transfer to</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {stxAddress}
+              {useShortAddress(stxAddress)}
             </p>
           </div>
         </div>
-        {depositStatus === DepositStatus.PendingConfirmation && (
-          <InfoAlert>Processing your bitcoin transfer...</InfoAlert>
-        )}
-        {depositStatus === DepositStatus.PendingMint && (
-          <div className="flex flex-col gap-3">
-            <SuccessAlert>Bitcoin transfer successful!</SuccessAlert>
-            <InfoAlert>Your sBTC tokens are being minted...</InfoAlert>
-          </div>
-        )}
-        {depositStatus === DepositStatus.Completed && (
-          <SuccessAlert>sBTC minted successfully!</SuccessAlert>
-        )}
+        <div className="flex flex-1 items-end">
+          {depositStatus === DepositStatus.PendingConfirmation && (
+            <InfoAlert>Processing your bitcoin transfer...</InfoAlert>
+          )}
+          {depositStatus === DepositStatus.PendingMint && (
+            <div className="flex flex-col gap-3">
+              <SuccessAlert>Bitcoin transfer successful!</SuccessAlert>
+              <InfoAlert>Your sBTC tokens are being minted...</InfoAlert>
+            </div>
+          )}
+          {depositStatus === DepositStatus.Completed && (
+            <SuccessAlert>sBTC minted successfully!</SuccessAlert>
+          )}
+        </div>
 
-        <div className="w-full flex-row flex justify-between items-center">
+        {/* <div className="w-full flex-row flex justify-between items-center">
           <PrimaryButton onClick={() => handleNextClick()}>
             VIEW TX INFO
           </PrimaryButton>
           <PrimaryButton onClick={() => handleTxStatusClick()}>
             VIEW STATUS
           </PrimaryButton>
-        </div>
+        </div> */}
       </>
     </FlowContainer>
   );
@@ -895,7 +886,7 @@ const DepositAmount = () => {
             <p
               className={classNames(
                 " text-lg tracking-wider font-Matter font-semibold",
-                isValid ? "text-black" : "text-black"
+                isValid ? "text-black" : "text-black",
               )}
             >
               NEXT
