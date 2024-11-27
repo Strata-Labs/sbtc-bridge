@@ -56,7 +56,7 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
       initial={{ x: "0", opacity: 0 }}
       animate={{ x: "0", opacity: 1 }}
       onClick={() => onClose()}
-      className="fixed inset-0 bg-black text-black bg-opacity-50 flex items-center justify-center md:p-4 z-10"
+      className="fixed inset-0 bg-black text-black bg-opacity-50 flex items-center justify-center md:p-4 z-50"
     >
       <motion.div
         initial={{ opacity: 0 }}

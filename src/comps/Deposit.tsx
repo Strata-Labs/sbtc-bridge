@@ -1,21 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import { classNames } from "@/util";
+import { useCallback, useEffect, useState } from "react";
 import { c32addressDecode } from "c32check";
 
-import { Menu, MenuButton, MenuItems } from "@headlessui/react";
-import {
-  ChevronDownIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/20/solid";
+import { InformationCircleIcon } from "@heroicons/react/20/solid";
 
 import { FlowContainer } from "@/comps/core/FlowContainer";
 import { Heading, SubText } from "@/comps/core/Heading";
 import { FlowForm } from "@/comps/core/Form";
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
-import { createDepositTx } from "../util/regtest/lib";
 import {
   getP2WSH,
   hexToUint8Array,
@@ -35,19 +28,16 @@ import {
   emilyUrlAtom,
   ENV,
   envAtom,
-  eventsAtom,
   signerPubKeyAtom,
   userDataAtom,
 } from "@/util/atoms";
-import { useRouter } from "next/navigation";
 import { NotificationStatusType } from "./Notifications";
 import { createAddress } from "@stacks/transactions";
 
-import { DepositStatus, useDepositStatus } from "@/hooks/use-deposit-status";
-import { InfoAlert } from "@/comps/alerts/info";
-import { SuccessAlert } from "@/comps/alerts/success";
 import { useShortAddress } from "@/hooks/use-short-address";
 import { useNotifications } from "@/hooks/use-notifications";
+import { DepositStepper } from "./deposit-stepper";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -167,7 +157,6 @@ export const SetEmilyUrl = () => {
   );
 };
 
-type SetSignerPubkeyProps = {};
 export const SetSignerPubkey = () => {
   const [signerPubKey, setSignerPubkey] = useAtom(signerPubKeyAtom);
 
@@ -390,21 +379,12 @@ type DepositFlowConfirmProps = DepositFlowStepProps & {
   handleUpdatingTransactionInfo: (info: TransactionInfo) => void;
 };
 
-type EmilyDepositCreationType = {
-  bitcoinTxid: string;
-  bitcoinTxOutputIndex: number;
-  reclaimScript: string;
-  depositScript: string;
-};
-
 const DepositFlowConfirm = ({
   setStep,
   amount,
   stxAddress,
   handleUpdatingTransactionInfo,
 }: DepositFlowConfirmProps) => {
-  const bridgeSeedPhrase = useAtomValue(bridgeSeedPhraseAtom);
-  const bridgeAddress = useAtomValue(bridgeAddressAtom);
   const { notify } = useNotifications();
   const signerPubKey = process.env.NEXT_PUBLIC_SIGNER_AGGREGATE_KEY || "";
 
@@ -419,8 +399,6 @@ const DepositFlowConfirm = ({
       if (userData === null) {
         throw new Error("User data is not set");
       }
-      console.log("DepositFlowConfirm - handle next step");
-      console.log("createPTRAddress", createDepositTx);
 
       // serialize the stx address
       const [version, hash] = c32addressDecode(stxAddress);
@@ -438,14 +416,7 @@ const DepositFlowConfirm = ({
       serializedAddress.set(versionArray, 1);
       serializedAddress.set(hashArray, 1 + versionArray.length);
 
-      console.log("serializedAddress", serializedAddress);
-      console.log(
-        "serializedAddressHex",
-        uint8ArrayToHexString(serializedAddress),
-      );
       const lockTime = 6000;
-
-      const senderSeedPhrase = bridgeSeedPhrase;
 
       // Create the reclaim script and convert to Buffer
       const reclaimScript = Buffer.from(
@@ -453,7 +424,6 @@ const DepositFlowConfirm = ({
       );
 
       const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
-      console.log("reclaimScriptHex", reclaimScriptHex);
 
       const signerUint8Array = hexToUint8Array(signerPubKey);
 
@@ -488,11 +458,6 @@ const DepositFlowConfirm = ({
         userData.profile.walletProvider === "hiro-wallet" ||
         userData.profile.walletProvider === "leather"
       ) {
-        console.log("leahter send walelt info");
-        console.log("amount", amount);
-        console.log("p2trAddress", p2trAddress);
-        console.log(window.LeatherProvider);
-
         const sendParams = {
           recipients: [
             {
@@ -502,13 +467,11 @@ const DepositFlowConfirm = ({
           ],
           network: process.env.NEXT_PUBLIC_WALLET_NETWORK || "sbtcTestnet",
         };
-        console.log("send params", sendParams);
         const response = await window.LeatherProvider?.request(
           "sendTransfer",
           sendParams,
         );
 
-        console.log("response", response);
         if (response && response.result) {
           const _txId = response.result.txid.replace(/^"|"$/g, ""); // Remove leading and trailing quotes
           txId = _txId;
@@ -542,7 +505,6 @@ const DepositFlowConfirm = ({
         throw new Error("Wallet provider not supported");
       }
 
-      console.log("testThing", txHex);
       if (txId === "") {
         notify({
           type: NotificationStatusType.ERROR,
@@ -552,7 +514,6 @@ const DepositFlowConfirm = ({
         throw new Error("Error with the transaction");
       }
 
-      console.log("txId", txId);
       const emilyReqPayload = {
         bitcoinTxid: txId,
         bitcoinTxOutputIndex: 0,
@@ -589,8 +550,10 @@ const DepositFlowConfirm = ({
         txId: txId,
       });
     } catch (error) {
-      console.log("error", error);
-    } finally {
+      notify({
+        type: NotificationStatusType.ERROR,
+        message: `Error while depositing funds`,
+      });
     }
   };
   const handlePrevClick = () => {
@@ -641,34 +604,16 @@ type TransactionInfo = {
   txId: string;
 };
 type DepositFlowReviewProps = DepositFlowStepProps & {
-  transactionInfo: TransactionInfo;
+  txId: string;
   amount: number;
   stxAddress: string;
 };
 
 const DepositFlowReview = ({
-  setStep,
-  transactionInfo,
+  txId,
   amount,
   stxAddress,
 }: DepositFlowReviewProps) => {
-  const router = useRouter();
-
-  console.log("transactionInfo", transactionInfo);
-  const handleNextClick = () => {
-    // open a new tab with this link https://www.bitscript.app/transactions?transaction=020000000001019aa9ec88a9a964451673b2e7d0ac0f9309b7acb8e6b87d6a1215d2f3e5de2dde0000000000ffffffff010200000000000000225120fb32fece50b22877384d8e0a242ebc7a12603a7f937839f7c136ebe6af8b0be302483045022100a2ab485e3ca3100f80460bb8bea191edb39487656a3470f1a4a6fe5e51842fed02201e831e1990f9c6c8a8c1b0d51104391f46a5c4f5a7fbfeaf9ec4b7c3c0d2bed3012102fc8961e2839d574c7c23f3c177825dcdc230745be96db02237431e17307832e100000000&env=MAINNET
-    console.log("DepositFlowReview - handle next step");
-
-    var urlLink = `https://www.bitscript.app/transactions?transaction=${transactionInfo.hex}&env=TESTNET`;
-    window.open(urlLink, "_blank");
-  };
-
-  const handleTxStatusClick = () => {
-    // go to status?txid=transactionInfo.txId
-    router.push(`/status?txId=${transactionInfo.txId}`);
-  };
-
-  const depositStatus = useDepositStatus(transactionInfo.txId);
   return (
     <FlowContainer>
       <>
@@ -690,18 +635,7 @@ const DepositFlowReview = ({
           </div>
         </div>
         <div className="flex flex-1 items-end">
-          {depositStatus === DepositStatus.PendingConfirmation && (
-            <InfoAlert>Processing your bitcoin transfer...</InfoAlert>
-          )}
-          {depositStatus === DepositStatus.PendingMint && (
-            <div className="flex flex-col gap-3">
-              <SuccessAlert>Bitcoin transfer successful!</SuccessAlert>
-              <InfoAlert>Your sBTC tokens are being minted...</InfoAlert>
-            </div>
-          )}
-          {depositStatus === DepositStatus.Completed && (
-            <SuccessAlert>sBTC minted successfully!</SuccessAlert>
-          )}
+          <DepositStepper txId={txId} />
         </div>
 
         {/* <div className="w-full flex-row flex justify-between items-center">
@@ -718,32 +652,65 @@ const DepositFlowReview = ({
 };
 
 const DepositFlow = () => {
-  const [step, setStep] = useState(DEPOSIT_STEP.AMOUNT);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const [stxAddress, _setStxAddress] = useState("");
-  const [amount, _setAmount] = useState(0);
-  const [transactionInfo, setTransactionInfo] = useState<TransactionInfo>({
-    hex: "",
-    txId: "",
-  });
+  const [step, _setStep] = useState(DEPOSIT_STEP.AMOUNT);
 
-  console.log("step", step);
-  const handleUpdateStep = (newStep: DEPOSIT_STEP) => {
-    console.log("newstep", newStep);
-    setStep(newStep);
-  };
+  const [stxAddress, _setStxAddress] = useState(
+    searchParams.get("stxAddress") ?? "",
+  );
+  const [amount, _setAmount] = useState(
+    Number(searchParams.get("amount") ?? 0),
+  );
+  const [txId, _setTxId] = useState("");
 
-  const setStxAddress = (address: string) => {
+  useEffect(() => {
+    const params = new URLSearchParams();
+    params.set("txId", txId);
+    params.set("step", String(step));
+    params.set("amount", String(amount));
+    router.push(pathname + "?" + params.toString());
+  }, [amount, txId, step, router, pathname]);
+
+  useEffect(() => {
+    const currentStep = Number(searchParams.get("step"));
+    if (currentStep === DEPOSIT_STEP.REVIEW || !currentStep) {
+      _setStep(currentStep);
+      _setTxId(searchParams.get("txId") || "");
+      _setAmount(Number(searchParams.get("amount") || 0));
+    }
+  }, [searchParams]);
+
+  const setTxId = useCallback((info: TransactionInfo) => {
+    _setTxId(info.txId);
+  }, []);
+  const setStep = useCallback((newStep: DEPOSIT_STEP) => {
+    _setStep(newStep);
+  }, []);
+
+  const handleUpdateStep = useCallback(
+    (newStep: DEPOSIT_STEP) => {
+      setStep(newStep);
+    },
+    [setStep],
+  );
+
+  const setStxAddress = useCallback((address: string) => {
     _setStxAddress(address);
-  };
+  }, []);
 
-  const setAmount = (amount: number) => {
+  const setAmount = useCallback((amount: number) => {
     _setAmount(amount);
-  };
+  }, []);
 
-  const handleUpdatingTransactionInfo = (info: TransactionInfo) => {
-    setTransactionInfo(info);
-  };
+  const handleUpdatingTransactionInfo = useCallback(
+    (info: TransactionInfo) => {
+      setTxId(info);
+    },
+    [setTxId],
+  );
   const renderStep = () => {
     switch (step) {
       case DEPOSIT_STEP.AMOUNT:
@@ -769,7 +736,7 @@ const DepositFlow = () => {
       case DEPOSIT_STEP.REVIEW:
         return (
           <DepositFlowReview
-            transactionInfo={transactionInfo}
+            txId={txId}
             amount={amount}
             stxAddress={stxAddress}
             setStep={handleUpdateStep}
@@ -793,122 +760,3 @@ const DepositFlow = () => {
 };
 
 export default DepositFlow;
-
-enum DENOMINATIONS {
-  SATS = "SATS",
-  BTC = "BTC",
-  USD = "USD",
-}
-
-const DepositAmount = () => {
-  const [value, setValue] = useState("");
-  const [isValid, setIsValid] = useState(false);
-
-  const [selectedDenomination, setSelectedDenomination] =
-    useState<DENOMINATIONS>(DENOMINATIONS.BTC);
-
-  useEffect(() => {
-    if (value !== "" && !value.endsWith("BTC")) {
-      setValue(`${value} BTC`);
-    }
-  }, [value]);
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    const btcRegex = /^[0-9]+(\.[0-9]{1,8})? BTC$/;
-
-    let inputValue = event.target.value.replace(/ BTC$/, ""); // Remove existing " BTC"
-    // ensure that the user can add numbers past "btc"
-    inputValue = inputValue.replace(/[^0-9.]/g, "");
-
-    setIsValid(validateInput(inputValue));
-    setValue(inputValue);
-  };
-
-  const validateInput = (input: string) => {
-    // Add your validation logic here
-    return input.length > 0;
-  };
-
-  return (
-    <>
-      <div className="flex flex-1 px-8 p-6 flex-col ">
-        <div className="w-full flex flex-row items-center justify-between">
-          <h1 className="text-2xl font-Matter font-normal">Deposit</h1>
-          <Menu as="div" className="relative inline-block text-left ">
-            <MenuButton className="w-24 flex flex-row justify-center items-center h-8 text-sm rounded-2xl  gap-x-1.5  ring-inset ring-gray-300 hover:bg-gray-50 bg-sand">
-              {selectedDenomination}
-              <ChevronDownIcon
-                aria-hidden="true"
-                className="-mr-1 h-5 w-5 text-gray-400"
-              />
-            </MenuButton>
-            <MenuItems
-              transition
-              className="absolute right-0 z-10 mt-2 w-32 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-            >
-              <p
-                onClick={() => setSelectedDenomination(DENOMINATIONS.SATS)}
-                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
-              >
-                SATS
-              </p>
-              <p
-                onClick={() => setSelectedDenomination(DENOMINATIONS.BTC)}
-                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
-              >
-                BTC
-              </p>
-              <p
-                onClick={() => setSelectedDenomination(DENOMINATIONS.USD)}
-                className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
-              >
-                USD
-              </p>
-            </MenuItems>
-          </Menu>
-        </div>
-        <p className="text-darkGray font-Matter font-thin text-sm">
-          Convert BTC into sBTC
-        </p>
-        <div className="w-full flex mt-16 flex-col gap-14 justify-start ">
-          <div className="relative ">
-            <input
-              type="text"
-              placeholder="Enter BTC amount to transfer"
-              value={value}
-              onChange={handleChange}
-              className={`w-full py-2 border-b-2 bg-transparent text-2xl text-black focus:outline-none placeholder-gray-300 ${
-                isValid ? "border-orange" : "border-midGray"
-              } transition-colors duration-500`}
-            />
-          </div>
-          <button className="w-52 rounded-lg py-3 flex justify-center items-center flex-row bg-orange">
-            <p
-              className={classNames(
-                " text-lg tracking-wider font-Matter font-semibold",
-                isValid ? "text-black" : "text-black",
-              )}
-            >
-              NEXT
-            </p>
-          </button>
-        </div>
-      </div>
-      <div
-        style={{
-          backgroundColor: "rgba(253, 157, 65, 0.1)",
-          height: "320px",
-          width: "320px",
-        }}
-        className="flex flex-col items-center justify-center"
-      >
-        <Image
-          src="/images/StacksBitcoin.svg"
-          alt="Icon"
-          width={150}
-          height={150}
-        />
-      </div>
-    </>
-  );
-};
