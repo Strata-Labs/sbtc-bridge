@@ -19,7 +19,10 @@ import { useWallet } from "@/util/WalletContext";
 import { NotificationStatusType } from "./Notifications";
 import { GetTestnetBTC } from "./get-testnet-btc";
 
-const isTestnet = process.env.NEXT_PUBLIC_WALLET_NETWORK !== "mainnet";
+// converting to lower case to avoid case sensitive issue
+const isTestnet =
+  process.env.NEXT_PUBLIC_WALLET_NETWORK?.toLowerCase() ===
+  "sbtcTestnet".toLowerCase();
 
 const Header = () => {
   const setUserData = useSetAtom(userDataAtom);
