@@ -17,6 +17,12 @@ import {
 import ConnectWallet from "./ConnectWallet";
 import { useWallet } from "@/util/WalletContext";
 import { NotificationStatusType } from "./Notifications";
+import { GetTestnetBTC } from "./get-testnet-btc";
+
+// converting to lower case to avoid case sensitive issue
+const isTestnet =
+  process.env.NEXT_PUBLIC_WALLET_NETWORK?.toLowerCase() ===
+  "sbtcTestnet".toLowerCase();
 
 const Header = () => {
   const setUserData = useSetAtom(userDataAtom);
@@ -25,7 +31,7 @@ const Header = () => {
   const { handleSignOut } = useWallet();
 
   const [showConnectWallet, setShowConnectWallet] = useAtom(
-    showConnectWalletAtom
+    showConnectWalletAtom,
   );
 
   const [isConnected, setIsConnected] = useAtom(isConnectedAtom);
@@ -50,14 +56,17 @@ const Header = () => {
 
   const renderUserWalletInfo = () => {
     return (
-      <button
-        onClick={() => handleSignOut()}
-        className="   px-4 py-2 rounded-md border-2 border-orange"
-      >
-        <h3 className="font-Matter text-xs text-orange font-semibold	 tracking-wide">
-          DISCONNECT WALLET
-        </h3>
-      </button>
+      <>
+        {isTestnet && <GetTestnetBTC />}
+        <button
+          onClick={() => handleSignOut()}
+          className="px-4 py-2 rounded-md border-2 border-orange"
+        >
+          <h3 className="font-Matter text-xs text-orange font-semibold tracking-wide">
+            DISCONNECT WALLET
+          </h3>
+        </button>
+      </>
     );
   };
   return (
@@ -98,7 +107,7 @@ const Header = () => {
                 onClick={() => setShowConnectWallet(true)}
                 className=" bg-orange  px-4 py-2 rounded-md"
               >
-                <h3 className="font-Matter text-xs font-semibold	 tracking-wide">
+                <h3 className="font-Matter text-xs font-semibold tracking-wide">
                   CONNECT WALLET
                 </h3>
               </button>
