@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { AppConfig, UserSession } from "@stacks/connect";
@@ -8,6 +10,7 @@ const userSession = new UserSession({ appConfig });
 import { AnimatePresence } from "framer-motion";
 import { useAtom, useSetAtom } from "jotai";
 import {
+  bridgeConfigAtom,
   isConnectedAtom,
   showConnectWalletAtom,
   userDataAtom,
@@ -16,13 +19,15 @@ import {
 import ConnectWallet from "./ConnectWallet";
 import { useWallet } from "@/util/WalletContext";
 import { GetTestnetBTC } from "./get-testnet-btc";
+import { useAtomValue } from "jotai";
 
 // converting to lower case to avoid case sensitive issue
-const isTestnet =
-  process.env.NEXT_PUBLIC_WALLET_NETWORK?.toLowerCase() ===
-  "sbtcTestnet".toLowerCase();
 
 const Header = () => {
+  const bridgeConfig = useAtomValue(bridgeConfigAtom);
+  const isTestnet =
+    bridgeConfig.WALLET_NETWORK?.toLowerCase() === "sbtcTestnet".toLowerCase();
+
   const setUserData = useSetAtom(userDataAtom);
 
   const { handleSignOut } = useWallet();

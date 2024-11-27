@@ -9,26 +9,18 @@ import { FlowContainer } from "@/comps/core/FlowContainer";
 import { Heading, SubText } from "@/comps/core/Heading";
 import { FlowForm } from "@/comps/core/Form";
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
-import {
-  getP2WSH,
-  hexToUint8Array,
-  uint8ArrayToHexString,
-} from "@/util/regtest/wallet";
+import { hexToUint8Array, uint8ArrayToHexString } from "@/util/regtest/wallet";
 import {
   createDepositAddress,
   createDepositScript,
   createReclaimScript,
 } from "@/util/regtest/depositRequest";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtomValue } from "jotai";
 import {
-  bitcoinDaemonUrlAtom,
-  bridgeAddressAtom,
-  bridgeSeedPhraseAtom,
+  bridgeConfigAtom,
   depositMaxFeeAtom,
-  emilyUrlAtom,
   ENV,
   envAtom,
-  signerPubKeyAtom,
   userDataAtom,
 } from "@/util/atoms";
 import { NotificationStatusType } from "./Notifications";
@@ -59,204 +51,6 @@ enum DEPOSIT_STEP {
   CONFIRM,
   REVIEW,
 }
-
-export const SetSeedPhraseForDeposit = () => {
-  const [bridgeSeedPhrase, setBridgeSeedPhrase] = useAtom(bridgeSeedPhraseAtom);
-
-  const handleSubmit = (value: string | undefined) => {
-    if (value) {
-      // set value to local storage
-
-      setBridgeSeedPhrase(value);
-    }
-  };
-
-  return (
-    <>
-      <FlowContainer>
-        <>
-          <div className="w-full flex flex-row items-center justify-between">
-            <Heading>Set Seed Phrase</Heading>
-          </div>
-          <SubText>Set the seed phrase this RegTest wallet will use </SubText>
-          <FlowForm
-            nameKey="seedPhrase"
-            type="text"
-            initialValue={bridgeSeedPhrase}
-            placeholder="Enter string to use as seed phrase"
-            handleSubmit={(value) => handleSubmit(value)}
-          ></FlowForm>
-        </>
-      </FlowContainer>
-      <GenerateBechWallet key={bridgeSeedPhrase} />
-    </>
-  );
-};
-
-export const SetBitcoinDUrl = () => {
-  const [bitcoinDaemonUrl, setBitcoinDaemonUrl] = useAtom(bitcoinDaemonUrlAtom);
-
-  const handleSubmit = (value: string | undefined) => {
-    if (value) {
-      // set value to local storage
-
-      setBitcoinDaemonUrl(value);
-    }
-  };
-
-  return (
-    <>
-      <FlowContainer>
-        <>
-          <div className="w-full flex flex-row items-center justify-between">
-            <Heading>Set Bitcoin Dameon Url </Heading>
-          </div>
-          <SubText>Set the RPC url: {bitcoinDaemonUrl} </SubText>
-          <FlowForm
-            nameKey="rpcUrl"
-            type="text"
-            initialValue={bitcoinDaemonUrl}
-            placeholder="Enter string to use as rpc url"
-            handleSubmit={(value) => handleSubmit(value)}
-          ></FlowForm>
-        </>
-      </FlowContainer>
-    </>
-  );
-};
-
-export const SetEmilyUrl = () => {
-  const [emilyUrl, setEmilyUrl] = useAtom(emilyUrlAtom);
-
-  const handleSubmit = (value: string | undefined) => {
-    if (value) {
-      // set value to local storage
-
-      setEmilyUrl(value);
-    }
-  };
-
-  return (
-    <>
-      <FlowContainer>
-        <>
-          <div className="w-full flex flex-row items-center justify-between">
-            <Heading>Set Emily API Url </Heading>
-          </div>
-          <SubText>Set the Emily url: {emilyUrl} </SubText>
-          <FlowForm
-            nameKey="rpcUrl"
-            type="text"
-            initialValue={emilyUrl}
-            placeholder="Enter string to use as rpc url"
-            handleSubmit={(value) => handleSubmit(value)}
-          ></FlowForm>
-        </>
-      </FlowContainer>
-    </>
-  );
-};
-
-export const SetSignerPubkey = () => {
-  const [signerPubKey, setSignerPubkey] = useAtom(signerPubKeyAtom);
-
-  const handleSubmit = (value: string | undefined) => {
-    if (value) {
-      // set value to local storage
-      setSignerPubkey(value);
-    }
-  };
-
-  return (
-    <>
-      <FlowContainer>
-        <>
-          <div className="w-full flex flex-row items-center justify-between">
-            <Heading>Set Signer Pub Key</Heading>
-          </div>
-          <SubText>Signer PubKey {signerPubKey} </SubText>
-          <FlowForm
-            nameKey="SignerPubKey"
-            type="text"
-            initialValue={signerPubKey}
-            placeholder="Enter the signer public key"
-            handleSubmit={(value) => handleSubmit(value)}
-          ></FlowForm>
-        </>
-      </FlowContainer>
-    </>
-  );
-};
-
-export const MaxFeeAmountView = () => {
-  const [maxFee, setMaxFee] = useAtom(depositMaxFeeAtom);
-
-  const handleSubmit = (value: string | undefined) => {
-    if (value) {
-      // set value to local storage
-      // ensure that the value is a number
-      setMaxFee(parseInt(value));
-    }
-  };
-
-  return (
-    <>
-      <FlowContainer>
-        <>
-          <div className="w-full flex flex-row items-center justify-between">
-            <Heading>Deposit Max Fee</Heading>
-          </div>
-          <SubText>Max Fee {maxFee} </SubText>
-          <FlowForm
-            nameKey="maxFee"
-            type="text"
-            initialValue={maxFee + ""}
-            placeholder="Enter the Max Fee"
-            handleSubmit={(value) => handleSubmit(value)}
-          ></FlowForm>
-        </>
-      </FlowContainer>
-    </>
-  );
-};
-
-const GenerateBechWallet = () => {
-  const bridgeSeedPhrase = useAtomValue(bridgeSeedPhraseAtom);
-  const [bridgeAddress, setBridgeAddress] = useAtom(bridgeAddressAtom);
-
-  const handleSubmit = () => {
-    // set value to local storage
-
-    if (bridgeSeedPhrase) {
-      const p2wsh = getP2WSH(bridgeSeedPhrase);
-
-      if (p2wsh) {
-        setBridgeAddress(p2wsh.address as any);
-        // set value to local storage to fetch later
-      }
-    } else {
-      // window alert
-
-      window.alert("Please set the seed phrase first");
-    }
-  };
-
-  return (
-    <FlowContainer>
-      <>
-        <div className="w-full flex flex-row items-center justify-between">
-          <Heading>Generate Address from Seed</Heading>
-        </div>
-        <SubText>Seed Phrase: {bridgeSeedPhrase} </SubText>
-        {bridgeAddress !== "" && <SubText>Address : {bridgeAddress} </SubText>}
-        <div className="flex-1" />
-        <div className="w-full flex-row flex justify-between items-center">
-          <PrimaryButton onClick={() => handleSubmit()}>GENERATE</PrimaryButton>
-        </div>
-      </>
-    </FlowContainer>
-  );
-};
 
 /*
   basic structure of a flow step
@@ -386,13 +180,14 @@ const DepositFlowConfirm = ({
   handleUpdatingTransactionInfo,
 }: DepositFlowConfirmProps) => {
   const { notify } = useNotifications();
-  const signerPubKey = process.env.NEXT_PUBLIC_SIGNER_AGGREGATE_KEY || "";
 
-  const emilyUrl = useAtomValue(emilyUrlAtom);
+  const { EMILY_URL: emilyUrl, SIGNER_AGGREGATE_KEY: signerPubKey } =
+    useAtomValue(bridgeConfigAtom);
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
 
   const userData = useAtomValue(userDataAtom);
+  const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
 
   const handleNextClick = async () => {
     try {
@@ -425,7 +220,7 @@ const DepositFlowConfirm = ({
 
       const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
 
-      const signerUint8Array = hexToUint8Array(signerPubKey);
+      const signerUint8Array = hexToUint8Array(signerPubKey!);
 
       const depositScript = Buffer.from(
         createDepositScript(signerUint8Array, maxFee, serializedAddress),
@@ -434,7 +229,7 @@ const DepositFlowConfirm = ({
       const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
       const p2trAddress = createDepositAddress(
         serializedAddress,
-        signerPubKey,
+        signerPubKey!,
         maxFee,
         lockTime,
       );
@@ -465,7 +260,8 @@ const DepositFlowConfirm = ({
               amount: `${amount}`,
             },
           ],
-          network: process.env.NEXT_PUBLIC_WALLET_NETWORK || "sbtcTestnet",
+          // TODO: remove hardcoded env
+          network: walletNetwork,
         };
         const response = await window.LeatherProvider?.request(
           "sendTransfer",
@@ -681,7 +477,9 @@ const DepositFlow = () => {
       _setTxId(searchParams.get("txId") || "");
       _setAmount(Number(searchParams.get("amount") || 0));
     }
-  }, [searchParams]);
+    // need to run this only once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const setTxId = useCallback((info: TransactionInfo) => {
     _setTxId(info.txId);

@@ -11,7 +11,7 @@ const sectionStyle = (isActive: boolean) =>
 
 type SectionActionProps = {
   section: SECTION;
-  onClickSection: (section: SECTION) => void;
+  onClickSection?: (section: SECTION) => void;
   activeSection: SECTION;
   text: string;
 };
@@ -23,16 +23,16 @@ export const SectionAction = ({
 }: SectionActionProps) => {
   return (
     <div
-      onClick={() => onClickSection(section)}
+      onClick={() => onClickSection && onClickSection(section)}
       className={classNames(
         "w-32 cursor-pointer h-14 flex flex-row items-center justify-center border-b-2",
-        sectionStyle(section === activeSection)
+        sectionStyle(section === activeSection),
       )}
     >
       <h1
         className={classNames(
           " text-2xl",
-          sectionTextStyle(section === activeSection)
+          sectionTextStyle(section === activeSection),
         )}
       >
         {text}

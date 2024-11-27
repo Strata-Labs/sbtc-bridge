@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAtomValue } from "jotai";
-import { emilyUrlAtom } from "@/util/atoms";
 import { getEmilyDepositInfo } from "@/util/tx-utils";
+import { bridgeConfigAtom } from "@/util/atoms";
 
 export enum DepositStatus {
   PendingConfirmation = "pending",
@@ -15,14 +15,14 @@ export function useDepositStatus(txId: string) {
     DepositStatus.PendingConfirmation,
   );
 
-  const emilyUrl = useAtomValue(emilyUrlAtom);
+  const { EMILY_URL: emilyUrl } = useAtomValue(bridgeConfigAtom);
 
   useEffect(() => {
     if (txId && transferTxStatus !== DepositStatus.Completed) {
       const interval = setInterval(async () => {
         const txInfo = await getEmilyDepositInfo({
           txId,
-          emilyURL: emilyUrl,
+          emilyURL: emilyUrl!,
         });
         setTransferTxStatus(txInfo.status as DepositStatus);
       }, 1000);

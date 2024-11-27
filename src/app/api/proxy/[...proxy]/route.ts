@@ -1,11 +1,11 @@
+"use server";
 import { NextRequest, NextResponse } from "next/server";
 
-const BITCOIND_URL =
-  process.env.NEXT_PUBLIC_BITCOIND_URL || "http://localhost:18443";
+const BITCOIND_URL = process.env.BITCOIND_URL || "http://localhost:18443";
 // Import your Bitcoin RPC logic
 
 const BASE_PROXY_URL =
-  process.env.NEXT_PUBLIC_MEMPOOL_API_URL || "http://localhost:8083/api/v1/";
+  process.env.MEMPOOL_API_URL || "http://localhost:8083/api/v1/";
 
 enum RpcMethods {
   generateToAddress = "generatetoaddress",
@@ -38,18 +38,9 @@ enum RpcMethods {
 }
 
 type RpcRequestParams = any[];
-type RpcRequest = {
-  rpcMethod: RpcMethods;
-  params: RpcRequestParams;
-  bitcoinDUrl: string;
-};
 
-type RpcResponse = {
-  result: any; // this eventually will be a genric type based on the rpcMethod
-};
-
-const rpcUser = process.env.NEXT_PUBLIC_BITCOIN_RPC_USER_NAME || "devnet";
-const rpcPassword = process.env.NEXT_PUBLIC_BITCOIN_RPC_PASSWORD || "devnet";
+const rpcUser = process.env.BITCOIN_RPC_USER_NAME || "devnet";
+const rpcPassword = process.env.BITCOIN_RPC_PASSWORD || "devnet";
 
 const rpcHandlerCore = async (
   method: RpcMethods,
@@ -62,9 +53,6 @@ const rpcHandlerCore = async (
       "Basic " + Buffer.from(`${rpcUser}:${rpcPassword}`).toString("base64"),
   };
 
-  console.log("rpcHandlerCore - bitcoinDUrl", bitcoinDUrl);
-
-  console.log("rpcHandlerCore -> params", params);
   const body = JSON.stringify({
     jsonrpc: "1.0",
     id: `${method}-${Date.now()}`,
@@ -84,7 +72,6 @@ const rpcHandlerCore = async (
     }
 
     const data = await response.json();
-    console.log("rpcHandlerCore -> data", data);
     return data.result;
   } catch (err) {
     console.error(`rpcHandlerCore ${method} error:`, err);
@@ -97,8 +84,6 @@ export async function POST(req: NextRequest) {
     const url = new URL(req.url);
     const path = url.pathname.replace("/api/proxy/", ""); // Get the dynamic part of the route
 
-    console.log("Requested path:", path);
-
     // Read the raw body from the request
     const body = req.body ? await req.text() : undefined;
 
@@ -110,13 +95,6 @@ export async function POST(req: NextRequest) {
 
     // Proxy the request
     const proxyUrl = `${BASE_PROXY_URL}${path}`;
-    const response = await fetch(proxyUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body, // Forward the raw body
-    });
     // make a basic post request to the bitcoin mempool api
     // fuck it we'll use the bitocin rpc
 
@@ -125,8 +103,6 @@ export async function POST(req: NextRequest) {
       [body],
       BITCOIND_URL,
     );
-
-    console.log("res", res);
 
     return NextResponse.json(res);
   } catch (error) {
@@ -143,8 +119,6 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url);
     const path = url.pathname.replace("/api/proxy/", ""); // Get the dynamic part of the route
 
-    console.log("Requested path:", path);
-
     // if path ends with "/utxo" then we are looking for the utxo of an address
 
     if (path.endsWith("/utxo")) {
@@ -157,7 +131,6 @@ export async function GET(req: NextRequest) {
       if (!address) {
         return NextResponse.json({ error: "Invalid address" }, { status: 400 });
       }
-      console.log("address", address);
       const args = ["start", [{ desc: `addr(${address})`, range: 10000 }]];
 
       const result = await rpcHandlerCore(
@@ -165,8 +138,6 @@ export async function GET(req: NextRequest) {
         args,
         BITCOIND_URL,
       );
-
-      console.log("result", result);
 
       const utxos = result.unspents.map((utxo: any) => ({
         txid: utxo.txid,
@@ -185,7 +156,6 @@ export async function GET(req: NextRequest) {
     // Proxy all other routes to the base proxy URL
     const proxyUrl = `${BASE_PROXY_URL}${path}`;
 
-    console.log("proxyUrl", proxyUrl);
     const response = await fetch(proxyUrl, {
       method: req.method,
       headers: req.headers, // Pass along incoming headers

@@ -12,17 +12,22 @@ import Header from "./Header";
 import * as bitcoin from "bitcoinjs-lib";
 import ecc from "@bitcoinerlab/secp256k1";
 import { ECPairFactory, ECPairAPI } from "ecpair";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SecondaryButton } from "./core/FlowButtons";
 import { useRouter } from "next/navigation";
-import { useAtomValue } from "jotai";
-import { bitcoinDaemonUrlAtom } from "@/util/atoms";
+import { useSetAtom } from "jotai";
+import { bridgeConfigAtom } from "@/util/atoms";
+import getSbtcBridgeConfig from "@/actions/get-sbtc-bridge-config";
 
 const ECPair: ECPairAPI = ECPairFactory(ecc);
 
 const network = bitcoin.networks.regtest;
 
 const TransferApp = () => {
+  const setConfig = useSetAtom(bridgeConfigAtom);
+  useEffect(() => {
+    getSbtcBridgeConfig().then(setConfig);
+  }, [setConfig]);
   return (
     <>
       <Header />
@@ -56,16 +61,15 @@ export const TransferAction = () => {
   const [txId, setTxId] = useState<string | undefined>(undefined);
 
   const router = useRouter();
-  const bitcoinDaemonUrl = useAtomValue(bitcoinDaemonUrlAtom);
+
   const handleSubmit = async (value: any) => {
-    console.log("value", value);
     try {
       const amount = parseInt(value.amount) || 0;
       const receiverAddy = value.receiverAddy || "";
 
       const senderPrivateKey = Buffer.from(
         "9e446f6b0c6a96cf2190e54bcd5a8569c3e386f091605499464389b8d4e0bfc2",
-        "hex"
+        "hex",
       );
       const senderKeyPair = ECPair.fromPrivateKey(senderPrivateKey, {
         network,
