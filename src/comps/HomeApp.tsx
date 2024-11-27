@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Header from "./Header";
 import Faqs from "./Faqs";
 import SelectedSection from "./HomeSelectedHeader";
@@ -7,6 +7,7 @@ import DepositFlow from "./Deposit";
 import HistoryView from "./HistoryView";
 import { TransferAction } from "./TransferHome";
 import LandingAnimation from "./core/LandingAnimation";
+import { usePathname, useRouter } from "next/navigation";
 
 export enum SECTION {
   DEPOSIT = "DEPOSIT",
@@ -29,43 +30,18 @@ sectionsMap.set(SECTION.TRANSFER, { title: "Transfer" });
 sectionsMap.set(SECTION.SETTINGS, { title: "Settings" });
 
 const HomeApp = () => {
-  const [selectedSection, setSelectedSection] = useState<SECTION>(
-    SECTION.DEPOSIT
+  const [selectedSection, _setSelectedSection] = useState<SECTION>(
+    SECTION.DEPOSIT,
   );
+  const pathname = usePathname();
+  const router = useRouter();
 
-  useEffect(() => {
-    // emily cors test
-  }, []);
-  const emilyTest = async () => {
-    try {
-      const paramsBody = {
-        bitcoinTxid: "",
-        bitcoinTxOutputIndex: "",
-        reclaimScript: "",
-        depositScript: "",
-      };
-      const body = "";
-      // Forward the request to the Rust server
-      const response = await fetch(`${body}/deposit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(paramsBody),
-      });
+  const setSelectedSection = (section: SECTION) => {
+    _setSelectedSection(section);
 
-      // If Rust server responds with an error status
-      if (!response.ok) {
-        const errorResponse = await response.json();
-        console.log(errorResponse);
-      }
-
-      // Return the success response from Rust server
-      const responseData = await response.json();
-    } catch (err) {
-      console.log(err);
-    }
+    router.push(pathname);
   };
+
   const selectedSectionData = sectionsMap.get(selectedSection);
 
   if (selectedSectionData === undefined) {

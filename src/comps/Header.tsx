@@ -8,7 +8,6 @@ const userSession = new UserSession({ appConfig });
 import { AnimatePresence } from "framer-motion";
 import { useAtom, useSetAtom } from "jotai";
 import {
-  eventsAtom,
   isConnectedAtom,
   showConnectWalletAtom,
   userDataAtom,
@@ -16,7 +15,6 @@ import {
 
 import ConnectWallet from "./ConnectWallet";
 import { useWallet } from "@/util/WalletContext";
-import { NotificationStatusType } from "./Notifications";
 import { GetTestnetBTC } from "./get-testnet-btc";
 
 // converting to lower case to avoid case sensitive issue
@@ -26,7 +24,6 @@ const isTestnet =
 
 const Header = () => {
   const setUserData = useSetAtom(userDataAtom);
-  const [events, setEvents] = useAtom(eventsAtom);
 
   const { handleSignOut } = useWallet();
 
@@ -35,22 +32,12 @@ const Header = () => {
   );
 
   const [isConnected, setIsConnected] = useAtom(isConnectedAtom);
-
   useEffect(() => {
     if (userSession.isUserSignedIn()) {
       const userData = userSession.loadUserData();
       setUserData(userData);
       setIsConnected(true);
-
       // add event to show user connected
-      const _events = events;
-      _events.push({
-        id: _events.length + 1 + "",
-        type: NotificationStatusType.SUCCESS,
-        title: `Welcome to sBTC Bridge`,
-      });
-
-      setEvents(_events);
     }
   }, []);
 
