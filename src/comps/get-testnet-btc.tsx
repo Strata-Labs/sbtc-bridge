@@ -8,7 +8,25 @@ import { getHiroTestnetBtc } from "@/actions/get-testnet-btc";
 export function GetTestnetBTC() {
   const [isLoading, setIsLoading] = useState(false);
   const setEvents = useSetAtom(eventsAtom);
+  const notifyError = (message: string) => {
+    setEvents([
+      {
+        id: "1",
+        type: NotificationStatusType.ERROR,
+        title: message,
+      },
+    ]);
+  };
 
+  const notifySuccess = (message: string) => {
+    setEvents([
+      {
+        id: "1",
+        type: NotificationStatusType.SUCCESS,
+        title: message,
+      },
+    ]);
+  };
   const getTestnetBtc = async () => {
     setIsLoading(true);
     let address = "";
@@ -17,55 +35,21 @@ export function GetTestnetBTC() {
       const nativeSegwit = res?.result.addresses.find((address) => {
         return address.type === "p2wpkh";
       });
+
       if (!nativeSegwit) {
-        setEvents((events) => {
-          return [
-            {
-              id: String(events.length + 1),
-              type: NotificationStatusType.ERROR,
-              title: `No native segwit address found`,
-            },
-          ];
-        });
-        return;
+        return notifyError(`No native segwit address found`);
       }
       address = nativeSegwit.address;
     } catch (error) {
-      setEvents((events) => {
-        return [
-          {
-            id: String(events.length + 1),
-            type: NotificationStatusType.ERROR,
-            title: `Error getting address`,
-          },
-        ];
-      });
-
       setIsLoading(false);
 
-      return;
+      return notifyError(`Error getting address`);
     }
     try {
       await getHiroTestnetBtc(address);
-      setEvents((events) => {
-        return [
-          {
-            id: String(events.length + 1),
-            type: NotificationStatusType.SUCCESS,
-            title: `0.5 BTC has been sent to your wallet!`,
-          },
-        ];
-      });
+      notifySuccess(`0.5 BTC has been sent to your wallet!`);
     } catch (error) {
-      setEvents((events) => {
-        return [
-          {
-            id: String(events.length + 1),
-            type: NotificationStatusType.ERROR,
-            title: `Error sending BTC`,
-          },
-        ];
-      });
+      notifyError(`Error sending BTC`);
       setIsLoading(false);
     }
 
