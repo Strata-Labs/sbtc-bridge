@@ -1,3 +1,6 @@
+// MUST NOT BE USED BY CLIENT
+import "server-only";
+
 export const env = {
   BITCOIND_URL: process.env.BITCOIND_URL || "http://localhost:18443",
   EMILY_URL: process.env.EMILY_URL,
