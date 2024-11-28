@@ -9,6 +9,7 @@ import { Heading, SubText } from "@/comps/core/Heading";
 import { FlowForm } from "@/comps/core/Form";
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
 import { hexToUint8Array, uint8ArrayToHexString } from "@/util/regtest/wallet";
+import * as yup from "yup";
 import {
   createDepositAddress,
   createDepositScript,
@@ -35,7 +36,8 @@ import { useNotifications } from "@/hooks/use-notifications";
 import { DepositStepper } from "./deposit-stepper";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { sendBTCLeather, sendBTCXverse } from "@/util/wallet-utils";
-
+import { useQuery } from "@tanstack/react-query";
+import getEmilyLimits from "@/actions/get-emily-limits";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -73,6 +75,18 @@ type DepositFlowAmountProps = DepositFlowStepProps & {
   setAmount: (amount: number) => void;
 };
 const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
+  const { data: emilyLimitsData, isLoading: isLoadingEmilyLimits } = useQuery({
+    queryKey: ["deposit-max-fee"],
+    queryFn: () => getEmilyLimits(),
+  });
+  const validationSchema = yup.object({
+    amount: yup
+      .number()
+      // dust amount is in sats
+      .min(10_000)
+      .max(emilyLimitsData?.perDepositCap ?? 0)
+      .required(),
+  });
   const handleSubmit = (value: string | undefined) => {
     if (value) {
       setAmount(parseInt(value));
@@ -90,7 +104,9 @@ const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
           nameKey="amount"
           type="number"
           placeholder="BTC amount to transfer (in sats)"
+          disabled={isLoadingEmilyLimits}
           handleSubmit={(value) => handleSubmit(value)}
+          validationSchema={validationSchema}
         ></FlowForm>
       </>
     </FlowContainer>
