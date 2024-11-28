@@ -41,6 +41,7 @@ type RpcRequest = {
 
 const rpcUser = env.BITCOIN_RPC_USER_NAME;
 const rpcPassword = env.BITCOIN_RPC_PASSWORD;
+const bitcoindURL = env.BITCOIND_URL;
 
 const rpcHandlerCore = async (
   method: RpcMethods,
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await rpcHandlerCore(rpcMethod, params, env.BITCOIND_URL);
+    const result = await rpcHandlerCore(rpcMethod, params, bitcoindURL);
     return NextResponse.json(
       { result },
       {
