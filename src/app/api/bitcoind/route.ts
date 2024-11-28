@@ -1,4 +1,5 @@
 "use server";
+import { env } from "@/env";
 import { NextRequest, NextResponse } from "next/server";
 
 //  supported prc methods
@@ -38,8 +39,8 @@ type RpcRequest = {
   params: RpcRequestParams;
 };
 
-const rpcUser = process.env.BITCOIN_RPC_USER_NAME || "devnet";
-const rpcPassword = process.env.BITCOIN_RPC_PASSWORD || "devnet";
+const rpcUser = env.BITCOIN_RPC_USER_NAME;
+const rpcPassword = env.BITCOIN_RPC_PASSWORD;
 
 const rpcHandlerCore = async (
   method: RpcMethods,
@@ -89,11 +90,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await rpcHandlerCore(
-      rpcMethod,
-      params,
-      process.env.BITCOIND_URL!,
-    );
+    const result = await rpcHandlerCore(rpcMethod, params, env.BITCOIND_URL);
     return NextResponse.json(
       { result },
       {

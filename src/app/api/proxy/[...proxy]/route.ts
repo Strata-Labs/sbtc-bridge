@@ -1,11 +1,11 @@
 "use server";
+import { env } from "@/env";
 import { NextRequest, NextResponse } from "next/server";
 
-const BITCOIND_URL = process.env.BITCOIND_URL || "http://localhost:18443";
+const BITCOIND_URL = env.BITCOIND_URL;
 // Import your Bitcoin RPC logic
 
-const BASE_PROXY_URL =
-  process.env.MEMPOOL_API_URL || "http://localhost:8083/api/v1/";
+const BASE_PROXY_URL = env.MEMPOOL_API_URL;
 
 enum RpcMethods {
   generateToAddress = "generatetoaddress",
@@ -39,8 +39,8 @@ enum RpcMethods {
 
 type RpcRequestParams = any[];
 
-const rpcUser = process.env.BITCOIN_RPC_USER_NAME || "devnet";
-const rpcPassword = process.env.BITCOIN_RPC_PASSWORD || "devnet";
+const rpcUser = env.BITCOIN_RPC_USER_NAME;
+const rpcPassword = env.BITCOIN_RPC_PASSWORD;
 
 const rpcHandlerCore = async (
   method: RpcMethods,

@@ -1,5 +1,6 @@
 "use server";
 
+import { env } from "@/env";
 import packageJson from "../../../../package.json";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -8,7 +9,7 @@ export async function GET(_: NextRequest) {
     {
       result: {
         version: packageJson.version,
-        contracts_deployer: process.env.SBTC_CONTRACT_ADDRESS,
+        contracts_deployer: env.SBTC_CONTRACT_ADDRESS,
       },
     },
     { status: 200 },
