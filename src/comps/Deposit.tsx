@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { c32addressDecode } from "c32check";
 
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 
@@ -24,12 +23,17 @@ import {
   userDataAtom,
 } from "@/util/atoms";
 import { NotificationStatusType } from "./Notifications";
-import { createAddress } from "@stacks/transactions";
+import {
+  createAddress,
+  principalCV,
+  serializeCVBytes,
+} from "@stacks/transactions";
 
 import { useShortAddress } from "@/hooks/use-short-address";
 import { useNotifications } from "@/hooks/use-notifications";
 import { DepositStepper } from "./deposit-stepper";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -102,12 +106,21 @@ const DepositFlowAddress = ({
   const stacksNetwork = useAtomValue(envAtom);
 
   const { notify } = useNotifications();
-  const validateStxAddress = (address: string) => {
+  const validateStxAddress = (addressOrContract: string) => {
     // validate the address
 
     try {
       // check length
+      const isContractAddress = addressOrContract.includes(".");
+      const [address, contractName] = addressOrContract.split(".");
       if (address.length < 38 || address.length > 41) {
+        return false;
+      }
+      // smart contract names shouldn't exceed 64 characters
+      if (
+        isContractAddress &&
+        (contractName.length < 3 || contractName.length > 64)
+      ) {
         return false;
       }
 
@@ -197,22 +210,8 @@ const DepositFlowConfirm = ({
         throw new Error("User data is not set");
       }
 
-      // serialize the stx address
-      const [version, hash] = c32addressDecode(stxAddress);
-      // Convert the version to a 1-byte Uint8Array
-      const versionArray = new Uint8Array([version]);
-
-      // Convert the public key hash (hex string) to Uint8Array
-      const hashArray = Uint8Array.from(Buffer.from(hash, "hex"));
-
       // Combine the version and hash into a single Uint8Array
-      const serializedAddress = new Uint8Array(
-        1 + versionArray.length + hashArray.length,
-      );
-      serializedAddress.set(hexToUint8Array("0x05"), 0);
-      serializedAddress.set(versionArray, 1);
-      serializedAddress.set(hashArray, 1 + versionArray.length);
-
+      const serializedAddress = serializeCVBytes(principalCV(stxAddress));
       const lockTime = 6000;
 
       // Create the reclaim script and convert to Buffer
