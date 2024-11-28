@@ -3,7 +3,6 @@
 import { cache } from "react";
 
 export default cache(async function getSbtcBridgeConfig() {
-  const BITCOIND_URL = process.env.BITCOIND_URL;
   const EMILY_URL = process.env.EMILY_URL;
   const MEMPOOL_API_URL = process.env.MEMPOOL_API_URL;
   const WALLET_NETWORK = process.env.WALLET_NETWORK;
@@ -13,7 +12,6 @@ export default cache(async function getSbtcBridgeConfig() {
   const STACKS_API_URL = process.env.STACKS_API_URL;
 
   return {
-    BITCOIND_URL,
     EMILY_URL,
     MEMPOOL_API_URL,
     WALLET_NETWORK,

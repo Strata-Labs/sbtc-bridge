@@ -36,7 +36,6 @@ type RpcRequestParams = any[];
 type RpcRequest = {
   rpcMethod: RpcMethods;
   params: RpcRequestParams;
-  bitcoinDUrl: string;
 };
 
 const rpcUser = process.env.BITCOIN_RPC_USER_NAME || "devnet";
@@ -81,7 +80,7 @@ const rpcHandlerCore = async (
 
 export async function POST(req: NextRequest) {
   try {
-    const { rpcMethod, params, bitcoinDUrl }: RpcRequest = await req.json();
+    const { rpcMethod, params }: RpcRequest = await req.json();
 
     if (!rpcMethod || !Object.values(RpcMethods).includes(rpcMethod)) {
       return NextResponse.json(
@@ -90,7 +89,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await rpcHandlerCore(rpcMethod, params, bitcoinDUrl);
+    const result = await rpcHandlerCore(
+      rpcMethod,
+      params,
+      process.env.BITCOIND_URL!,
+    );
     return NextResponse.json(
       { result },
       {

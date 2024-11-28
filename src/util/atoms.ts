@@ -10,7 +10,6 @@ export const store = createStore();
 export type BridgeConfig = Awaited<ReturnType<typeof getSbtcBridgeConfig>>;
 
 export const bridgeConfigAtom = atom<BridgeConfig>({
-  BITCOIND_URL: undefined,
   EMILY_URL: undefined,
   MEMPOOL_API_URL: undefined,
   WALLET_NETWORK: undefined,

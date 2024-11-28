@@ -18,7 +18,6 @@ const rpcRequest = async (
   rpcMethod: string,
   params: any[] = [],
 ): Promise<any> => {
-  let { BITCOIND_URL: bitcoinDUrl } = store.get(bridgeConfigAtom);
   const response = await fetch("/api/bitcoind", {
     method: "POST",
     headers: {
@@ -27,7 +26,6 @@ const rpcRequest = async (
     body: JSON.stringify({
       rpcMethod,
       params,
-      bitcoinDUrl,
     }),
   });
 
