@@ -1,7 +1,8 @@
-import { fetchCallReadOnlyFunction, createAddress } from "@stacks/transactions";
+import { fetchCallReadOnlyFunction } from "@stacks/transactions";
 import { cvToJSON } from "@stacks/transactions";
 
 import { StacksNetwork } from "@stacks/network";
+import { bridgeConfigAtom, store } from "./atoms";
 
 type ReadOnlyHelperProps = {
   stacksNetwork: StacksNetwork;
@@ -14,9 +15,10 @@ const readOnlyHelper = async ({
   stacksNetwork,
   walletAddress,
 }: ReadOnlyHelperProps) => {
+  const config = store.get(bridgeConfigAtom);
   const options = {
-    contractAddress: process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-    contractName: process.env.NEXT_PUBLIC_CONTRACT_NAME,
+    contractAddress: config.SBTC_CONTRACT_ADDRESS!,
+    contractName: "sbtc-registry",
     functionName: functionName,
     //'get-current-aggregate-pubkey',
     functionArgs: [],
@@ -28,11 +30,9 @@ const readOnlyHelper = async ({
   try {
     const call = await fetchCallReadOnlyFunction(options as any);
     const result = cvToJSON(call).value;
-    console.log("result: ", result);
 
     return result;
   } catch (err: any) {
-    console.log("error: ", options, err);
     throw new Error(err);
   }
 };

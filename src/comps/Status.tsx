@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import { StatusContainer } from "./core/FlowContainer";
 import { Heading, SubText } from "./core/Heading";
 import { PrimaryButton } from "./core/FlowButtons";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { getRawTransaction } from "@/util/bitcoinClient";
 import { useAtomValue } from "jotai";
-import { bitcoinDaemonUrlAtom, emilyUrlAtom } from "@/util/atoms";
+import { bridgeConfigAtom } from "@/util/atoms";
 
 type BitcoinTransactionResponse = {
   txid: string;
@@ -69,107 +69,100 @@ const Status = () => {
     useState<EmilyDepositResponse | null>();
 
   // get the query params from the url
-  const router = useRouter();
   const searchParams = useSearchParams();
 
-  const emilyUrl = useAtomValue(emilyUrlAtom);
-  const bitcoinDaemonUrl = useAtomValue(bitcoinDaemonUrlAtom);
+  const { EMILY_URL: emilyUrl } = useAtomValue(bridgeConfigAtom);
+  const handleFetchFromEmily = useCallback(
+    async (txId: string, vout: number) => {
+      try {
+        // create a get request to emily to get the tx status
+        // call /deposit with body { bitcoinTxid: string, vout: number, url: string }
+
+        // make emily post request
+        const emilyGetPayload = {
+          bitcoinTxid: txId,
+          vout: vout,
+        };
+        // create search params for the url from the payload
+        const searchParams = new URLSearchParams(emilyGetPayload as any);
+
+        const response = await fetch(
+          `/api/emilyDeposit?${searchParams.toString()}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error("Error with the request");
+        }
+
+        const responseData = await response.json();
+
+        setEmilyDeposit(responseData);
+      } catch (err) {
+        window.alert("Error fetching transaction details");
+      }
+    },
+    [emilyUrl],
+  );
+  const handleDetermineIfSbtcDeposit = useCallback(
+    (txInfo: BitcoinTransactionResponse) => {
+      if (txInfo) {
+        // determin if any of the outputs may be a depoist tx
+        // this logic will def need to be cleaned up eventaully
+        // loop throug the vouts and see if any of scriptPubKey types is "witness_v1_taproot"
+
+        let depositIndex = null;
+        for (let i = 0; i < txInfo.vout.length; i++) {
+          if (
+            txInfo.vout[i].scriptPubKey &&
+            txInfo.vout[i].scriptPubKey.type === "witness_v1_taproot"
+          ) {
+            depositIndex = txInfo.vout[i].n;
+            break;
+          }
+        }
+        if (depositIndex !== null) {
+          // fetch the tx status from emily and determine if it is a deposit
+          //const
+          handleFetchFromEmily(txInfo.txid, depositIndex);
+        }
+      }
+    },
+    [handleFetchFromEmily],
+  );
+  const fetchTransactionDetails = useCallback(
+    async (txId: string) => {
+      try {
+        const rawTx = await getRawTransaction(txId);
+
+        if (rawTx) {
+          setTxDetails(rawTx);
+          handleDetermineIfSbtcDeposit(rawTx);
+        } else {
+          window.alert("Error fetching transaction details");
+        }
+      } catch (err) {
+        window.alert("Error fetching transaction details");
+      }
+    },
+    [handleDetermineIfSbtcDeposit],
+  );
 
   useEffect(() => {
     // get the txId from the query params
 
     const search = searchParams.get("txId");
     // fetch the transacition details from bitcoin rpc and emily
-    if (search) {
+    if (search && emilyUrl) {
       fetchTransactionDetails(search);
     }
-  }, []);
+  }, [emilyUrl, fetchTransactionDetails, searchParams]);
 
-  const fetchTransactionDetails = async (txId: string) => {
-    try {
-      const rawTx = await getRawTransaction(txId);
-      console.log("rawTx", rawTx);
-      if (rawTx) {
-        setTxDetails(rawTx);
-        handleDetermineIfSbtcDeposit(rawTx);
-      } else {
-        window.alert("Error fetching transaction details");
-      }
-    } catch (err) {
-      console.log("err", err);
-      window.alert("Error fetching transaction details");
-    }
-  };
-
-  const handleDetermineIfSbtcDeposit = (txInfo: BitcoinTransactionResponse) => {
-    console.log("handleDetermineIfSbtcDeposit");
-    if (txInfo) {
-      // determin if any of the outputs may be a depoist tx
-      // this logic will def need to be cleaned up eventaully
-      // loop throug the vouts and see if any of scriptPubKey types is "witness_v1_taproot"
-
-      let depositIndex = null;
-      for (let i = 0; i < txInfo.vout.length; i++) {
-        console.log(
-          " txInfo.vout[i].scriptPubKey",
-          txInfo.vout[i].scriptPubKey
-        );
-        if (
-          txInfo.vout[i].scriptPubKey &&
-          txInfo.vout[i].scriptPubKey.type === "witness_v1_taproot"
-        ) {
-          depositIndex = txInfo.vout[i].n;
-          break;
-        }
-      }
-      if (depositIndex !== null) {
-        // fetch the tx status from emily and determine if it is a deposit
-        //const
-        handleFetchFromEmily(txInfo.txid, depositIndex);
-      }
-    }
-  };
-
-  const handleFetchFromEmily = async (txId: string, vout: number) => {
-    try {
-      // create a get request to emily to get the tx status
-      // call /deposit with body { bitcoinTxid: string, vout: number, url: string }
-
-      // make emily post request
-      const emilyGetPayload = {
-        bitcoinTxid: txId,
-        vout: vout,
-        url: emilyUrl,
-      };
-      // create search params for the url from the payload
-      const searchParams = new URLSearchParams(emilyGetPayload as any);
-
-      const response = await fetch(
-        `/api/emilyDeposit?${searchParams.toString()}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          //body: JSON.stringify(emilyGetPayload),
-        }
-      );
-
-      console.log("handleFetchFromEmily -> response", response);
-
-      if (!response.ok) {
-        throw new Error("Error with the request");
-      }
-
-      const responseData = await response.json();
-      console.log("handleFetchFromEmily -> responseData", responseData);
-
-      setEmilyDeposit(responseData);
-    } catch (err) {
-      console.log("err", err);
-      window.alert("Error fetching transaction details");
-    }
-  };
   return (
     <>
       {txDetails ? (

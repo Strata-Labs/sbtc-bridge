@@ -1,4 +1,5 @@
-import type { NextApiRequest, NextApiResponse } from "next";
+"use server";
+import { env } from "@/env";
 import { NextRequest, NextResponse } from "next/server";
 
 //  supported prc methods
@@ -36,20 +37,16 @@ type RpcRequestParams = any[];
 type RpcRequest = {
   rpcMethod: RpcMethods;
   params: RpcRequestParams;
-  bitcoinDUrl: string;
 };
 
-type RpcResponse = {
-  result: any; // this eventually will be a genric type based on the rpcMethod
-};
-
-const rpcUser = process.env.NEXT_PUBLIC_BITCOIN_RPC_USER_NAME || "devnet";
-const rpcPassword = process.env.NEXT_PUBLIC_BITCOIN_RPC_PASSWORD || "devnet";
+const rpcUser = env.BITCOIN_RPC_USER_NAME;
+const rpcPassword = env.BITCOIN_RPC_PASSWORD;
+const bitcoindURL = env.BITCOIND_URL;
 
 const rpcHandlerCore = async (
   method: RpcMethods,
   params: RpcRequestParams,
-  bitcoinDUrl: string
+  bitcoinDUrl: string,
 ): Promise<any> => {
   const headers = {
     "Content-Type": "application/json",
@@ -57,8 +54,6 @@ const rpcHandlerCore = async (
       "Basic " + Buffer.from(`${rpcUser}:${rpcPassword}`).toString("base64"),
   };
 
-  console.log("rpcHandlerCore -> params", params);
-  console.log("rpcHandlerCore - bitcoinDUrl", bitcoinDUrl);
   const body = JSON.stringify({
     jsonrpc: "1.0",
     id: `${method}-${Date.now()}`,
@@ -78,7 +73,6 @@ const rpcHandlerCore = async (
     }
 
     const data = await response.json();
-    console.log("rpcHandlerCore -> data", data);
     return data.result;
   } catch (err) {
     console.error(`rpcHandlerCore ${method} error:`, err);
@@ -88,17 +82,16 @@ const rpcHandlerCore = async (
 
 export async function POST(req: NextRequest) {
   try {
-    const { rpcMethod, params, bitcoinDUrl }: RpcRequest = await req.json();
+    const { rpcMethod, params }: RpcRequest = await req.json();
 
-    console.log("bitcoinDUrl", bitcoinDUrl);
     if (!rpcMethod || !Object.values(RpcMethods).includes(rpcMethod)) {
       return NextResponse.json(
         { error: "Invalid RPC method" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const result = await rpcHandlerCore(rpcMethod, params, bitcoinDUrl);
+    const result = await rpcHandlerCore(rpcMethod, params, bitcoindURL);
     return NextResponse.json(
       { result },
       {
@@ -106,14 +99,14 @@ export async function POST(req: NextRequest) {
         headers: {
           "Access-Control-Allow-Origin": "*", // Adjust the origin as needed
         },
-      }
+      },
     );
   } catch (error) {
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

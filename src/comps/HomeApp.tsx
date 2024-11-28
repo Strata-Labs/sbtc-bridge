@@ -8,6 +8,8 @@ import HistoryView from "./HistoryView";
 import { TransferAction } from "./TransferHome";
 import LandingAnimation from "./core/LandingAnimation";
 import { usePathname, useRouter } from "next/navigation";
+import { BridgeConfig, bridgeConfigAtom } from "@/util/atoms";
+import { useSetAtom } from "jotai";
 
 export enum SECTION {
   DEPOSIT = "DEPOSIT",
@@ -29,10 +31,12 @@ sectionsMap.set(SECTION.HISTORY, { title: "History" });
 sectionsMap.set(SECTION.TRANSFER, { title: "Transfer" });
 sectionsMap.set(SECTION.SETTINGS, { title: "Settings" });
 
-const HomeApp = () => {
+const HomeApp = ({ config }: { config: BridgeConfig }) => {
   const [selectedSection, _setSelectedSection] = useState<SECTION>(
     SECTION.DEPOSIT,
   );
+  const setConfig = useSetAtom(bridgeConfigAtom);
+  setConfig(config);
   const pathname = usePathname();
   const router = useRouter();
 
