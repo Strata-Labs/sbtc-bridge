@@ -1,5 +1,3 @@
-"use server";
-
 import getSbtcBridgeConfig from "@/actions/get-sbtc-bridge-config";
 import HomeApp from "@/comps/HomeApp";
 import { Suspense } from "react";
@@ -14,3 +12,4 @@ export default async function Home() {
     </main>
   );
 }
+export const dynamic = "force-dynamic";
