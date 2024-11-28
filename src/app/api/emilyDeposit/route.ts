@@ -66,12 +66,6 @@ export async function POST(req: NextRequest) {
   };
   should follow the above
 */
-
-interface fetchFromEmilyRequestBody {
-  bitcoinTxid: string;
-  vout: number;
-  url: string;
-}
 export async function GET(req: NextRequest) {
   try {
     //const body: fetchFromEmilyRequestBody = await req.json();

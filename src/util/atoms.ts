@@ -11,11 +11,9 @@ export type BridgeConfig = Awaited<ReturnType<typeof getSbtcBridgeConfig>>;
 
 export const bridgeConfigAtom = atom<BridgeConfig>({
   EMILY_URL: undefined,
-  MEMPOOL_API_URL: "",
   WALLET_NETWORK: undefined,
-  SBTC_CONTRACT_ADDRESS: undefined,
+  SBTC_CONTRACT_DEPLOYER: undefined,
   SIGNER_AGGREGATE_KEY: undefined,
-  STACKS_API_URL: undefined,
 });
 export const depositMaxFeeAtom = atom(80000);
 

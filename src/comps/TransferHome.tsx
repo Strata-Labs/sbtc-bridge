@@ -12,9 +12,8 @@ import Header from "./Header";
 import * as bitcoin from "bitcoinjs-lib";
 import ecc from "@bitcoinerlab/secp256k1";
 import { ECPairFactory, ECPairAPI } from "ecpair";
-import { useEffect, useState } from "react";
-import { SecondaryButton } from "./core/FlowButtons";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 import { useSetAtom } from "jotai";
 import { bridgeConfigAtom } from "@/util/atoms";
 import getSbtcBridgeConfig from "@/actions/get-sbtc-bridge-config";
@@ -58,10 +57,6 @@ const data: NameKeysInfo[] = [
 ];
 const senderAddy = "miEJtNKa3ASpA19v5ZhvbKTEieYjLpzCYT";
 export const TransferAction = () => {
-  const [txId, setTxId] = useState<string | undefined>(undefined);
-
-  const router = useRouter();
-
   const handleSubmit = async (value: any) => {
     try {
       const amount = parseInt(value.amount) || 0;
@@ -150,14 +145,6 @@ export const TransferAction = () => {
       console.log("err", err);
     }
   };
-  const handleViewTx = () => {
-    // route to /status?txid=txId
-
-    // window.location.href = `/status?txid=${txId}`;
-    if (!txId) return;
-
-    router.push(`/status?txId=${txId}`);
-  };
   return (
     <FlowContainer>
       <>
@@ -173,13 +160,7 @@ export const TransferAction = () => {
         <FlowFormDynamic
           nameKeys={data}
           handleSubmit={(value) => handleSubmit(value)}
-        >
-          {txId && (
-            <SecondaryButton onClick={() => handleViewTx()}>
-              View Tx
-            </SecondaryButton>
-          )}
-        </FlowFormDynamic>
+        />
       </>
     </FlowContainer>
   );
