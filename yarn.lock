@@ -405,6 +405,11 @@
   resolved "https://registry.yarnpkg.com/@stacks/common/-/common-7.0.0.tgz#1d06b4d0323ad0a3cf0bca6c8974682cc8ab5e09"
   integrity sha512-/BKBK9S9GEuGjbnc2fBAwsG21f8cfNekG/9mXLSMwBqnh4qaQY2hxK+6wRI2YXJgpkXrpZilpZy2sdPGlVUdQA==
 
+"@stacks/common@^7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@stacks/common/-/common-7.0.2.tgz#8b17f9cf6265cf1c9065bf3cd844556870a6ee20"
+  integrity sha512-+RSecHdkxOtswmE4tDDoZlYEuULpnTQVeDIG5eZ32opK8cFxf4EugAcK9CsIsHx/Se1yTEaQ21WGATmJGK84lQ==
+
 "@stacks/connect-react@22.5.0":
   version "22.5.0"
   resolved "https://registry.yarnpkg.com/@stacks/connect-react/-/connect-react-22.5.0.tgz#a9ed4564bf469d3274de79073369d342cc258312"
@@ -450,6 +455,7 @@
     varuint-bitcoin "^1.1.2"
 
 "@stacks/network-v6@npm:@stacks/network@^6.16.0", "@stacks/network@^6.17.0":
+  name "@stacks/network-v6"
   version "6.17.0"
   resolved "https://registry.yarnpkg.com/@stacks/network/-/network-6.17.0.tgz#9e0eefb8d72cb2243744beaf1e17673737290a49"
   integrity sha512-numHbfKjwco/rbkGPOEz8+FcJ2nBnS/tdJ8R422Q70h3SiA9eqk9RjSzB8p4JP8yW1SZvW+eihADHfMpBuZyfw==
@@ -463,6 +469,14 @@
   integrity sha512-4diddT0ii85BQ4PW6ww3l4cS7Oo0a5VIsJ7umBcCPAArIc4Sm/MIOEXIg9joKK8fVHLnWyh1p4D+febJQFfa+Q==
   dependencies:
     "@stacks/common" "^7.0.0"
+    cross-fetch "^3.1.5"
+
+"@stacks/network@^7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@stacks/network/-/network-7.0.2.tgz#bbf1cb049ebcc9d3f8048950c7d230d79c87cb0b"
+  integrity sha512-XzHnoWqku/jRrTgMXhmh3c+I0O9vDH24KlhzGDZtBu+8CGGyHNPAZzGwvoUShonMXrXjEnfO9IYQwV5aJhfv6g==
+  dependencies:
+    "@stacks/common" "^7.0.2"
     cross-fetch "^3.1.5"
 
 "@stacks/profile@^7.0.0", "@stacks/profile@^7.0.0-next.70":
@@ -503,6 +517,18 @@
     "@noble/secp256k1" "1.7.1"
     "@stacks/common" "^7.0.0"
     "@stacks/network" "^7.0.0"
+    c32check "^2.0.0"
+    lodash.clonedeep "^4.5.0"
+
+"@stacks/transactions@^7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@stacks/transactions/-/transactions-7.0.2.tgz#fe4a3ece5a779b65a1d7cbef9393f13dc7ec7f85"
+  integrity sha512-m2bvchqUeYv1ttXuC0EukW8UX4xBXTDcYb8bXmfI1RG89HXAvvCCgr5aiadU6zbutgoXvm8mquDt3nww0PO4Jg==
+  dependencies:
+    "@noble/hashes" "1.1.5"
+    "@noble/secp256k1" "1.7.1"
+    "@stacks/common" "^7.0.2"
+    "@stacks/network" "^7.0.2"
     c32check "^2.0.0"
     lodash.clonedeep "^4.5.0"
 
@@ -3714,6 +3740,7 @@ streamsearch@^1.1.0:
   integrity sha512-Mcc5wHehp9aXz1ax6bZUyY5afg9u2rv5cqQI3mRrYkGC8rW2hM02jWuwjtL++LS5qinSyhj2QfLyNsuc+VsExg==
 
 "string-width-cjs@npm:string-width@^4.2.0", string-width@^4.1.0:
+  name string-width-cjs
   version "4.2.3"
   resolved "https://registry.yarnpkg.com/string-width/-/string-width-4.2.3.tgz#269c7117d27b05ad2e536830a8ec895ef9c6d010"
   integrity sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==
