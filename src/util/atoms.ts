@@ -14,7 +14,6 @@ export const bridgeConfigAtom = atom<BridgeConfig>({
   MEMPOOL_API_URL: undefined,
   WALLET_NETWORK: undefined,
   SBTC_CONTRACT_ADDRESS: undefined,
-  SBTC_CONTRACT_NAME: undefined,
   SIGNER_AGGREGATE_KEY: undefined,
   STACKS_API_URL: undefined,
 });
