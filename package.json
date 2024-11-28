@@ -30,7 +30,7 @@
     "server-only": "^0.0.1",
     "webpack": "5.95.0",
     "yarn": "1.22.22",
-    "yup": "^1.4.0"
+    "yup": "1.4.0"
   },
   "devDependencies": {
     "@leather.io/rpc": "^2.1.20",
