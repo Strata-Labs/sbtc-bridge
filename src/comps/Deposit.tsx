@@ -75,22 +75,30 @@ type DepositFlowAmountProps = DepositFlowStepProps & {
   setAmount: (amount: number) => void;
 };
 const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
-  const { data: emilyLimitsData, isLoading: isLoadingEmilyLimits } = useQuery({
+  const {
+    data: emilyLimitsData,
+    isFetching: isLoadingEmilyLimits,
+    refetch,
+  } = useQuery({
     queryKey: ["deposit-max-fee"],
     queryFn: () => getEmilyLimits(),
   });
+  const currentCap = emilyLimitsData?.perDepositCap ?? 0;
   const validationSchema = yup.object({
     amount: yup
       .number()
       // dust amount is in sats
-      .min(10_000)
-      .max(emilyLimitsData?.perDepositCap ?? 0)
+      .min(10_000, `Minimum deposit amount is 10,000 sats`)
+      .max(currentCap, `Current deposit cap is ${currentCap} sats`)
       .required(),
   });
-  const handleSubmit = (value: string | undefined) => {
+  const handleSubmit = async (value: string | undefined) => {
     if (value) {
-      setAmount(parseInt(value));
-      setStep(DEPOSIT_STEP.ADDRESS);
+      const { data } = await refetch();
+      if (data && data.perDepositCap >= Number(value)) {
+        setAmount(Number(value));
+        setStep(DEPOSIT_STEP.ADDRESS);
+      }
     }
   };
   return (
@@ -436,22 +444,25 @@ const DepositFlow = () => {
 
   useEffect(() => {
     const params = new URLSearchParams();
-    params.set("txId", txId);
-    params.set("step", String(step));
-    params.set("amount", String(amount));
-    router.push(pathname + "?" + params.toString());
+    if (step === DEPOSIT_STEP.REVIEW) {
+      params.set("txId", txId);
+      params.set("step", String(step));
+      params.set("amount", String(amount));
+      router.push(pathname + "?" + params.toString());
+    }
   }, [amount, txId, step, router, pathname]);
 
   useEffect(() => {
     const currentStep = Number(searchParams.get("step"));
-    if (currentStep === DEPOSIT_STEP.REVIEW || !currentStep) {
+    if (!currentStep) {
+      _setStep(DEPOSIT_STEP.AMOUNT);
+    }
+    if (currentStep === DEPOSIT_STEP.REVIEW) {
       _setStep(currentStep);
       _setTxId(searchParams.get("txId") || "");
       _setAmount(Number(searchParams.get("amount") || 0));
     }
-    // need to run this only once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchParams]);
 
   const setTxId = useCallback((info: TransactionInfo) => {
     _setTxId(info.txId);
