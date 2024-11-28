@@ -74,6 +74,8 @@ const rpcHandlerCore = async (
     const data = await response.json();
     return data.result;
   } catch (err) {
+    // good for debugging
+    // eslint-disable-next-line no-console
     console.error(`rpcHandlerCore ${method} error:`, err);
     throw new Error(err instanceof Error ? err.message : String(err));
   }
@@ -81,9 +83,6 @@ const rpcHandlerCore = async (
 
 export async function POST(req: NextRequest) {
   try {
-    const url = new URL(req.url);
-    const path = url.pathname.replace("/api/proxy/", ""); // Get the dynamic part of the route
-
     // Read the raw body from the request
     const body = req.body ? await req.text() : undefined;
 
@@ -93,11 +92,6 @@ export async function POST(req: NextRequest) {
       headers[key] = value;
     });
 
-    // Proxy the request
-    const proxyUrl = `${BASE_PROXY_URL}${path}`;
-    // make a basic post request to the bitcoin mempool api
-    // fuck it we'll use the bitocin rpc
-
     const res = await rpcHandlerCore(
       RpcMethods.sendRawTransaction,
       [body],
@@ -106,6 +100,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(res);
   } catch (error) {
+    // good for debugging
+    // eslint-disable-next-line no-console
     console.error("Error in POST handler:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
@@ -164,6 +160,8 @@ export async function GET(req: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data, { status: response.status });
   } catch (error) {
+    // good for debugging
+    // eslint-disable-next-line no-console
     console.error("Error in GET handler:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
