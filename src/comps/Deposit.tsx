@@ -260,7 +260,6 @@ const DepositFlowConfirm = ({
               amount: `${amount}`,
             },
           ],
-          // TODO: remove hardcoded env
           network: walletNetwork,
         };
         const response = await window.LeatherProvider?.request(
