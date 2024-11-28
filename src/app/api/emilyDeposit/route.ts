@@ -1,3 +1,4 @@
+import { env } from "@/env";
 import { NextRequest, NextResponse } from "next/server";
 
 interface CreateDepositRequestBody {
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
       const errorResponse = await response.json();
       return NextResponse.json(
         { error: errorResponse },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
@@ -43,11 +44,11 @@ export async function POST(req: NextRequest) {
     console.error("Error forwarding request to Rust server:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-/* 
+/*
     const handleFetchFromEmily = async (txId: string, vout: number) => {
     try {
       // create a get request to emily to get the tx status
@@ -78,10 +79,9 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
     const bitcoinTxid = searchParams.get("bitcoinTxid");
     const vout = searchParams.get("vout");
-    const emilyUrl = searchParams.get("url");
 
     // Construct the URL for the external request
-    const url = `${emilyUrl}/deposit/${bitcoinTxid}/${vout}`;
+    const url = `${env.EMILY_URL}/deposit/${bitcoinTxid}/${vout}`;
     console.log("url", url);
     console.log("url", url);
 
@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
     console.error("Error forwarding request to Rust server:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

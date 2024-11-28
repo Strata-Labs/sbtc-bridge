@@ -82,7 +82,6 @@ const Status = () => {
         const emilyGetPayload = {
           bitcoinTxid: txId,
           vout: vout,
-          url: emilyUrl,
         };
         // create search params for the url from the payload
         const searchParams = new URLSearchParams(emilyGetPayload as any);
@@ -94,7 +93,6 @@ const Status = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            //body: JSON.stringify(emilyGetPayload),
           },
         );
 

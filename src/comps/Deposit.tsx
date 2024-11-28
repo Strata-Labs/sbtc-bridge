@@ -181,13 +181,15 @@ const DepositFlowConfirm = ({
 }: DepositFlowConfirmProps) => {
   const { notify } = useNotifications();
 
-  const { EMILY_URL: emilyUrl, SIGNER_AGGREGATE_KEY: signerPubKey } =
-    useAtomValue(bridgeConfigAtom);
+  const {
+    EMILY_URL: emilyUrl,
+    SIGNER_AGGREGATE_KEY: signerPubKey,
+    WALLET_NETWORK: walletNetwork,
+  } = useAtomValue(bridgeConfigAtom);
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
 
   const userData = useAtomValue(userDataAtom);
-  const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
 
   const handleNextClick = async () => {
     try {
