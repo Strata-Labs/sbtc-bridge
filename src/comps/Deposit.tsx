@@ -20,7 +20,8 @@ import {
   depositMaxFeeAtom,
   ENV,
   envAtom,
-  userDataAtom,
+  walletInfoAtom,
+  WalletProvider,
 } from "@/util/atoms";
 import { NotificationStatusType } from "./Notifications";
 import {
@@ -33,6 +34,7 @@ import { useShortAddress } from "@/hooks/use-short-address";
 import { useNotifications } from "@/hooks/use-notifications";
 import { DepositStepper } from "./deposit-stepper";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { sendBTCLeather, sendBTCXverse } from "@/util/wallet-utils";
 
 /*
   deposit flow has 3 steps
@@ -202,14 +204,9 @@ const DepositFlowConfirm = ({
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
 
-  const userData = useAtomValue(userDataAtom);
-
+  const walletInfo = useAtomValue(walletInfoAtom);
   const handleNextClick = async () => {
     try {
-      if (userData === null) {
-        throw new Error("User data is not set");
-      }
-
       // Combine the version and hash into a single Uint8Array
       const serializedAddress = serializeCVBytes(principalCV(stxAddress));
       const lockTime = 6000;
@@ -235,79 +232,33 @@ const DepositFlowConfirm = ({
         lockTime,
       );
 
-      /*
-      const txHex = await createDepositTx(
-        serializedAddress,
-        senderSeedPhrase,
-        signerPubKey,
-        amount,
-        maxFee,
-        lockTime
-      );
-      */
-
-      // check the wallet provider from user data
       let txId = "";
       let txHex = "";
 
-      if (
-        userData.profile.walletProvider === "hiro-wallet" ||
-        userData.profile.walletProvider === "leather"
-      ) {
-        const sendParams = {
-          recipients: [
-            {
-              address: p2trAddress,
-              amount: `${amount}`,
-            },
-          ],
+      try {
+        const params = {
+          recipient: p2trAddress,
+          amountInSats: amount,
           network: walletNetwork,
         };
-        const response = await window.LeatherProvider?.request(
-          "sendTransfer",
-          sendParams,
-        );
-
-        if (response && response.result) {
-          const _txId = response.result.txid.replace(/^"|"$/g, ""); // Remove leading and trailing quotes
-          txId = _txId;
+        switch (walletInfo.selectedWallet) {
+          case WalletProvider.LEATHER:
+            txId = await sendBTCLeather(params);
+            break;
+          case WalletProvider.XVERSE:
+            txId = await sendBTCXverse(params);
+            break;
         }
-      } else if (userData.profile.walletProvider === "xverse") {
-        // get the txId from the xverse wallet
-        if (!window.XverseProviders) {
-          throw new Error("XverseProviders not found");
+      } catch (error) {
+        let errorMessage = error;
+        if (error instanceof Error) {
+          errorMessage = error.message;
         }
-        const response = await window.XverseProviders.request("sendTransfer", {
-          recipients: [
-            {
-              address: p2trAddress,
-              amount: Number(amount),
-            },
-          ],
-        });
-        if (response.status === "success") {
-          // handle success
-          txId = response.txId;
-        } else {
-          // handle error
-          notify({
-            type: NotificationStatusType.ERROR,
-            message: `Issue with Transaction`,
-          });
-
-          throw new Error("Error with the transaction");
-        }
-      } else {
-        throw new Error("Wallet provider not supported");
-      }
-
-      if (txId === "") {
         notify({
           type: NotificationStatusType.ERROR,
-          message: `Issue with Transaction`,
+          message: `Issue with Transaction ${errorMessage}`,
         });
-
-        throw new Error("Error with the transaction");
+        return;
       }
 
       const emilyReqPayload = {
@@ -346,9 +297,14 @@ const DepositFlowConfirm = ({
         txId: txId,
       });
     } catch (error) {
+      let errorMessage = error;
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       notify({
         type: NotificationStatusType.ERROR,
-        message: `Error while depositing funds`,
+        message: `Error while depositing funds: ${errorMessage}`,
       });
     }
   };

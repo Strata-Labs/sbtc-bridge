@@ -2,24 +2,21 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { AppConfig, UserSession } from "@stacks/connect";
-import { useEffect } from "react";
+import { useMemo } from "react";
 
-const appConfig = new AppConfig(["store_write"]);
-const userSession = new UserSession({ appConfig });
 import { AnimatePresence } from "framer-motion";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 import {
   bridgeConfigAtom,
-  isConnectedAtom,
   showConnectWalletAtom,
-  userDataAtom,
+  walletInfoAtom,
 } from "@/util/atoms";
 
 import ConnectWallet from "./ConnectWallet";
-import { useWallet } from "@/util/WalletContext";
 import { GetTestnetBTC } from "./get-testnet-btc";
 import { useAtomValue } from "jotai";
+import { useNotifications } from "@/hooks/use-notifications";
+import { NotificationStatusType } from "./Notifications";
 
 // converting to lower case to avoid case sensitive issue
 
@@ -28,23 +25,26 @@ const Header = () => {
   const isTestnet =
     bridgeConfig.WALLET_NETWORK?.toLowerCase() === "sbtcTestnet".toLowerCase();
 
-  const setUserData = useSetAtom(userDataAtom);
+  const { notify } = useNotifications();
 
-  const { handleSignOut } = useWallet();
-
+  const [walletInfo, setWalletInfo] = useAtom(walletInfoAtom);
+  const handleSignOut = () => {
+    setWalletInfo({
+      selectedWallet: null,
+      addresses: {
+        payment: null,
+        taproot: null,
+      },
+    });
+    notify({
+      type: NotificationStatusType.SUCCESS,
+      message: `Wallet disconnected`,
+    });
+  };
+  const isConnected = useMemo(() => !!walletInfo.selectedWallet, [walletInfo]);
   const [showConnectWallet, setShowConnectWallet] = useAtom(
     showConnectWalletAtom,
   );
-
-  const [isConnected, setIsConnected] = useAtom(isConnectedAtom);
-  useEffect(() => {
-    if (userSession.isUserSignedIn()) {
-      const userData = userSession.loadUserData();
-      setUserData(userData);
-      setIsConnected(true);
-      // add event to show user connected
-    }
-  }, []);
 
   const renderUserWalletInfo = () => {
     return (

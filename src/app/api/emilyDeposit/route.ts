@@ -76,8 +76,6 @@ export async function GET(req: NextRequest) {
 
     // Construct the URL for the external request
     const url = `${env.EMILY_URL}/deposit/${bitcoinTxid}/${vout}`;
-    console.log("url", url);
-    console.log("url", url);
 
     const response = await fetch(url, {
       method: "GET",

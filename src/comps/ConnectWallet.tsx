@@ -1,13 +1,17 @@
-import { useConnect } from "@stacks/connect-react";
 import { motion } from "framer-motion";
 import { Heading, SubText } from "./core/Heading";
 import Image from "next/image";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
-
-enum WalletProvider {
-  LEATHER = "Leather",
-  XVERSE = "Xverse",
-}
+import { bridgeConfigAtom, walletInfoAtom, WalletProvider } from "@/util/atoms";
+import {
+  checkAvailableWallets,
+  getAddressesLeather,
+  getAddressesXverse,
+} from "@/util/wallet-utils";
+import { useAtomValue, useSetAtom } from "jotai";
+import { useNotifications } from "@/hooks/use-notifications";
+import { NotificationStatusType } from "./Notifications";
+import { useEffect, useState } from "react";
 
 const WALLET_PROVIDERS = [
   {
@@ -22,32 +26,50 @@ const WALLET_PROVIDERS = [
   },
 ];
 
-const resolveProvider = (wallet: WalletProvider) => {
-  if (wallet === WalletProvider.XVERSE && window.XverseProviders) {
-    return window.XverseProviders?.StacksProvider;
-  } else if (wallet === WalletProvider.LEATHER && window.LeatherProvider) {
-    return window.LeatherProvider;
-  } else {
-    return null;
-  }
-};
-
 type ConnectWalletProps = {
   onClose: () => void;
 };
 const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
-  const { doOpenAuth } = useConnect();
-
+  const [availableWallets, setAvailableWallets] = useState<{
+    [key in WalletProvider]: boolean;
+  }>({
+    leather: false,
+    xverse: false,
+  });
+  useEffect(() => {
+    checkAvailableWallets().then(setAvailableWallets);
+  }, []);
+  const setWalletInfo = useSetAtom(walletInfoAtom);
+  const { notify } = useNotifications();
+  const { WALLET_NETWORK } = useAtomValue(bridgeConfigAtom);
   const handleSelectWallet = async (wallet: WalletProvider) => {
     try {
-      const provider = resolveProvider(wallet);
-      if (provider) {
-        doOpenAuth(true, undefined, provider);
-      } else {
-        throw new Error("Provider not found");
+      let addresses = {
+        payment: "",
+        taproot: "",
+      };
+      switch (wallet) {
+        case WalletProvider.LEATHER:
+          addresses = await getAddressesLeather();
+          break;
+        case WalletProvider.XVERSE:
+          addresses = await getAddressesXverse();
       }
+
+      if (WALLET_NETWORK !== "mainnet" && addresses.payment.startsWith("bc1")) {
+        throw new Error(`Please switch to ${WALLET_NETWORK} network`);
+      }
+
+      setWalletInfo({
+        selectedWallet: wallet,
+        addresses: addresses,
+      });
+      onClose();
     } catch (error) {
-      console.error("Error during authentication process:", error);
+      notify({
+        message: String(error),
+        type: NotificationStatusType.ERROR,
+      });
     }
   };
 
@@ -56,7 +78,7 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
       initial={{ x: "0", opacity: 0 }}
       animate={{ x: "0", opacity: 1 }}
       onClick={() => onClose()}
-      className="fixed inset-0 bg-black text-black bg-opacity-50 flex items-center justify-center md:p-4 z-50"
+      className="fixed inset-0 bg-black text-black bg-opacity-50 flex items-center justify-center md:p-4 z-20"
     >
       <motion.div
         initial={{ opacity: 0 }}
@@ -79,7 +101,9 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
           height={150}
         />
         <div className="w-full flex flex-col gap-4 items-center justify-center">
-          {WALLET_PROVIDERS.map((provider, index) => {
+          {WALLET_PROVIDERS.filter(
+            (provider) => availableWallets[provider.walletProvider],
+          ).map((provider, index) => {
             return (
               <div
                 key={index}

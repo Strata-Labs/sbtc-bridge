@@ -154,14 +154,16 @@ export async function GET(req: NextRequest) {
 
     // Proxy all other routes to the base proxy URL
     const proxyUrl = `${MEMPOOL_API_URL}${path}`;
-
     const response = await fetch(proxyUrl, {
       method: req.method,
       headers: req.headers, // Pass along incoming headers
     });
 
-    const data = await response.json();
-    return NextResponse.json(data, { status: response.status });
+    if (response.headers.get("content-type")?.includes("application/json")) {
+      const data = await response.json();
+      return NextResponse.json(data, { status: response.status });
+    }
+    return NextResponse.redirect(response.url);
   } catch (error) {
     // good for debugging
     // eslint-disable-next-line no-console

@@ -1,9 +1,9 @@
 "use client";
 
 import { atom, createStore } from "jotai";
-import { UserData } from "@stacks/connect";
 import { NotificationEventType } from "@/comps/Notifications";
 import getSbtcBridgeConfig from "@/actions/get-sbtc-bridge-config";
+import { atomWithStorage } from "jotai/utils";
 
 export const store = createStore();
 
@@ -25,12 +25,24 @@ export enum ENV {
 
 export const envAtom = atom(ENV.TESTNET);
 
-export const isConnectedAtom = atom<boolean>(false);
-
 export const showConnectWalletAtom = atom<boolean>(false);
 
-export const userDataAtom = atom<UserData | null>(null);
-
-export const walletAddressAtom = atom<string | null>(null);
-
 export const eventsAtom = atom<NotificationEventType[]>([]);
+export enum WalletProvider {
+  LEATHER = "leather",
+  XVERSE = "xverse",
+}
+export const walletInfoAtom = atomWithStorage<{
+  selectedWallet: WalletProvider | null;
+  addresses: {
+    // can't call this p2wpkh because xverse sometimes uses segwit rather than native segwit
+    payment: string | null;
+    taproot: string | null;
+  };
+}>("walletInfo", {
+  selectedWallet: null,
+  addresses: {
+    payment: null,
+    taproot: null,
+  },
+});
