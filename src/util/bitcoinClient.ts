@@ -1,7 +1,5 @@
 "use client";
 
-import { bridgeConfigAtom, store } from "./atoms";
-
 type RpcResponse = {
   result: any;
 };

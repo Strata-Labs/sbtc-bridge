@@ -9,7 +9,6 @@ import { Provider } from "jotai";
 import { store } from "@/util/atoms";
 import { useWallet, WalletContextProvider } from "@/util/WalletContext";
 import RenderNotifications from "@/comps/RenderNotifications";
-import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,10 +28,8 @@ export default function RootLayout({
       <Provider store={store}>
         <WalletContextProvider>
           <Layout>
-            <Suspense fallback={<div>Loading...</div>}>
-              <RenderNotifications />
-              <body className={inter.className}>{children}</body>
-            </Suspense>
+            <RenderNotifications />
+            <body className={inter.className}>{children}</body>
           </Layout>
         </WalletContextProvider>
       </Provider>

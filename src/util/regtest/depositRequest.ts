@@ -30,7 +30,7 @@ const flipEndian = (buffer: Uint8Array): Uint8Array => {
 export const createDepositScript = (
   signersPubKey: Uint8Array,
   maxFee: number,
-  recipientBytes: Uint8Array
+  recipientBytes: Uint8Array,
 ) => {
   const opDropData = recipientBytes;
 
@@ -46,7 +46,7 @@ export const createDepositScript = (
 
   // Concat maxfee and opdropdata
   const opDropDataTogether = new Uint8Array(
-    BEmaxFee.length + opDropData.length
+    BEmaxFee.length + opDropData.length,
   );
   opDropDataTogether.set(BEmaxFee);
   opDropDataTogether.set(opDropData, BEmaxFee.length);
@@ -58,14 +58,13 @@ export const createDepositScript = (
     bitcoin.opcodes.OP_CHECKSIG,
   ]);
 
-  const hexOfTing = uint8ArrayToHexString(ting);
   return ting;
 };
 //the max fee is 8 bytes, big endian
 
 export const createReclaimScript = (
   lockTime: number,
-  additionalScriptBytes: Uint8Array
+  additionalScriptBytes: Uint8Array,
 ): Uint8Array => {
   const { script, opcodes } = bitcoin;
 
@@ -92,7 +91,7 @@ export const createReclaimScript = (
   reclaimScript.set(opCheckSequenceVerify, lockTimeArray.length);
   reclaimScript.set(
     additionalScriptBytes,
-    lockTimeArray.length + opCheckSequenceVerify.length
+    lockTimeArray.length + opCheckSequenceVerify.length,
   ); // Append additional script
 
   // Return the combined Uint8Array
@@ -107,29 +106,24 @@ export const createDepositAddress = (
   stxAddress: Uint8Array,
   signerPubKey: string,
   maxFee: number,
-  lockTime: number
+  lockTime: number,
 ): string => {
   const internalPubkey = hexToUint8Array(signerPubKey);
 
   // Create the reclaim script and convert to Buffer
   const reclaimScript = Buffer.from(
-    createReclaimScript(lockTime, new Uint8Array([]))
+    createReclaimScript(lockTime, new Uint8Array([])),
   );
-
-  const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
 
   // Create the deposit script and convert to Buffer
 
   const recipientBytes = stxAddress;
   const depositScript = Buffer.from(
-    createDepositScript(internalPubkey, maxFee, recipientBytes)
+    createDepositScript(internalPubkey, maxFee, recipientBytes),
   );
   // convert buffer to hex
-  const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
 
   //  Hash the leaf scripts using tapLeafHash
-  const depositScriptHash = bip341.tapleafHash({ output: depositScript });
-  const depositScriptHashHex = uint8ArrayToHexString(depositScriptHash);
 
   const reclaimScriptHash = bip341.tapleafHash({ output: reclaimScript });
   const reclaimScriptHashHex = uint8ArrayToHexString(reclaimScriptHash);
@@ -223,20 +217,20 @@ export const createDepositScriptP2TROutput = async (
   amount: number,
   signersPublicKey: string,
   maxFee: number,
-  lockTime: number
+  lockTime: number,
 ) => {
   try {
     // const internalPubkey = hexToUint8Array(
     //   "50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0"
     // );
 
-    /* 
-      couple steps that make this up - going try to detail in chapters sort of language 
+    /*
+      couple steps that make this up - going try to detail in chapters sort of language
       1. create the reclaim script
       2. create the deposit script
       3. hash the leaf scripts using toHashTree
       4. create an internal public key (tapTweakHash)
-      5. create the taprootPubKey 
+      5. create the taprootPubKey
       6. create the pt2r payment object
       7 basic validation for the payment object
       8. fetch UTXOs for the sender address
@@ -254,7 +248,7 @@ export const createDepositScriptP2TROutput = async (
       stxDepositAddress,
       signersPublicKey,
       maxFee,
-      lockTime
+      lockTime,
     );
 
     // Fetch UTXOs for the sender address

@@ -1,4 +1,4 @@
-import bitcoin, { networks, payments, initEccLib } from "bitcoinjs-lib";
+import { networks, payments, initEccLib } from "bitcoinjs-lib";
 import { HDKey } from "@scure/bip32";
 import * as crypto from "crypto";
 import bs58check from "bs58check";
@@ -24,8 +24,6 @@ const createWallet = (seed: string) => {
 
   return root;
 };
-
-const getAddressInfo = (masterWallet: HDKey, path: string) => {};
 
 export const getP2pkh = (seed: string) => {
   const root = createWallet(seed);
@@ -60,7 +58,6 @@ export const getP2TR = (seed: string) => {
     throw new Error("Failed to create wallet");
   }
 
-  const derived = root.derive(TAPR00T_DERIVE_PATH);
   // Generate the public key
   const p2trRes = payments.p2tr({
     internalPubkey: toXOnly(root.publicKey || ([] as any)), // Taproot needs X-only pubkey
@@ -100,18 +97,8 @@ export const getP2WSH = (seed: string) => {
 
   const buffer = Buffer.from(derived.publicKey);
 
-  const p2pkh = payments.p2pkh({
-    pubkey: buffer,
-    network: networks.regtest,
-  });
-
   const p2wpkh = payments.p2wpkh({
     pubkey: buffer,
-    network: networks.regtest,
-  });
-
-  const p2wsh = payments.p2wsh({
-    redeem: p2wpkh,
     network: networks.regtest,
   });
 
@@ -166,7 +153,7 @@ export type BitcoinNetwork = "mainnet" | "testnet" | "regtest";
 
 export function privateKeyToWIF(
   privateKeyHex: string,
-  network: BitcoinNetwork
+  network: BitcoinNetwork,
 ): string {
   // Use 0x80 for mainnet, 0xef for testnet and regtest
   const versionByte = network === "mainnet" ? 0x80 : 0xef; // 0xEF for both testnet and regtest

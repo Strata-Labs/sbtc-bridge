@@ -17,7 +17,7 @@ const readOnlyHelper = async ({
 }: ReadOnlyHelperProps) => {
   const config = store.get(bridgeConfigAtom);
   const options = {
-    contractAddress: config.SBTC_CONTRACT_ADDRESS!,
+    contractAddress: config.SBTC_CONTRACT_DEPLOYER!,
     contractName: "sbtc-registry",
     functionName: functionName,
     //'get-current-aggregate-pubkey',

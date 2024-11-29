@@ -2,10 +2,13 @@
 import { env } from "@/env";
 import { NextRequest, NextResponse } from "next/server";
 
-const BITCOIND_URL = env.BITCOIND_URL;
+const {
+  BITCOIND_URL,
+  MEMPOOL_API_URL,
+  BITCOIN_RPC_USER_NAME,
+  BITCOIN_RPC_PASSWORD,
+} = env;
 // Import your Bitcoin RPC logic
-
-const BASE_PROXY_URL = env.MEMPOOL_API_URL;
 
 enum RpcMethods {
   generateToAddress = "generatetoaddress",
@@ -39,9 +42,6 @@ enum RpcMethods {
 
 type RpcRequestParams = any[];
 
-const rpcUser = env.BITCOIN_RPC_USER_NAME;
-const rpcPassword = env.BITCOIN_RPC_PASSWORD;
-
 const rpcHandlerCore = async (
   method: RpcMethods,
   params: RpcRequestParams,
@@ -50,7 +50,10 @@ const rpcHandlerCore = async (
   const headers = {
     "Content-Type": "application/json",
     Authorization:
-      "Basic " + Buffer.from(`${rpcUser}:${rpcPassword}`).toString("base64"),
+      "Basic " +
+      Buffer.from(`${BITCOIN_RPC_USER_NAME}:${BITCOIN_RPC_PASSWORD}`).toString(
+        "base64",
+      ),
   };
 
   const body = JSON.stringify({
@@ -150,7 +153,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Proxy all other routes to the base proxy URL
-    const proxyUrl = `${BASE_PROXY_URL}${path}`;
+    const proxyUrl = `${MEMPOOL_API_URL}${path}`;
 
     const response = await fetch(proxyUrl, {
       method: req.method,

@@ -9,7 +9,7 @@ export async function GET(_: NextRequest) {
     {
       result: {
         version: packageJson.version,
-        contracts_deployer: env.SBTC_CONTRACT_ADDRESS,
+        contracts_deployer: env.SBTC_CONTRACT_DEPLOYER,
       },
     },
     { status: 200 },
