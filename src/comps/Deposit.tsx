@@ -211,9 +211,10 @@ const DepositFlowConfirm = ({
       // Combine the version and hash into a single Uint8Array
       const serializedAddress = serializeCVBytes(principalCV(stxAddress));
 
+      const parsedLockTime = parseInt(lockTime || "144");
       // Create the reclaim script and convert to Buffer
       const reclaimScript = Buffer.from(
-        createReclaimScript(lockTime, new Uint8Array([]))
+        createReclaimScript(parsedLockTime, new Uint8Array([]))
       );
 
       const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
@@ -229,7 +230,7 @@ const DepositFlowConfirm = ({
         serializedAddress,
         signerPubKey!,
         maxFee,
-        lockTime
+        parsedLockTime
       );
 
       let txId = "";
