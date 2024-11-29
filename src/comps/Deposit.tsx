@@ -211,6 +211,7 @@ const DepositFlowConfirm = ({
       // Combine the version and hash into a single Uint8Array
       const serializedAddress = serializeCVBytes(principalCV(stxAddress));
 
+      // Parse lockTime from env variable
       const parsedLockTime = parseInt(lockTime || "144");
       // Create the reclaim script and convert to Buffer
       const reclaimScript = Buffer.from(
