@@ -14,6 +14,7 @@ export const bridgeConfigAtom = atom<BridgeConfig>({
   WALLET_NETWORK: undefined,
   SBTC_CONTRACT_DEPLOYER: undefined,
   SIGNER_AGGREGATE_KEY: undefined,
+  BANNER_CONTENT: undefined,
 });
 export const depositMaxFeeAtom = atom(80000);
 

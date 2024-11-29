@@ -11,11 +11,12 @@ export default cache(async function getSbtcBridgeConfig() {
     | undefined;
   const SBTC_CONTRACT_DEPLOYER = env.SBTC_CONTRACT_DEPLOYER;
   const SIGNER_AGGREGATE_KEY = env.SIGNER_AGGREGATE_KEY;
-
+  const BANNER_CONTENT = env.BANNER_CONTENT;
   return {
     EMILY_URL,
     WALLET_NETWORK,
     SBTC_CONTRACT_DEPLOYER,
     SIGNER_AGGREGATE_KEY,
+    BANNER_CONTENT,
   };
 });
