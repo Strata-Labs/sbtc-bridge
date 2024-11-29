@@ -9,6 +9,7 @@ import { Heading, SubText } from "@/comps/core/Heading";
 import { FlowForm } from "@/comps/core/Form";
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
 import { hexToUint8Array, uint8ArrayToHexString } from "@/util/regtest/wallet";
+import * as yup from "yup";
 import {
   createDepositAddress,
   createDepositScript,
@@ -35,7 +36,7 @@ import { useNotifications } from "@/hooks/use-notifications";
 import { DepositStepper } from "./deposit-stepper";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { sendBTCLeather, sendBTCXverse } from "@/util/wallet-utils";
-
+import useMintCaps from "@/hooks/use-mint-caps";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -73,10 +74,21 @@ type DepositFlowAmountProps = DepositFlowStepProps & {
   setAmount: (amount: number) => void;
 };
 const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
-  const handleSubmit = (value: string | undefined) => {
+  const { currentCap, isWithinDepositLimits, isLoading } = useMintCaps();
+  const validationSchema = yup.object({
+    amount: yup
+      .number()
+      // dust amount is in sats
+      .min(10_000, `Minimum deposit amount is 10,000 sats`)
+      .max(currentCap, `Current deposit cap is ${currentCap} sats`)
+      .required(),
+  });
+  const handleSubmit = async (value: string | undefined) => {
     if (value) {
-      setAmount(parseInt(value));
-      setStep(DEPOSIT_STEP.ADDRESS);
+      if (await isWithinDepositLimits(Number(value))) {
+        setAmount(Number(value));
+        setStep(DEPOSIT_STEP.ADDRESS);
+      }
     }
   };
   return (
@@ -89,9 +101,15 @@ const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
         <FlowForm
           nameKey="amount"
           type="number"
-          placeholder="BTC amount to transfer (in sats)"
+          placeholder={
+            currentCap <= 0
+              ? "Mint cap reached!"
+              : "BTC amount to transfer (in sats)"
+          }
+          disabled={isLoading || currentCap <= 0}
           handleSubmit={(value) => handleSubmit(value)}
-        ></FlowForm>
+          validationSchema={validationSchema}
+        />
       </>
     </FlowContainer>
   );
@@ -420,22 +438,25 @@ const DepositFlow = () => {
 
   useEffect(() => {
     const params = new URLSearchParams();
-    params.set("txId", txId);
-    params.set("step", String(step));
-    params.set("amount", String(amount));
-    router.push(pathname + "?" + params.toString());
+    if (step === DEPOSIT_STEP.REVIEW) {
+      params.set("txId", txId);
+      params.set("step", String(step));
+      params.set("amount", String(amount));
+      router.push(pathname + "?" + params.toString());
+    }
   }, [amount, txId, step, router, pathname]);
 
   useEffect(() => {
     const currentStep = Number(searchParams.get("step"));
-    if (currentStep === DEPOSIT_STEP.REVIEW || !currentStep) {
+    if (!currentStep) {
+      _setStep(DEPOSIT_STEP.AMOUNT);
+    }
+    if (currentStep === DEPOSIT_STEP.REVIEW) {
       _setStep(currentStep);
       _setTxId(searchParams.get("txId") || "");
       _setAmount(Number(searchParams.get("amount") || 0));
     }
-    // need to run this only once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchParams]);
 
   const setTxId = useCallback((info: TransactionInfo) => {
     _setTxId(info.txId);

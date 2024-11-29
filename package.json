@@ -14,7 +14,8 @@
     "@bitcoinerlab/secp256k1": "1.1.1",
     "@headlessui/react": "2.1.2",
     "@heroicons/react": "2.1.5",
-    "@stacks/transactions": "7.0.2",
+    "@stacks/transactions": "^7.0.2",
+    "@tanstack/react-query": "^5.61.5",
     "add": "2.0.6",
     "babel-loader": "9.2.1",
     "c32check": "2.0.0",
@@ -26,8 +27,10 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "sats-connect": "3.0.1",
+    "server-only": "^0.0.1",
     "webpack": "5.95.0",
-    "yarn": "1.22.22"
+    "yarn": "1.22.22",
+    "yup": "1.4.0"
   },
   "devDependencies": {
     "@leather.io/rpc": "^2.1.20",
