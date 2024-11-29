@@ -9,4 +9,5 @@ export const env = {
   SBTC_CONTRACT_DEPLOYER: process.env.SBTC_CONTRACT_DEPLOYER,
   SIGNER_AGGREGATE_KEY: process.env.SIGNER_AGGREGATE_KEY,
   BANNER_CONTENT: process.env.BANNER_CONTENT,
+  RECLAIM_LOCK_TIME: parseInt(process.env.RECLAIM_LOCK_TIME || "144"),
 };
