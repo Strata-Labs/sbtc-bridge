@@ -63,9 +63,9 @@ const Header = () => {
   };
   return (
     <>
-      {process.env.NODE_ENV !== "production" && (
+      {bridgeConfig.BANNER_CONTENT && (
         <div className="w-screen bg-[#F26969] text-white text-center py-2">
-          This is a testnet release
+          {bridgeConfig.BANNER_CONTENT}
         </div>
       )}
       <header className="w-screen py-6 flex items-center justify-center">
