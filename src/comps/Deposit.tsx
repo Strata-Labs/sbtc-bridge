@@ -252,7 +252,7 @@ const DepositFlowConfirm = ({
       const signerUint8Array = hexToUint8Array(signersAggregatePubKey!);
 
       const depositScript = Buffer.from(
-        createDepositScript(signerUint8Array, maxFee, serializedAddress),
+        createDepositScript(signerUint8Array, maxFee, serializedAddress)
       );
       // convert buffer to hex
       const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
@@ -443,10 +443,10 @@ const DepositFlow = () => {
   const [step, _setStep] = useState(DEPOSIT_STEP.AMOUNT);
 
   const [stxAddress, _setStxAddress] = useState(
-    searchParams.get("stxAddress") ?? "",
+    searchParams.get("stxAddress") ?? ""
   );
   const [amount, _setAmount] = useState(
-    Number(searchParams.get("amount") ?? 0),
+    Number(searchParams.get("amount") ?? 0)
   );
   const [txId, _setTxId] = useState("");
 
@@ -483,7 +483,7 @@ const DepositFlow = () => {
     (newStep: DEPOSIT_STEP) => {
       setStep(newStep);
     },
-    [setStep],
+    [setStep]
   );
 
   const setStxAddress = useCallback((address: string) => {
@@ -498,7 +498,7 @@ const DepositFlow = () => {
     (info: TransactionInfo) => {
       setTxId(info);
     },
-    [setTxId],
+    [setTxId]
   );
   const renderStep = () => {
     switch (step) {
