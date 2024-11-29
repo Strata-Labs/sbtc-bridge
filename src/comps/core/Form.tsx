@@ -1,7 +1,8 @@
 import { useFormik } from "formik";
 import { PrimaryButton } from "./FlowButtons";
 import { useAtomValue, useSetAtom } from "jotai";
-import { isConnectedAtom, showConnectWalletAtom } from "@/util/atoms";
+import { showConnectWalletAtom, walletInfoAtom } from "@/util/atoms";
+import { useMemo } from "react";
 // this is supposed to be as reusable as possible given all the flows are very similar in order and action
 type FlowFormProps = {
   nameKey: string;
@@ -21,7 +22,8 @@ export const FlowForm = ({
   type,
   children,
 }: FlowFormProps) => {
-  const isConnected = useAtomValue(isConnectedAtom);
+  const walletInfo = useAtomValue(walletInfoAtom);
+  const isConnected = useMemo(() => !!walletInfo.selectedWallet, [walletInfo]);
   const setShowConnectWallet = useSetAtom(showConnectWalletAtom);
 
   const formik = useFormik({
@@ -99,7 +101,7 @@ export const FlowFormDynamic = ({
         acc[nameKey] = initValue;
         return acc;
       },
-      {}
+      {},
     ),
 
     onSubmit: (values) => {
