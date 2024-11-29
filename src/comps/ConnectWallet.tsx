@@ -66,7 +66,6 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
       });
       onClose();
     } catch (error) {
-      console.warn(error);
       notify({
         message: String(error),
         type: NotificationStatusType.ERROR,

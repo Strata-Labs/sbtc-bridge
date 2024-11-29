@@ -250,9 +250,13 @@ const DepositFlowConfirm = ({
             break;
         }
       } catch (error) {
+        let errorMessage = error;
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
         notify({
           type: NotificationStatusType.ERROR,
-          message: `Issue with Transaction ${error && error.message}`,
+          message: `Issue with Transaction ${errorMessage}`,
         });
         return;
       }
@@ -293,10 +297,14 @@ const DepositFlowConfirm = ({
         txId: txId,
       });
     } catch (error) {
-      console.warn(error);
+      let errorMessage = error;
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
       notify({
         type: NotificationStatusType.ERROR,
-        message: `Error while depositing funds`,
+        message: `Error while depositing funds: ${errorMessage}`,
       });
     }
   };

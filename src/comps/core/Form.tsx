@@ -31,7 +31,6 @@ export const FlowForm = ({
       [nameKey]: initialValue,
     },
     onSubmit: (values) => {
-      console.log(values);
       handleSubmit(values[nameKey]);
     },
   });
@@ -105,7 +104,6 @@ export const FlowFormDynamic = ({
     ),
 
     onSubmit: (values) => {
-      console.log(values);
       handleSubmit(values);
     },
   });
