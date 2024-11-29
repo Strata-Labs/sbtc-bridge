@@ -1,5 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: "/api/proxy/:path*",
+        destination: "https://beta.sbtc-mempool.tech/api/proxy/:path*",
+      },
+    ];
+  },
   webpack(config, { isServer, dev }) {
     config.experiments = {
       syncWebAssembly: true, // Change to sync WebAssembly

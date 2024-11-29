@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       const errorResponse = await response.json();
       return NextResponse.json(
         { error: errorResponse },
-        { status: response.status },
+        { status: response.status }
       );
     }
 
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     console.error("Error forwarding request to Rust server:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -96,7 +96,7 @@ export async function GET(req: NextRequest) {
     console.error("Error forwarding request to Rust server:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
