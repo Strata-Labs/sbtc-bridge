@@ -36,8 +36,7 @@ import { useNotifications } from "@/hooks/use-notifications";
 import { DepositStepper } from "./deposit-stepper";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { sendBTCLeather, sendBTCXverse } from "@/util/wallet-utils";
-import { useQuery } from "@tanstack/react-query";
-import getEmilyLimits from "@/actions/get-emily-limits";
+import useMintCaps from "@/hooks/use-mint-caps";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -75,15 +74,7 @@ type DepositFlowAmountProps = DepositFlowStepProps & {
   setAmount: (amount: number) => void;
 };
 const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
-  const {
-    data: emilyLimitsData,
-    isFetching: isLoadingEmilyLimits,
-    refetch,
-  } = useQuery({
-    queryKey: ["deposit-max-fee"],
-    queryFn: () => getEmilyLimits(),
-  });
-  const currentCap = emilyLimitsData?.perDepositCap ?? 0;
+  const { currentCap, isWithinDepositLimits, isLoading } = useMintCaps();
   const validationSchema = yup.object({
     amount: yup
       .number()
@@ -94,8 +85,7 @@ const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
   });
   const handleSubmit = async (value: string | undefined) => {
     if (value) {
-      const { data } = await refetch();
-      if (data && data.perDepositCap >= Number(value)) {
+      if (await isWithinDepositLimits(Number(value))) {
         setAmount(Number(value));
         setStep(DEPOSIT_STEP.ADDRESS);
       }
@@ -111,11 +101,15 @@ const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
         <FlowForm
           nameKey="amount"
           type="number"
-          placeholder="BTC amount to transfer (in sats)"
-          disabled={isLoadingEmilyLimits}
+          placeholder={
+            currentCap <= 0
+              ? "Mint cap reached!"
+              : "BTC amount to transfer (in sats)"
+          }
+          disabled={isLoading || currentCap <= 0}
           handleSubmit={(value) => handleSubmit(value)}
           validationSchema={validationSchema}
-        ></FlowForm>
+        />
       </>
     </FlowContainer>
   );

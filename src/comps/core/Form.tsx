@@ -56,7 +56,7 @@ export const FlowForm = ({
           disabled={disabled}
           className={`w-full py-2 border-b-2 bg-transparent text-xl text-black focus:outline-none placeholder-gray-300 ${
             formik.isValid ? "border-orange" : "border-red-300"
-          } transition-colors duration-500`}
+          } transition-colors duration-500 disabled:opacity-50 disabled:cursor-not-allowed`}
         />
         <p className="text-red-500 text-sm h-4">{formik.errors[nameKey]}</p>
       </div>
@@ -66,7 +66,7 @@ export const FlowForm = ({
           <PrimaryButton
             type="submit"
             onClick={formik.handleSubmit}
-            isValid={formik.isValid}
+            disabled={!formik.isValid || disabled}
           >
             NEXT
           </PrimaryButton>
