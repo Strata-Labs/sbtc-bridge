@@ -1,91 +1,19 @@
 "use server";
 import { env } from "@/env";
 import { NextRequest, NextResponse } from "next/server";
+import { rpcHandlerCore, RpcMethods } from "./rpc-handler-core";
 
-const {
-  BITCOIND_URL,
-  MEMPOOL_API_URL,
-  BITCOIN_RPC_USER_NAME,
-  BITCOIN_RPC_PASSWORD,
-} = env;
+const { MEMPOOL_API_URL } = env;
 // Import your Bitcoin RPC logic
-
-enum RpcMethods {
-  generateToAddress = "generatetoaddress",
-  getBlockChainInfo = "getblockchaininfo",
-  listUnspent = "listunspent",
-  createWallet = "createwallet",
-  loadWallet = "loadwallet",
-  getNewAddress = "getnewaddress",
-  getAddressesByLabel = "getaddressesbylabel",
-  listLabels = "listlabels",
-  listWallets = "listwallets",
-  getWalletInfo = "getwalletinfo",
-  unloadWallet = "unloadwallet",
-  createRawTransaction = "createrawtransaction",
-  signRawTransactionWithWallet = "signrawtransactionwithwallet",
-  sendRawTransaction = "sendrawtransaction",
-  decodeRawTransaction = "decoderawtransaction",
-  getTransaction = "gettransaction",
-  dumpPrivKey = "dumpprivkey",
-  listaddressgroupings = "listaddressgroupings",
-  getAddressInfo = "getaddressinfo",
-  getWalletDescriptor = "listdescriptors",
-  importprivkey = "importprivkey",
-  importaddress = "importaddress",
-  scantxoutset = "scantxoutset",
-  testMempoolAccept = "testmempoolaccept",
-  getBlockHash = "getblockhash",
-  getBlock = "getblock",
-  getRawTransaction = "getrawtransaction",
-}
-
-type RpcRequestParams = any[];
-
-const rpcHandlerCore = async (
-  method: RpcMethods,
-  params: RpcRequestParams,
-  bitcoinDUrl: string,
-): Promise<any> => {
-  const headers = {
-    "Content-Type": "application/json",
-    Authorization:
-      "Basic " +
-      Buffer.from(`${BITCOIN_RPC_USER_NAME}:${BITCOIN_RPC_PASSWORD}`).toString(
-        "base64",
-      ),
-  };
-
-  const body = JSON.stringify({
-    jsonrpc: "1.0",
-    id: `${method}-${Date.now()}`,
-    method: method,
-    params,
-  });
-
-  try {
-    const response = await fetch(bitcoinDUrl, {
-      method: "POST",
-      headers: headers,
-      body: body,
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.result;
-  } catch (err) {
-    // good for debugging
-    // eslint-disable-next-line no-console
-    console.error(`rpcHandlerCore ${method} error:`, err);
-    throw new Error(err instanceof Error ? err.message : String(err));
-  }
-};
 
 export async function POST(req: NextRequest) {
   try {
+    if (env.WALLET_NETWORK === "mainnet") {
+      return NextResponse.json(
+        { error: "Mainnet not supported" },
+        { status: 400 },
+      );
+    }
     // Read the raw body from the request
     const body = req.body ? await req.text() : undefined;
 
@@ -95,11 +23,7 @@ export async function POST(req: NextRequest) {
       headers[key] = value;
     });
 
-    const res = await rpcHandlerCore(
-      RpcMethods.sendRawTransaction,
-      [body],
-      BITCOIND_URL,
-    );
+    const res = await rpcHandlerCore(RpcMethods.sendRawTransaction, [body]);
 
     return NextResponse.json(res);
   } catch (error) {
@@ -115,6 +39,12 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    if (env.WALLET_NETWORK === "mainnet") {
+      return NextResponse.json(
+        { error: "Mainnet not supported" },
+        { status: 400 },
+      );
+    }
     const url = new URL(req.url);
     const path = url.pathname.replace("/api/proxy/", ""); // Get the dynamic part of the route
 
@@ -132,18 +62,14 @@ export async function GET(req: NextRequest) {
       }
       const args = ["start", [{ desc: `addr(${address})`, range: 10000 }]];
 
-      const result = await rpcHandlerCore(
-        RpcMethods.scantxoutset,
-        args,
-        BITCOIND_URL,
-      );
+      const result = await rpcHandlerCore(RpcMethods.scantxoutset, args);
 
       const utxos = result.unspents.map((utxo: any) => ({
         txid: utxo.txid,
         vout: utxo.vout,
         status: {
           confirmed: true,
-          block_height: result.height, // Use the height from the main RPC result
+          block_height: utxo.height, // Use the height from the main RPC result
           block_hash: result.bestblock, // Use the bestblock from the RPC result
           block_time: Math.floor(Date.now() / 1000), // You can replace this with an actual block time if available
         },

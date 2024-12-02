@@ -256,7 +256,7 @@ export const createDepositScriptP2TROutput = async (
     const utxosRes = await scanTxOutSet(senderAddress);
 
     if (utxosRes) {
-      utxosRes.unspents.forEach((utxo: any) => {
+      utxosRes.forEach((utxo: any) => {
         utxos.push({
           txid: utxo.txid,
           vout: utxo.vout,
