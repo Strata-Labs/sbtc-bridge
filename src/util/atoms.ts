@@ -13,7 +13,6 @@ export const bridgeConfigAtom = atom<BridgeConfig>({
   EMILY_URL: undefined,
   WALLET_NETWORK: undefined,
   SBTC_CONTRACT_DEPLOYER: undefined,
-  SIGNER_AGGREGATE_KEY: undefined,
   BANNER_CONTENT: undefined,
   RECLAIM_LOCK_TIME: undefined,
 });

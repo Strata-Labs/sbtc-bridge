@@ -20,13 +20,11 @@ const readOnlyHelper = async ({
     contractAddress: config.SBTC_CONTRACT_DEPLOYER!,
     contractName: "sbtc-registry",
     functionName: functionName,
-    //'get-current-aggregate-pubkey',
     functionArgs: [],
     network: stacksNetwork,
     senderAddress: walletAddress,
   };
 
-  //setLoading(true);
   try {
     const call = await fetchCallReadOnlyFunction(options as any);
     const result = cvToJSON(call).value;
