@@ -1,7 +1,7 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
-import { FlowContainer } from "./core/FlowContainer";
+import { FlowContainer, FlowLoaderContainer } from "./core/FlowContainer";
 import { Heading, SubText } from "./core/Heading";
 import { useShortAddress } from "@/hooks/use-short-address";
 import { InformationCircleIcon } from "@heroicons/react/16/solid";
@@ -56,7 +56,7 @@ const ReclaimManager = () => {
 
   const { notify } = useNotifications();
 
-  const [step, _setStep] = useState<RECLAIM_STEP>(RECLAIM_STEP.LOADING);
+  const [step, _setStep] = useState<RECLAIM_STEP>(RECLAIM_STEP.NOT_FOUND);
 
   const [emilyDepositTransaction, setEmilyDepositTransaction] =
     useState<EmilyDepositTransactionType | null>(null);
@@ -139,7 +139,7 @@ const ReclaimManager = () => {
 
       setEmilyDepositTransaction(responseData);
 
-      setStep(RECLAIM_STEP.RECLAIM);
+      //setStep(RECLAIM_STEP.RECLAIM);
     } catch (err) {
       console.error("Error fetching deposit info from Emily", err);
       setStep(RECLAIM_STEP.NOT_FOUND);
@@ -160,11 +160,39 @@ const ReclaimManager = () => {
 export default ReclaimManager;
 
 const LoadingInfo = () => {
-  return <div>LoadingInfo</div>;
+  return (
+    <FlowContainer>
+      <div className="flex h-full flex-col gap-2 items-center justify-center">
+        <div
+          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-orange"
+          role="status"
+        ></div>
+        <SubText>Loading Info</SubText>
+      </div>
+    </FlowContainer>
+  );
 };
 
 const NotFound = () => {
-  return <div>NotFound</div>;
+  return (
+    <FlowContainer>
+      <>
+        <div className="w-full flex flex-row items-center justify-between">
+          <Heading>Transaction could not be found</Heading>
+        </div>
+        <div className="flex flex-1 ">
+          <div className="w-full p-4 bg-lightOrange h-24 rounded-lg flex flex-row items-center justify-center gap-2">
+            <InformationCircleIcon className="h-10 w-10 text-orange" />
+            <p className="text-orange font-Matter font-semibold text-sm break-keep">
+              The transaction you are looking for could not be found. Please
+              check the transaction details and try again. If you believe this
+              is an error please contact a team member.
+            </p>
+          </div>
+        </div>
+      </>
+    </FlowContainer>
+  );
 };
 
 type ReclaimDepositProps = {
@@ -307,5 +335,15 @@ const ReclaimDeposit = ({
 };
 
 const CurrentStatusReclaim = () => {
-  return <div>CurrentStatusReclaim</div>;
+  const [showLoader, setShowLoader] = useState<boolean>(false);
+
+  return (
+    <FlowLoaderContainer showLoader={showLoader}>
+      <>
+        <div className="w-full flex flex-row items-center justify-between">
+          <Heading>Review Reclaim Transaction</Heading>
+        </div>
+      </>
+    </FlowLoaderContainer>
+  );
 };
