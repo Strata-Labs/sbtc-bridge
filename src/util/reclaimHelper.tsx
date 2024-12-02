@@ -2,10 +2,9 @@ import * as bip341 from "bitcoinjs-lib/src/payments/bip341";
 import * as bitcoin from "bitcoinjs-lib";
 
 import { Taptree } from "bitcoinjs-lib/src/types";
-import { hexToUint8Array, uint8ArrayToHexString } from "./regtest/wallet";
 import { buildLeafIndexFinalizer } from "./validateTapLeaf";
 import { NUMS_X_COORDINATE } from "./regtest/depositRequest";
-
+import { hexToBytes as hexToUint8Array } from "@stacks/common";
 type Utxo = {
   txid: string;
   vout: number;
@@ -47,24 +46,27 @@ export const createTransactionFromHex = (hex: string) => {
 type ReclaimDepositProps = {
   feeAmount: number;
   depositAmount: number;
+
   lockTime: number;
   depositScript: string;
   reclaimScript: string;
-  pubkey: string;
   txId: string;
   vout: number;
+
   bitcoinReturnAddress: string;
 };
 
 export const constructPsbtForReclaim = ({
   depositAmount,
   feeAmount,
+
   lockTime,
   depositScript,
   reclaimScript,
-  pubkey,
+
   txId,
   vout,
+
   bitcoinReturnAddress,
 }: ReclaimDepositProps) => {
   const uInt8DepositScript = hexToUint8Array(depositScript);
@@ -112,8 +114,6 @@ export const constructPsbtForReclaim = ({
     script: uInt8ReclaimScript,
     controlBlock: p2trRes.witness![p2trRes.witness!.length - 1],
   };
-
-  // apend array of uint8array in p2trRes.witness! to a single uint8array
 
   psbt.addInput({
     hash: txId,
