@@ -8,6 +8,12 @@ const { MEMPOOL_API_URL } = env;
 
 export async function POST(req: NextRequest) {
   try {
+    if (env.WALLET_NETWORK === "mainnet") {
+      return NextResponse.json(
+        { error: "Mainnet not supported" },
+        { status: 400 },
+      );
+    }
     // Read the raw body from the request
     const body = req.body ? await req.text() : undefined;
 
@@ -33,6 +39,12 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    if (env.WALLET_NETWORK === "mainnet") {
+      return NextResponse.json(
+        { error: "Mainnet not supported" },
+        { status: 400 },
+      );
+    }
     const url = new URL(req.url);
     const path = url.pathname.replace("/api/proxy/", ""); // Get the dynamic part of the route
 

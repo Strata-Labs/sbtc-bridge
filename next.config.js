@@ -14,6 +14,18 @@ const nextConfig = {
 
     return config;
   },
+  async redirects() {
+    return process.env.WALLET_NETWORK !== "sbtcDevenv"
+      ? [
+          // Basic redirect
+          {
+            source: "/transfer",
+            destination: "/" + process.env.WALLET_NETWORK,
+            permanent: false,
+          },
+        ]
+      : [];
+  },
 };
 
 module.exports = nextConfig;
