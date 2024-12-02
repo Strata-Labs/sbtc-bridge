@@ -218,6 +218,7 @@ const DepositFlowConfirm = ({
     EMILY_URL: emilyUrl,
     SIGNER_AGGREGATE_KEY: signerPubKey,
     WALLET_NETWORK: walletNetwork,
+    RECLAIM_LOCK_TIME: lockTime,
   } = useAtomValue(bridgeConfigAtom);
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
@@ -227,11 +228,12 @@ const DepositFlowConfirm = ({
     try {
       // Combine the version and hash into a single Uint8Array
       const serializedAddress = serializeCVBytes(principalCV(stxAddress));
-      const lockTime = 6000;
 
+      // Parse lockTime from env variable
+      const parsedLockTime = parseInt(lockTime || "144");
       // Create the reclaim script and convert to Buffer
       const reclaimScript = Buffer.from(
-        createReclaimScript(lockTime, new Uint8Array([])),
+        createReclaimScript(parsedLockTime, new Uint8Array([]))
       );
 
       const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
@@ -239,7 +241,7 @@ const DepositFlowConfirm = ({
       const signerUint8Array = hexToUint8Array(signerPubKey!);
 
       const depositScript = Buffer.from(
-        createDepositScript(signerUint8Array, maxFee, serializedAddress),
+        createDepositScript(signerUint8Array, maxFee, serializedAddress)
       );
       // convert buffer to hex
       const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
@@ -247,7 +249,7 @@ const DepositFlowConfirm = ({
         serializedAddress,
         signerPubKey!,
         maxFee,
-        lockTime,
+        parsedLockTime
       );
 
       let txId = "";
@@ -429,10 +431,10 @@ const DepositFlow = () => {
   const [step, _setStep] = useState(DEPOSIT_STEP.AMOUNT);
 
   const [stxAddress, _setStxAddress] = useState(
-    searchParams.get("stxAddress") ?? "",
+    searchParams.get("stxAddress") ?? ""
   );
   const [amount, _setAmount] = useState(
-    Number(searchParams.get("amount") ?? 0),
+    Number(searchParams.get("amount") ?? 0)
   );
   const [txId, _setTxId] = useState("");
 
@@ -469,7 +471,7 @@ const DepositFlow = () => {
     (newStep: DEPOSIT_STEP) => {
       setStep(newStep);
     },
-    [setStep],
+    [setStep]
   );
 
   const setStxAddress = useCallback((address: string) => {
@@ -484,7 +486,7 @@ const DepositFlow = () => {
     (info: TransactionInfo) => {
       setTxId(info);
     },
-    [setTxId],
+    [setTxId]
   );
   const renderStep = () => {
     switch (step) {
