@@ -10,7 +10,6 @@ export default cache(async function getSbtcBridgeConfig() {
     | DefaultNetworkConfigurations
     | undefined;
   const SBTC_CONTRACT_DEPLOYER = env.SBTC_CONTRACT_DEPLOYER;
-  const SIGNER_AGGREGATE_KEY = env.SIGNER_AGGREGATE_KEY;
   const BANNER_CONTENT = env.BANNER_CONTENT;
   const RECLAIM_LOCK_TIME = env.RECLAIM_LOCK_TIME;
 
@@ -18,7 +17,6 @@ export default cache(async function getSbtcBridgeConfig() {
     EMILY_URL,
     WALLET_NETWORK,
     SBTC_CONTRACT_DEPLOYER,
-    SIGNER_AGGREGATE_KEY,
     BANNER_CONTENT,
     RECLAIM_LOCK_TIME,
   };

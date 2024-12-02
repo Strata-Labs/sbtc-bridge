@@ -37,6 +37,7 @@ import { DepositStepper } from "./deposit-stepper";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { sendBTCLeather, sendBTCXverse } from "@/util/wallet-utils";
 import useMintCaps from "@/hooks/use-mint-caps";
+import { getAggregateKey } from "@/util/get-aggregate-key";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -216,7 +217,6 @@ const DepositFlowConfirm = ({
 
   const {
     EMILY_URL: emilyUrl,
-    SIGNER_AGGREGATE_KEY: signerPubKey,
     WALLET_NETWORK: walletNetwork,
     RECLAIM_LOCK_TIME: lockTime,
   } = useAtomValue(bridgeConfigAtom);
@@ -226,6 +226,8 @@ const DepositFlowConfirm = ({
   const walletInfo = useAtomValue(walletInfoAtom);
   const handleNextClick = async () => {
     try {
+      const signersAggregatePubKey = (await getAggregateKey()).slice(2);
+
       // Combine the version and hash into a single Uint8Array
       const serializedAddress = serializeCVBytes(principalCV(stxAddress));
 
@@ -233,23 +235,23 @@ const DepositFlowConfirm = ({
       const parsedLockTime = parseInt(lockTime || "144");
       // Create the reclaim script and convert to Buffer
       const reclaimScript = Buffer.from(
-        createReclaimScript(parsedLockTime, new Uint8Array([]))
+        createReclaimScript(parsedLockTime, new Uint8Array([])),
       );
 
       const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
 
-      const signerUint8Array = hexToUint8Array(signerPubKey!);
+      const signerUint8Array = hexToUint8Array(signersAggregatePubKey!);
 
       const depositScript = Buffer.from(
-        createDepositScript(signerUint8Array, maxFee, serializedAddress)
+        createDepositScript(signerUint8Array, maxFee, serializedAddress),
       );
       // convert buffer to hex
       const depositScriptHexPreHash = uint8ArrayToHexString(depositScript);
       const p2trAddress = createDepositAddress(
         serializedAddress,
-        signerPubKey!,
+        signersAggregatePubKey!,
         maxFee,
-        parsedLockTime
+        parsedLockTime,
       );
 
       let txId = "";
@@ -431,10 +433,10 @@ const DepositFlow = () => {
   const [step, _setStep] = useState(DEPOSIT_STEP.AMOUNT);
 
   const [stxAddress, _setStxAddress] = useState(
-    searchParams.get("stxAddress") ?? ""
+    searchParams.get("stxAddress") ?? "",
   );
   const [amount, _setAmount] = useState(
-    Number(searchParams.get("amount") ?? 0)
+    Number(searchParams.get("amount") ?? 0),
   );
   const [txId, _setTxId] = useState("");
 
@@ -471,7 +473,7 @@ const DepositFlow = () => {
     (newStep: DEPOSIT_STEP) => {
       setStep(newStep);
     },
-    [setStep]
+    [setStep],
   );
 
   const setStxAddress = useCallback((address: string) => {
@@ -486,7 +488,7 @@ const DepositFlow = () => {
     (info: TransactionInfo) => {
       setTxId(info);
     },
-    [setTxId]
+    [setTxId],
   );
   const renderStep = () => {
     switch (step) {
