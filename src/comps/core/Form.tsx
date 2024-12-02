@@ -93,13 +93,12 @@ export type NameKeysInfo = {
 };
 type FlowFormDynamicProps = {
   nameKeys: NameKeysInfo[];
-  handleSubmit: (values: any) => void;
+  handleSubmit: (values: Record<string, string>) => void;
   children?: React.ReactNode;
 };
 export const FlowFormDynamic = ({
   nameKeys,
   handleSubmit,
-
   children,
 }: FlowFormDynamicProps) => {
   const formik = useFormik({
