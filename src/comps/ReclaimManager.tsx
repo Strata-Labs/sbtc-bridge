@@ -11,6 +11,7 @@ import {
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
 import { useAtomValue } from "jotai";
 import { bridgeConfigAtom, walletInfoAtom } from "@/util/atoms";
+
 import { useNotifications } from "@/hooks/use-notifications";
 import { NotificationStatusType } from "./Notifications";
 import {
@@ -63,6 +64,7 @@ type ReclaimTxType = {
     confirmed: boolean;
   };
 };
+
 const ReclaimManager = () => {
   // const router = useRouter();
   // const pathname = usePathname();
@@ -353,10 +355,6 @@ const ReclaimDeposit = ({
 
   const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
 
-  const signerPubKey =
-    "4ea6e657117bc8168254b8943e55a65997c71b3994e1e2915002a9da0c22ee1e";
-  //const userData = useAtomValue(userDataAtom);
-
   const buildReclaimTransaction = async () => {
     try {
       const maxReclaimFee = 5000;
@@ -377,7 +375,6 @@ const ReclaimDeposit = ({
         lockTime: depositTransaction.parameters.lockTime,
         depositScript: depositTransaction.depositScript,
         reclaimScript: depositTransaction.reclaimScript,
-        pubkey: signerPubKey || "",
         txId: depositTransaction.bitcoinTxid,
         vout: depositTransaction.bitcoinTxOutputIndex,
         bitcoinReturnAddress: btcAddress,
@@ -389,8 +386,7 @@ const ReclaimDeposit = ({
       const signPsbtRequestParams: SignPsbtRequestParams = {
         hex: unsignedTxHex,
         network: walletNetwork,
-        //signAtIndex: [0, 1],
-        broadcast: false,
+        broadcast: true,
       };
 
       const response = await window.LeatherProvider?.request(
