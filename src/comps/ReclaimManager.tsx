@@ -7,10 +7,15 @@ import { useShortAddress } from "@/hooks/use-short-address";
 import { InformationCircleIcon } from "@heroicons/react/16/solid";
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
 import { useAtomValue } from "jotai";
-import { userDataAtom } from "@/util/atoms";
+import { bridgeConfigAtom, userDataAtom } from "@/util/atoms";
 import { useNotifications } from "@/hooks/use-notifications";
 import { NotificationStatusType } from "./Notifications";
-import { constructUtxoInputForFee } from "@/util/reclaimHelper";
+import {
+  constructPsbtForReclaim,
+  constructUtxoInputForFee,
+  finalizePsbt,
+} from "@/util/reclaimHelper";
+import { SignatureHash } from "@leather.io/rpc";
 
 enum RECLAIM_STEP {
   LOADING = "LOADING",
@@ -18,15 +23,44 @@ enum RECLAIM_STEP {
   RECLAIM = "RECLAIM",
   CURRENT_STATUS = "CURRENT_STATUS",
 }
+
+type EmilyDepositTransactionType = {
+  bitcoinTxid: string;
+  bitcoinTxOutputIndex: number;
+  recipient: string;
+  amount: number;
+  lastUpdateHeight: number;
+  lastUpdateBlockHash: string;
+  status: string;
+  statusMessage: string;
+  parameters: {
+    maxFee: number;
+    lockTime: number;
+  };
+  reclaimScript: string;
+  depositScript: string;
+  fulfillment: {
+    BitcoinTxid: string;
+    BitcoinTxIndex: number;
+    StacksTxid: string;
+    BitcoinBlockHash: string;
+    BitcoinBlockHeight: number;
+    BtcFee: number;
+  };
+};
+
 const ReclaimManager = () => {
   // const router = useRouter();
   // const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [step, _setStep] = useState<RECLAIM_STEP>(RECLAIM_STEP.RECLAIM);
+  const { notify } = useNotifications();
 
-  const [depositScript, setDepositScript] = useState<string>("");
-  const [reclaimScript, setReclaimScript] = useState<string>("");
+  const [step, _setStep] = useState<RECLAIM_STEP>(RECLAIM_STEP.LOADING);
+
+  const [emilyDepositTransaction, setEmilyDepositTransaction] =
+    useState<EmilyDepositTransactionType | null>(null);
+
   const [amount, setAmount] = useState<number>(0);
 
   useEffect(() => {
@@ -41,7 +75,21 @@ const ReclaimManager = () => {
   const renderStep = () => {
     switch (step) {
       case RECLAIM_STEP.RECLAIM:
-        return <ReclaimDeposit />;
+        // ensure we have the deposit transaction
+        if (!emilyDepositTransaction) {
+          notify({
+            type: NotificationStatusType.ERROR,
+            message: "Something went wrong",
+          });
+          _setStep(RECLAIM_STEP.NOT_FOUND);
+          return null;
+        }
+        return (
+          <ReclaimDeposit
+            amount={amount}
+            depositTransaction={emilyDepositTransaction}
+          />
+        );
       case RECLAIM_STEP.CURRENT_STATUS:
         return <CurrentStatusReclaim />;
       case RECLAIM_STEP.LOADING:
@@ -86,7 +134,16 @@ const ReclaimManager = () => {
       const responseData = await response.json();
 
       console.log("responseData", responseData);
-    } catch (err) {}
+
+      setAmount(amount);
+
+      setEmilyDepositTransaction(responseData);
+
+      setStep(RECLAIM_STEP.RECLAIM);
+    } catch (err) {
+      console.error("Error fetching deposit info from Emily", err);
+      setStep(RECLAIM_STEP.NOT_FOUND);
+    }
   };
   return (
     <>
@@ -112,12 +169,25 @@ const NotFound = () => {
 
 type ReclaimDepositProps = {
   amount: number;
-  lockTime: number;
-  depositScript: string;
-  reclaimScript: string;
+  depositTransaction: EmilyDepositTransactionType;
 };
-const ReclaimDeposit = () => {
+interface SignPsbtRequestParams {
+  hex: string;
+  allowedSighash?: SignatureHash[];
+  signAtIndex?: number | number[];
+  network?: string;
+  account?: number;
+  broadcast?: boolean;
+}
+
+const ReclaimDeposit = ({
+  amount,
+  depositTransaction,
+}: ReclaimDepositProps) => {
   const { notify } = useNotifications();
+
+  const { SIGNER_AGGREGATE_KEY: signerPubKey, WALLET_NETWORK: walletNetwork } =
+    useAtomValue(bridgeConfigAtom);
 
   const userData = useAtomValue(userDataAtom);
 
@@ -137,11 +207,52 @@ const ReclaimDeposit = () => {
 
       console.log("userData", userData);
       // fetch utxo to covert maxFee
-      const maxReclaimFee = 1000;
+      const maxReclaimFee = 80000;
 
       const btcAddress = getUserBtcAddress();
 
       const utxo = await constructUtxoInputForFee(maxReclaimFee, btcAddress);
+
+      console.log("utxo", utxo);
+
+      const unsignedTxHex = constructPsbtForReclaim({
+        amount: maxReclaimFee,
+        lockTime: depositTransaction.parameters.lockTime,
+        depositScript: depositTransaction.depositScript,
+        reclaimScript: depositTransaction.reclaimScript,
+        pubkey: signerPubKey || "",
+        txId: depositTransaction.bitcoinTxid,
+        vout: depositTransaction.bitcoinTxOutputIndex,
+        selectedUtxos: utxo.selectedUtxos,
+        bitcoinReturnAddress: btcAddress,
+      });
+
+      console.log("unsignedTxHex", unsignedTxHex);
+
+      // sign the transaction through api
+      const signPsbtRequestParams: SignPsbtRequestParams = {
+        hex: unsignedTxHex,
+        allowedSighash: [SignatureHash.DEFAULT],
+        network: walletNetwork,
+
+        broadcast: true,
+      };
+
+      const response = await window.LeatherProvider?.request(
+        "signPsbt",
+        signPsbtRequestParams
+      );
+
+      console.log("response", response);
+      if (response && response.result) {
+        console.log("response", response);
+
+        const signedTxHex = response.result.hex;
+
+        const finalizedTxHex = finalizePsbt(signedTxHex);
+
+        console.log("finalizedTxHex", finalizedTxHex);
+      }
     } catch (err) {
       console.error("Error building reclaim transaction", err);
     }
@@ -177,7 +288,7 @@ const ReclaimDeposit = () => {
             <InformationCircleIcon className="h-10 w-10 text-orange" />
             <p className="text-orange font-Matter font-semibold text-sm break-keep">
               Please note that deposit wont be able to be reclaimed till after
-              enough blocks have passed from It's locktime
+              enough blocks have passed from it's locktime
             </p>
           </div>
         </div>
