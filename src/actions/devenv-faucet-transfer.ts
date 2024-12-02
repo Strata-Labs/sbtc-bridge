@@ -11,7 +11,6 @@ import { ECPairFactory, ECPairAPI } from "ecpair";
 
 const ECPair: ECPairAPI = ECPairFactory(ecc);
 
-const bitcoindURL = env.BITCOIND_URL;
 const senderAddy = "miEJtNKa3ASpA19v5ZhvbKTEieYjLpzCYT";
 const network = bitcoin.networks.regtest;
 export const devenvFaucetTransfer = async (value: {
@@ -33,11 +32,10 @@ export const devenvFaucetTransfer = async (value: {
       network,
     });
 
-    const utxosRes = await rpcHandlerCore(
-      RpcMethods.scantxoutset,
-      ["start", [{ desc: `addr(${senderAddy})`, range: 10000 }]],
-      bitcoindURL,
-    );
+    const utxosRes = await rpcHandlerCore(RpcMethods.scantxoutset, [
+      "start",
+      [{ desc: `addr(${senderAddy})`, range: 10000 }],
+    ]);
     // console.log("utxosRes", utxosRes);
 
     if (utxosRes.unspent === 0)
@@ -47,11 +45,10 @@ export const devenvFaucetTransfer = async (value: {
     utxosRes.unspents.sort((a: any, b: any) => a.height - b.height);
     const inputs = [];
     for (const utxo of utxosRes.unspents) {
-      const rawTxHex = await rpcHandlerCore(
-        RpcMethods.getRawTransaction,
-        [utxo.txid, true],
-        bitcoindURL,
-      );
+      const rawTxHex = await rpcHandlerCore(RpcMethods.getRawTransaction, [
+        utxo.txid,
+        true,
+      ]);
       // console.log("TransferAction -> Raw Transaction Hex:", rawTxHex);
       inputs.push({
         txid: utxo.txid,
@@ -106,11 +103,9 @@ export const devenvFaucetTransfer = async (value: {
     // console.log("Signed Transaction Hex:", signedTx);
 
     // Send the transaction to the Bitcoin network
-    const txId = await rpcHandlerCore(
-      RpcMethods.sendRawTransaction,
-      [signedTx],
-      bitcoindURL,
-    );
+    const txId = await rpcHandlerCore(RpcMethods.sendRawTransaction, [
+      signedTx,
+    ]);
     // console.log("Transaction ID:", txId);
 
     return txId;

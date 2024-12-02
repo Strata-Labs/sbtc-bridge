@@ -3,7 +3,7 @@ import { env } from "@/env";
 import { NextRequest, NextResponse } from "next/server";
 import { rpcHandlerCore, RpcMethods } from "./rpc-handler-core";
 
-const { BITCOIND_URL, MEMPOOL_API_URL } = env;
+const { MEMPOOL_API_URL } = env;
 // Import your Bitcoin RPC logic
 
 export async function POST(req: NextRequest) {
@@ -17,11 +17,7 @@ export async function POST(req: NextRequest) {
       headers[key] = value;
     });
 
-    const res = await rpcHandlerCore(
-      RpcMethods.sendRawTransaction,
-      [body],
-      BITCOIND_URL,
-    );
+    const res = await rpcHandlerCore(RpcMethods.sendRawTransaction, [body]);
 
     return NextResponse.json(res);
   } catch (error) {
@@ -54,11 +50,7 @@ export async function GET(req: NextRequest) {
       }
       const args = ["start", [{ desc: `addr(${address})`, range: 10000 }]];
 
-      const result = await rpcHandlerCore(
-        RpcMethods.scantxoutset,
-        args,
-        BITCOIND_URL,
-      );
+      const result = await rpcHandlerCore(RpcMethods.scantxoutset, args);
 
       const utxos = result.unspents.map((utxo: any) => ({
         txid: utxo.txid,

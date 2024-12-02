@@ -1,8 +1,7 @@
 import "server-only";
 import { env } from "@/env";
 
-const rpcUser = env.BITCOIN_RPC_USER_NAME;
-const rpcPassword = env.BITCOIN_RPC_PASSWORD;
+const { BITCOIND_URL, BITCOIN_RPC_PASSWORD, BITCOIN_RPC_USER_NAME } = env;
 //  supported prc methods
 export enum RpcMethods {
   sendRawTransaction = "sendrawtransaction",
@@ -15,12 +14,14 @@ export type RpcRequestParams = any[];
 export const rpcHandlerCore = async (
   method: RpcMethods,
   params: RpcRequestParams,
-  bitcoinDUrl: string,
 ): Promise<any> => {
   const headers = {
     "Content-Type": "application/json",
     Authorization:
-      "Basic " + Buffer.from(`${rpcUser}:${rpcPassword}`).toString("base64"),
+      "Basic " +
+      Buffer.from(`${BITCOIN_RPC_USER_NAME}:${BITCOIN_RPC_PASSWORD}`).toString(
+        "base64",
+      ),
   };
 
   const body = JSON.stringify({
@@ -31,7 +32,7 @@ export const rpcHandlerCore = async (
   });
 
   try {
-    const response = await fetch(bitcoinDUrl, {
+    const response = await fetch(BITCOIND_URL, {
       method: "POST",
       headers: headers,
       body: body,
