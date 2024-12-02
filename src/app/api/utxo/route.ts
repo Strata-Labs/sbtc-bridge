@@ -11,14 +11,19 @@ export async function GET(req: NextRequest) {
       throw new Error("btcAddress is required");
     }
 
-    const url = `https://beta.sbtc-mempool.tech/api/proxy/address/${btcAddress}/utxo`;
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      "https://beta.sbtc-mempool.tech/api/bitcoind",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          rpcMethod: "scantxoutset",
+          params: ["start", [{ desc: `addr(${btcAddress})`, range: 10000 }]],
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error("Failed to fetch transaction details");
