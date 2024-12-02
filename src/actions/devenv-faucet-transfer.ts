@@ -3,7 +3,7 @@
 import {
   rpcHandlerCore,
   RpcMethods,
-} from "@/app/api/bitcoind/rpc-handler-core";
+} from "@/app/api/proxy/[...proxy]/rpc-handler-core";
 import { env } from "@/env";
 import * as bitcoin from "bitcoinjs-lib";
 import ecc from "@bitcoinerlab/secp256k1";

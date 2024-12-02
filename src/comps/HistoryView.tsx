@@ -4,8 +4,8 @@ import { useState } from "react";
 import { FlowContainer } from "./core/FlowContainer";
 import { FlowForm } from "./core/Form";
 import { Heading, SubText } from "./core/Heading";
-import { scanTxOutSet } from "@/util/bitcoinClient";
-import { HistoryTx, HistoryTxProps } from "./Status";
+import { AddressUtxos, scanTxOutSet } from "@/util/bitcoinClient";
+import { HistoryTx } from "./Status";
 import { useAtom } from "jotai";
 import { eventsAtom } from "@/util/atoms";
 import { NotificationStatusType } from "./Notifications";
@@ -13,7 +13,7 @@ import { NotificationStatusType } from "./Notifications";
 const HistoryView = () => {
   const [events, setEvents] = useAtom(eventsAtom);
 
-  const [history, setHistory] = useState<HistoryTxProps[]>([]);
+  const [history, setHistory] = useState<AddressUtxos[]>([]);
 
   const [totalBitcoinHeld, setTotalBitcoinHeld] = useState<number>(0);
 
@@ -25,7 +25,7 @@ const HistoryView = () => {
 
         const history = await scanTxOutSet(value);
         if (history) {
-          if (history.unspents === 0) {
+          if (history.length === 0) {
             //window.alert("No history found for this address");
 
             _events.push({
@@ -36,12 +36,12 @@ const HistoryView = () => {
 
             setEvents(_events);
           }
-          const totalBalance = history.unspents.reduce(
-            (acc: number, utxo: HistoryTxProps) => acc + utxo.amount,
-            0
+          const totalBalance = history.reduce(
+            (acc: number, utxo) => acc + utxo.value / 1e8,
+            0,
           );
 
-          setHistory(history.unspents);
+          setHistory(history);
           setTotalBitcoinHeld(totalBalance);
         } else {
           _events.push({
@@ -87,13 +87,11 @@ const HistoryView = () => {
       {history.map((tx, index) => {
         return (
           <HistoryTx
-            key={index}
+            key={tx.txid}
             txid={tx.txid}
             vout={tx.vout}
-            scriptPubKey={tx.scriptPubKey}
-            desc={tx.desc}
-            amount={tx.amount}
-            height={tx.height}
+            amount={tx.value / 1e8}
+            height={tx.status.block_height}
           />
         );
       })}

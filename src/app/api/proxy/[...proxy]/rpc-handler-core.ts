@@ -11,6 +11,7 @@ export enum RpcMethods {
 }
 
 export type RpcRequestParams = any[];
+
 export const rpcHandlerCore = async (
   method: RpcMethods,
   params: RpcRequestParams,
@@ -43,6 +44,8 @@ export const rpcHandlerCore = async (
     const data = await response.json();
     return data.result;
   } catch (err) {
+    // good for debugging
+    // eslint-disable-next-line no-console
     console.error(`rpcHandlerCore ${method} error:`, err);
     throw new Error(err instanceof Error ? err.message : String(err));
   }

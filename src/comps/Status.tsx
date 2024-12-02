@@ -6,43 +6,12 @@ import { Heading, SubText } from "./core/Heading";
 import { PrimaryButton } from "./core/FlowButtons";
 import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { getRawTransaction } from "@/util/bitcoinClient";
+import {
+  BitcoinTransactionResponse,
+  getRawTransaction,
+} from "@/util/bitcoinClient";
 import { useAtomValue } from "jotai";
 import { bridgeConfigAtom } from "@/util/atoms";
-
-type BitcoinTransactionResponse = {
-  txid: string;
-  hash: string;
-  size: number;
-  vsize: number;
-  weight: number;
-  version: number;
-  locktime: number;
-  vin: {
-    txid: string;
-    vout: number;
-    scriptSig: {
-      asm: string;
-      hex: string;
-    };
-    sequence: number;
-  }[];
-  vout: {
-    value: number;
-    n: number;
-    scriptPubKey: {
-      asm: string;
-      hex: string;
-      reqSigs: number;
-      type: string;
-      addresses: string[];
-    };
-  }[];
-  blockhash: string;
-  confirmations: number;
-  time: number;
-  blocktime: number;
-};
 
 type EmilyDepositResponse = {
   bitcoinTxid: string;
@@ -119,10 +88,10 @@ const Status = () => {
         let depositIndex = null;
         for (let i = 0; i < txInfo.vout.length; i++) {
           if (
-            txInfo.vout[i].scriptPubKey &&
-            txInfo.vout[i].scriptPubKey.type === "witness_v1_taproot"
+            txInfo.vout[i].scriptpubkey &&
+            txInfo.vout[i].scriptpubkey_type === "witness_v1_taproot"
           ) {
-            depositIndex = txInfo.vout[i].n;
+            depositIndex = i;
             break;
           }
         }
@@ -182,12 +151,6 @@ const Status = () => {
                     </p>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <SubText>Hash</SubText>
-                    <p className="text-black font-Matter font-semibold text-sm">
-                      {txDetails.hash}
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-1">
                     <SubText>Size</SubText>
                     <p className="text-black font-Matter font-semibold text-sm">
                       {txDetails.size}
@@ -215,22 +178,22 @@ const Status = () => {
                   <div className="flex flex-col gap-1">
                     <SubText>Blockhash</SubText>
                     <p className="text-black font-Matter break-all font-semibold text-sm">
-                      {txDetails.blockhash}
+                      {txDetails.status.block_hash}
                     </p>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <SubText>Confirmations</SubText>
+                    <SubText>Confirmed at Block</SubText>
                     <p className="text-black font-Matter break-all font-semibold text-sm">
-                      {txDetails.confirmations}
+                      {txDetails.status.block_height}
                     </p>
                   </div>
                   <div className="flex flex-col gap-1">
                     <SubText>Blocktime</SubText>
                     <p className="text-black font-Matter break-all font-semibold text-sm">
-                      {txDetails.blocktime}
+                      {txDetails.status.block_time}
                     </p>
                   </div>
-                  {
+                  {/* {
                     // vin
                     txDetails.vin.map((vin, index) => {
                       return (
@@ -247,11 +210,11 @@ const Status = () => {
                               {vin.sequence}
                             </p>
                           </div>
-                          {vin.scriptSig && vin.scriptSig.hex && (
+                          {vin.scriptsig && vin.scriptsig && (
                             <div className="flex flex-col gap-1">
                               <SubText>Value</SubText>
                               <p className="text-black font-Matter break-all font-semibold text-sm">
-                                {vin.scriptSig.hex}
+                                {vin.scriptsig}
                               </p>
                             </div>
                           )}
@@ -267,32 +230,19 @@ const Status = () => {
                           <div className="flex flex-col gap-1">
                             <SubText>v Out</SubText>
                             <p className="text-black font-Matter break-all font-semibold text-sm">
-                              {vout.n}
+                              {index}
                             </p>
                           </div>
                           <div className="flex flex-col gap-1">
                             <SubText>Script Pub Key</SubText>
                             <p className="text-black font-Matter break-all font-semibold text-sm">
-                              {vout.scriptPubKey.hex}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-col gap-1">
-                            <SubText>Script Pub Key reqSig</SubText>
-                            <p className="text-black font-Matter break-all font-semibold text-sm">
-                              {vout.scriptPubKey.reqSigs}
-                            </p>
-                          </div>
-                          <div className="flex flex-col gap-1">
-                            <SubText>Script Pub Key type</SubText>
-                            <p className="text-black font-Matter break-all font-semibold text-sm">
-                              {vout.scriptPubKey.type}
+                              {vout.scriptpubkey}
                             </p>
                           </div>
                         </div>
                       );
                     })
-                  }
+                  } */}
                 </div>
               </>
             </>
@@ -356,19 +306,10 @@ export default Status;
 export type HistoryTxProps = {
   txid: string;
   vout: number;
-  scriptPubKey: string;
-  desc: string;
   amount: number;
   height: number;
 };
-export const HistoryTx = ({
-  txid,
-  vout,
-  scriptPubKey,
-  desc,
-  amount,
-  height,
-}: HistoryTxProps) => {
+export const HistoryTx = ({ txid, vout, amount, height }: HistoryTxProps) => {
   // get the query params from the url
   const router = useRouter();
 
@@ -392,25 +333,7 @@ export const HistoryTx = ({
               {vout}
             </p>
           </div>
-          <div className="flex flex-col gap-1">
-            <SubText>Script Pub Key</SubText>
-            <p className="text-black font-Matter font-semibold text-sm">
-              {scriptPubKey}
-            </p>
-          </div>
 
-          <div className="flex flex-col gap-1">
-            <SubText>Desc</SubText>
-            <p className="text-black font-Matter break-all font-semibold text-sm">
-              {desc}
-            </p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <SubText>Desc</SubText>
-            <p className="text-black font-Matter break-all font-semibold text-sm">
-              {desc}
-            </p>
-          </div>
           <div className="flex flex-col gap-1">
             <SubText>Amount</SubText>
             <p className="text-black font-Matter break-all font-semibold text-sm">
