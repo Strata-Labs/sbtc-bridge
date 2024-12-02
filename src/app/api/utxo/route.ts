@@ -5,9 +5,9 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
 
     const btcAddress = searchParams.get("btcAddress");
-
+    const txId = searchParams.get("txId");
     // ensure that the btcAddress is not empty
-    if (!btcAddress) {
+    if (!btcAddress || txId) {
       throw new Error("btcAddress is required");
     }
 
