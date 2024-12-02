@@ -17,8 +17,6 @@ import { GetTestnetBTC } from "./get-testnet-btc";
 import { useAtomValue } from "jotai";
 import { useNotifications } from "@/hooks/use-notifications";
 import { NotificationStatusType } from "./Notifications";
-import { hexToUint8Array, uint8ArrayToHexString } from "@/util/regtest/wallet";
-import readOnlyHelper from "@/util/readOnlyHelper";
 
 // converting to lower case to avoid case sensitive issue
 
