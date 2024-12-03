@@ -372,6 +372,7 @@ const ReclaimDeposit = ({
       const unsignedTxHex = await constructPsbtForReclaim({
         depositAmount: amount * 1e8,
         feeAmount: maxReclaimFee,
+
         lockTime: depositTransaction.parameters.lockTime,
         depositScript: depositTransaction.depositScript,
         reclaimScript: depositTransaction.reclaimScript,
