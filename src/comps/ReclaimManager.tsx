@@ -21,6 +21,7 @@ enum RECLAIM_STEP {
   LOADING = "LOADING",
   NOT_FOUND = "NOT_FOUND",
   RECLAIM = "RECLAIM",
+  CANT_RECLAIM = "CANT_RECLAIM",
   CURRENT_STATUS = "CURRENT_STATUS",
 }
 
@@ -56,7 +57,7 @@ const ReclaimManager = () => {
 
   const { notify } = useNotifications();
 
-  const [step, _setStep] = useState<RECLAIM_STEP>(RECLAIM_STEP.NOT_FOUND);
+  const [step, _setStep] = useState<RECLAIM_STEP>(RECLAIM_STEP.LOADING);
 
   const [emilyDepositTransaction, setEmilyDepositTransaction] =
     useState<EmilyDepositTransactionType | null>(null);
@@ -139,7 +140,7 @@ const ReclaimManager = () => {
 
       setEmilyDepositTransaction(responseData);
 
-      //setStep(RECLAIM_STEP.RECLAIM);
+      setStep(RECLAIM_STEP.RECLAIM);
     } catch (err) {
       console.error("Error fetching deposit info from Emily", err);
       setStep(RECLAIM_STEP.NOT_FOUND);
@@ -195,6 +196,26 @@ const NotFound = () => {
   );
 };
 
+const CantReclaim = () => {
+  return (
+    <FlowContainer>
+      <>
+        <div className="w-full flex flex-row items-center justify-between">
+          <Heading>Can't Reclaim Deposit</Heading>
+        </div>
+        <div className="flex flex-1 ">
+          <div className="w-full p-4 bg-lightOrange h-24 rounded-lg flex flex-row items-center justify-center gap-2">
+            <InformationCircleIcon className="h-10 w-10 text-orange" />
+            <p className="text-orange font-Matter font-semibold text-sm break-keep">
+              This deposit can't be reclaimed since it's been minted for sBTC
+              and deposited into the Stacks chain.
+            </p>
+          </div>
+        </div>
+      </>
+    </FlowContainer>
+  );
+};
 type ReclaimDepositProps = {
   amount: number;
   depositTransaction: EmilyDepositTransactionType;
@@ -342,6 +363,11 @@ const CurrentStatusReclaim = () => {
       <>
         <div className="w-full flex flex-row items-center justify-between">
           <Heading>Review Reclaim Transaction</Heading>
+        </div>
+        <div className="flex flex-col  gap-2">
+          <div className="flex flex-col gap-1">
+            <SubText>Amount selected to Reclaim</SubText>
+          </div>
         </div>
       </>
     </FlowLoaderContainer>
