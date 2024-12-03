@@ -67,6 +67,7 @@ export async function GET(req: NextRequest) {
       const utxos = result.unspents.map((utxo: any) => ({
         txid: utxo.txid,
         vout: utxo.vout,
+        scriptPubKey: utxo.scriptPubKey,
         status: {
           confirmed: true,
           block_height: utxo.height, // Use the height from the main RPC result

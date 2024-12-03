@@ -16,7 +16,7 @@ export const bridgeConfigAtom = atom<BridgeConfig>({
   BANNER_CONTENT: undefined,
   RECLAIM_LOCK_TIME: undefined,
 });
-export const depositMaxFeeAtom = atom(80000);
+export const depositMaxFeeAtom = atom(5000);
 
 export enum ENV {
   MAINNET = "MAINNET",
@@ -33,17 +33,25 @@ export enum WalletProvider {
   LEATHER = "leather",
   XVERSE = "xverse",
 }
+
+type Address = {
+  address: string;
+  publicKey: string;
+};
+
 export const walletInfoAtom = atomWithStorage<{
   selectedWallet: WalletProvider | null;
   addresses: {
     // can't call this p2wpkh because xverse sometimes uses segwit rather than native segwit
-    payment: string | null;
-    taproot: string | null;
+    payment: Address | null;
+    taproot: Address | null;
+    stacks: Address | null;
   };
-}>("walletInfo", {
+}>("walletInfoV2", {
   selectedWallet: null,
   addresses: {
     payment: null,
     taproot: null,
+    stacks: null,
   },
 });

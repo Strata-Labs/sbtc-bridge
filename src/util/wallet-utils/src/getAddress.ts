@@ -6,9 +6,20 @@ import { getLeatherBTCProviderOrThrow } from "./util/btc-provider";
 
 type Results = {
   /** @description payment address can be native segwit or segwit */
-  payment: string;
+  payment: {
+    address: string;
+    publicKey: string;
+  };
   /** @description taproot address */
-  taproot: string;
+  taproot: {
+    address: string;
+    publicKey: string;
+  };
+  /** @description stacks address */
+  stacks: {
+    address: string;
+    publicKey: string;
+  };
 };
 
 type getAddresses = (params?: {
@@ -19,22 +30,37 @@ type getAddresses = (params?: {
 const getAddressByPurpose = (
   response: RpcSuccessResponse<"wallet_connect">["result"],
   purpose: AddressPurpose,
-) => response.addresses.find((item) => item.purpose === purpose)?.address;
+) => response.addresses.find((item) => item.purpose === purpose);
 
 export function getWalletAddresses(
   response: RpcSuccessResponse<"wallet_connect">["result"],
 ) {
-  let taproot = getAddressByPurpose(response, AddressPurpose.Ordinals);
+  const taproot = getAddressByPurpose(response, AddressPurpose.Ordinals);
   if (!taproot) {
     throw new Error("Taproot address not found");
   }
-  let payment = getAddressByPurpose(response, AddressPurpose.Payment);
+  const payment = getAddressByPurpose(response, AddressPurpose.Payment);
   if (!payment) {
     throw new Error("Payment address not found");
   }
+
+  const stacks = getAddressByPurpose(response, AddressPurpose.Stacks);
+  if (!stacks) {
+    throw new Error("Stacks address not found");
+  }
   return {
-    taproot,
-    payment,
+    taproot: {
+      address: taproot.address,
+      publicKey: taproot.publicKey,
+    },
+    payment: {
+      address: payment.address,
+      publicKey: payment.publicKey,
+    },
+    stacks: {
+      address: stacks.address,
+      publicKey: stacks.publicKey,
+    },
   };
 }
 
@@ -59,9 +85,13 @@ const extractAddressByType = (
   addresses: Address[],
   addressType: BtcAddress["type"],
 ) => {
-  return addresses.find(
+  const addressInfo = addresses.find(
     (address) => address.symbol === "BTC" && address.type === addressType,
-  )?.address;
+  )!;
+  return {
+    address: addressInfo.address,
+    publicKey: addressInfo.publicKey,
+  };
 };
 /**
  * @name getAddressesLeather
@@ -74,9 +104,12 @@ export const getAddressesLeather: getAddresses = async () => {
   const { addresses } = response.result;
   const payment = extractAddressByType(addresses, "p2wpkh")!;
   const taproot = extractAddressByType(addresses, "p2tr")!;
-
+  const stacks = addresses.find(
+    (address) => address.symbol === "STX" && address.type === "p2wpkh",
+  )!;
   return {
     payment,
     taproot,
+    stacks,
   };
 };

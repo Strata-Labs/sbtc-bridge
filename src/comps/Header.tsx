@@ -34,6 +34,7 @@ const Header = () => {
       addresses: {
         payment: null,
         taproot: null,
+        stacks: null,
       },
     });
     notify({

@@ -58,6 +58,7 @@ interface Status {
 export interface AddressUtxos {
   txid: string;
   vout: number;
+  scriptPubKey: string;
   status: Status;
   value: number;
 }

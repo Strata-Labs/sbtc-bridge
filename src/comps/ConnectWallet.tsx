@@ -44,10 +44,8 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
   const { WALLET_NETWORK } = useAtomValue(bridgeConfigAtom);
   const handleSelectWallet = async (wallet: WalletProvider) => {
     try {
-      let addresses = {
-        payment: "",
-        taproot: "",
-      };
+      let addresses: Awaited<ReturnType<typeof getAddressesLeather>> | null =
+        null;
       switch (wallet) {
         case WalletProvider.LEATHER:
           addresses = await getAddressesLeather();
@@ -56,7 +54,10 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
           addresses = await getAddressesXverse();
       }
 
-      if (WALLET_NETWORK !== "mainnet" && addresses.payment.startsWith("bc1")) {
+      if (
+        WALLET_NETWORK !== "mainnet" &&
+        addresses.payment.address.startsWith("bc1")
+      ) {
         throw new Error(`Please switch to ${WALLET_NETWORK} network`);
       }
 
