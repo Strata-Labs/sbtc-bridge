@@ -65,7 +65,7 @@ const fetchUtxosForReclaim = async (address: string) => {
 
 export const selectCoins = (
   utxos: Utxo[],
-  requiredAmount: number
+  requiredAmount: number,
 ): SelectUtxos => {
   // Sort UTXOs by amount
   const sortedUtxos = utxos.sort((a, b) => a.amount - b.amount);
@@ -92,7 +92,7 @@ export const selectCoins = (
 
 export const constructUtxoInputForFee = async (
   feeAmount: number,
-  address: string
+  address: string,
 ) => {
   try {
     // get utxo
@@ -108,7 +108,7 @@ export const constructUtxoInputForFee = async (
 
 const createControlBlock = (
   internalPubKey: Uint8Array,
-  siblingHash: Uint8Array
+  siblingHash: Uint8Array,
 ): Uint8Array => {
   if (internalPubKey.length !== 32) {
     throw new Error("Invalid internal public key: Must be 32 bytes.");
@@ -117,7 +117,7 @@ const createControlBlock = (
   const versionByte = new Uint8Array([0xc0]);
 
   const controlBlock = new Uint8Array(
-    versionByte.length + internalPubKey.length + siblingHash.length
+    versionByte.length + internalPubKey.length + siblingHash.length,
   );
 
   controlBlock.set(versionByte, 0);
@@ -135,7 +135,17 @@ export const finalizePsbt = (psbtHex: string) => {
 
     const psbt = bitcoin.Psbt.fromHex(psbtHex, { network });
     //psbt.validateSignaturesOfAllInputs();
+    //psbt.finalizeInput(0);
     psbt.finalizeInput(1);
+    //psbt.finalizeAllInputs();
+
+    console.log("finalizePsbt - psbt", psbt);
+    console.log("hex", psbt.extractTransaction().toHex());
+
+    console.log(
+      "test asm",
+      bitcoin.script.toASM(psbt.data.inputs[0].finalScriptWitness!),
+    );
 
     return psbt.extractTransaction().toHex();
   } catch (err) {
@@ -166,8 +176,11 @@ export const constructPsbtForReclaim = ({
   selectedUtxos,
   bitcoinReturnAddress,
 }: ReclaimDepositProps) => {
+  console.log("reclaimScript", reclaimScript);
   const uInt8DepositScript = hexToUint8Array(depositScript);
   const uInt8ReclaimScript = hexToUint8Array(reclaimScript);
+
+  console.log("uInt8ReclaimScript", uInt8ReclaimScript);
 
   console.log("amount", amount);
   const scriptTree: Taptree = [
@@ -192,6 +205,10 @@ export const constructPsbtForReclaim = ({
   const merkleRootHash = merkleeTree.hash;
   console.log("merkleRootHash", merkleRootHash);
 
+  // convert merkleRootHash to hex
+  const merkleRootHashHex = uint8ArrayToHexString(merkleRootHash);
+  console.log("merkleRootHashHex", merkleRootHashHex);
+
   const siblingHash = bip341.tapleafHash({ output: uInt8DepositScript });
   console.log("siblingHash", siblingHash);
 
@@ -202,7 +219,7 @@ export const constructPsbtForReclaim = ({
   console.log("reclaimTapScriptLeaf", reclaimTapScriptLeaf);
   const controlBlock = createControlBlock(
     hexToUint8Array(pubkey),
-    reclaimTapScriptLeaf
+    reclaimTapScriptLeaf,
   );
   console.log("controlBlock", controlBlock);
 
@@ -226,6 +243,7 @@ export const constructPsbtForReclaim = ({
   // };
 
   // console.log("paramsTest", paramsTest);
+  // send bitcoin to your self
 
   const p2trRes = bitcoin.payments.p2tr({
     internalPubkey: NUMS_X_COORDINATE,
@@ -236,8 +254,12 @@ export const constructPsbtForReclaim = ({
     },
     network: network,
   });
+
   console.log("p2trRes", p2trRes);
   console.log("p2trRes output", p2trRes.output);
+
+  console.log(uint8ArrayToHexString(p2trRes.output!));
+
   console.log("p2trRes redeem", p2trRes.redeem);
   console.log("witness", p2trRes.witness);
   if (!p2trRes.output || !p2trRes.redeem) {
@@ -248,30 +270,58 @@ export const constructPsbtForReclaim = ({
     bitcoin.opcodes.OP_1,
     merkleeTree.hash,
   ]);
+
+  const wtfisgoingOn = bitcoin.script.compile([
+    0x51,
+    bitcoin.opcodes.OP_CHECKSEQUENCEVERIFY,
+  ]);
+
+  console.log("wtfisgoingOn", wtfisgoingOn);
+
+  const test4 = bitcoin.script.compile([81, 178]);
+  console.log("pretest4", test4);
+
+  console.log("test4", bitcoin.script.toASM(test4));
+
   console.log("taprootOutputScript", taprootOutputScript);
 
   // ensure the taproot output script is correct
   console.log("test", bitcoin.script.toASM(taprootOutputScript));
 
-  console.log("test2", bitcoin.script.toASM(p2trRes.output));
+  console.log("test2", bitcoin.script.toASM(p2trRes.witness!));
+
+  console.log("control", p2trRes.witness![1]);
 
   const tapLeafScript = {
     leafVersion: p2trRes.redeemVersion || 192,
-    script: p2trRes.output,
+    script: uInt8ReclaimScript,
     controlBlock: p2trRes.witness![1],
   };
 
+  console.log("tapLeafScript", tapLeafScript);
+
   console.log("second test", p2trRes.witness![1]);
   console.log("controlBlock", controlBlock);
+
+  // apend array of uint8array in p2trRes.witness! to a single uint8array
+
   psbt.addInput({
     hash: txId,
     index: vout,
     witnessUtxo: {
-      script: p2trRes.output,
+      script: test4,
       value: BigInt(0),
     },
     tapLeafScript: [tapLeafScript],
   });
+
+  console.log("psbt post add input", psbt);
+
+  console.log(uint8ArrayToHexString(psbt.data.inputs[0].witnessUtxo?.script!));
+  console.log(
+    "one more test",
+    bitcoin.script.toASM(psbt.data.inputs[0].witnessUtxo?.script!),
+  );
 
   const leafIndexFinalizerFn = buildLeafIndexFinalizer(tapLeafScript, 0);
 
@@ -299,6 +349,7 @@ export const constructPsbtForReclaim = ({
 
   console.log("change", change);
   if (change > 0) {
+    console.log("addOutput", change);
     psbt.addOutput({
       address: bitcoinReturnAddress,
       value: BigInt(change),

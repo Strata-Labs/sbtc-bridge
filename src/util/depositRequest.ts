@@ -76,34 +76,12 @@ export const createReclaimScript = (
   // Encode lockTime using bitcoin.script.number.encode (ensure minimal encoding)
   const lockTimeEncoded = script.number.encode(lockTime);
 
-  // Combine the script elements into a single Uint8Array
-  const lockTimeArray = new Uint8Array(lockTimeEncoded);
-  const opCheckSequenceVerify = new Uint8Array([
-    opcodes.OP_CHECKSEQUENCEVERIFY,
-  ]);
-
-  // Calculate total length of the final Uint8Array
-  const totalLength =
-    lockTimeArray.length +
-    opCheckSequenceVerify.length +
-    additionalScriptBytes.length;
-
-  // Create the combined Uint8Array to hold the script
-  const reclaimScript = new Uint8Array(totalLength);
-
-  // Set each part of the script
-  reclaimScript.set(lockTimeArray, 0);
-  reclaimScript.set(opCheckSequenceVerify, lockTimeArray.length);
-  reclaimScript.set(
-    additionalScriptBytes,
-    lockTimeArray.length + opCheckSequenceVerify.length,
-  ); // Append additional script
-
   // Return the combined Uint8Array
   const buildScript = script.compile([
-    lockTimeArray,
+    lockTimeEncoded,
     opcodes.OP_CHECKSEQUENCEVERIFY,
   ]);
+
   return buildScript;
 };
 
