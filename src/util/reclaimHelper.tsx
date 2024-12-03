@@ -69,6 +69,7 @@ export const constructPsbtForReclaim = ({
 
   bitcoinReturnAddress,
 }: ReclaimDepositProps) => {
+  console.log("reclaimScript", reclaimScript);
   const uInt8DepositScript = hexToUint8Array(depositScript);
   const uInt8ReclaimScript = hexToUint8Array(reclaimScript);
 
@@ -128,6 +129,7 @@ export const constructPsbtForReclaim = ({
   });
 
   const leafIndexFinalizerFn = buildLeafIndexFinalizer(tapLeafScript, lockTime);
+
   psbt.finalizeInput(0, leafIndexFinalizerFn);
 
   // Add the fee payer inputs
@@ -140,7 +142,6 @@ export const constructPsbtForReclaim = ({
   });
 
   const psbtHex = psbt.toHex();
-  const base64 = psbt.toBase64();
 
   return psbtHex;
 };
