@@ -126,7 +126,7 @@ const ReclaimManager = () => {
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
       if (!response.ok) {
         throw new Error("Error with the request");
@@ -140,7 +140,9 @@ const ReclaimManager = () => {
 
       setEmilyDepositTransaction(responseData);
 
-      setStep(RECLAIM_STEP.RECLAIM);
+      const emilyRes = responseData as EmilyDepositTransactionType;
+
+      if (emilyRes.status === "pending") setStep(RECLAIM_STEP.RECLAIM);
     } catch (err) {
       console.error("Error fetching deposit info from Emily", err);
       setStep(RECLAIM_STEP.NOT_FOUND);
@@ -235,10 +237,11 @@ const ReclaimDeposit = ({
 }: ReclaimDepositProps) => {
   const { notify } = useNotifications();
 
-  const { SIGNER_AGGREGATE_KEY: signerPubKey, WALLET_NETWORK: walletNetwork } =
-    useAtomValue(bridgeConfigAtom);
+  const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
 
-  const userData = useAtomValue(userDataAtom);
+  const signerPubKey =
+    "4ea6e657117bc8168254b8943e55a65997c71b3994e1e2915002a9da0c22ee1e";
+  //const userData = useAtomValue(userDataAtom);
 
   const getUserBtcAddress = () => {
     return "bcrt1q728h29ejjttmkupwdkyu2x4zcmkuc3q29gvwaa";
@@ -246,17 +249,17 @@ const ReclaimDeposit = ({
   const buildReclaimTransaction = async () => {
     try {
       // ensure userData is not empty
-      if (!userData) {
-        notify({
-          type: NotificationStatusType.ERROR,
-          message: "Wallet not Connected",
-        });
-        return;
-      }
+      // if (!userData) {
+      //   notify({
+      //     type: NotificationStatusType.ERROR,
+      //     message: "Wallet not Connected",
+      //   });
+      //   return;
+      // }
 
-      console.log("userData", userData);
+      //console.log("userData", userData);
       // fetch utxo to covert maxFee
-      const maxReclaimFee = 80000;
+      const maxReclaimFee = 400000;
 
       const btcAddress = getUserBtcAddress();
 
@@ -283,13 +286,13 @@ const ReclaimDeposit = ({
         hex: unsignedTxHex,
         allowedSighash: [SignatureHash.DEFAULT],
         network: walletNetwork,
-
-        broadcast: true,
+        //signAtIndex: [0, 1],
+        broadcast: false,
       };
 
       const response = await window.LeatherProvider?.request(
         "signPsbt",
-        signPsbtRequestParams
+        signPsbtRequestParams,
       );
 
       console.log("response", response);
