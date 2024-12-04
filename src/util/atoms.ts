@@ -47,7 +47,7 @@ export const walletInfoAtom = atomWithStorage<{
     taproot: Address | null;
     stacks: Address | null;
   };
-}>("walletInfoV2", {
+}>("walletInfoV3", {
   selectedWallet: null,
   addresses: {
     payment: null,

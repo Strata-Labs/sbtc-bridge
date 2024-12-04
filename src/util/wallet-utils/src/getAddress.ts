@@ -104,9 +104,7 @@ export const getAddressesLeather: getAddresses = async () => {
   const { addresses } = response.result;
   const payment = extractAddressByType(addresses, "p2wpkh")!;
   const taproot = extractAddressByType(addresses, "p2tr")!;
-  const stacks = addresses.find(
-    (address) => address.symbol === "STX" && address.type === "p2wpkh",
-  )!;
+  const stacks = addresses.find((address) => address.symbol === "STX")!;
   return {
     payment,
     taproot,
