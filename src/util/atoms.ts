@@ -33,17 +33,25 @@ export enum WalletProvider {
   LEATHER = "leather",
   XVERSE = "xverse",
 }
+
+type Address = {
+  address: string;
+  publicKey: string;
+};
+
 export const walletInfoAtom = atomWithStorage<{
   selectedWallet: WalletProvider | null;
   addresses: {
     // can't call this p2wpkh because xverse sometimes uses segwit rather than native segwit
-    payment: string | null;
-    taproot: string | null;
+    payment: Address | null;
+    taproot: Address | null;
+    stacks: Address | null;
   };
-}>("walletInfo", {
+}>("walletInfoV3", {
   selectedWallet: null,
   addresses: {
     payment: null,
     taproot: null,
+    stacks: null,
   },
 });
