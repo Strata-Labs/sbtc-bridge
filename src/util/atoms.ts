@@ -16,7 +16,7 @@ export const bridgeConfigAtom = atom<BridgeConfig>({
   BANNER_CONTENT: undefined,
   RECLAIM_LOCK_TIME: undefined,
 });
-export const depositMaxFeeAtom = atom(5000);
+export const depositMaxFeeAtom = atom(80000);
 
 export enum ENV {
   MAINNET = "MAINNET",
