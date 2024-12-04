@@ -21,8 +21,8 @@ export default function SBTCBalance({ address }: { address: string }) {
   });
   return (
     <div className="flex flex-col items-center justify-center">
-      <div className="text-center font-bold text-darkGray">
-        {data !== undefined ? Number(data) / 1e8 : "..."} sBTC
+      <div className="text-center font-bold text-darkGray font-Matter text-sm">
+        Balance: {data !== undefined ? Number(data) / 1e8 : "..."} sBTC
       </div>
     </div>
   );
