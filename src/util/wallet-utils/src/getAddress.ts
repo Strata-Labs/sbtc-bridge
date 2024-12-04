@@ -22,7 +22,7 @@ type Results = {
   };
 };
 
-type getAddresses = (params?: {
+export type getAddresses = (params?: {
   message?: string;
   network?: DefaultNetworkConfigurations;
 }) => Promise<Results>;

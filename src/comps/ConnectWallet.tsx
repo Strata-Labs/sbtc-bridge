@@ -12,6 +12,7 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { useNotifications } from "@/hooks/use-notifications";
 import { NotificationStatusType } from "./Notifications";
 import { useEffect, useState } from "react";
+import { getAddresses } from "@/util/wallet-utils/src/getAddress";
 
 const WALLET_PROVIDERS = [
   {
@@ -44,8 +45,7 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
   const { WALLET_NETWORK } = useAtomValue(bridgeConfigAtom);
   const handleSelectWallet = async (wallet: WalletProvider) => {
     try {
-      let addresses: Awaited<ReturnType<typeof getAddressesLeather>> | null =
-        null;
+      let addresses: Awaited<ReturnType<getAddresses>> | null = null;
       switch (wallet) {
         case WalletProvider.LEATHER:
           addresses = await getAddressesLeather();
