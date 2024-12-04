@@ -1,45 +1,36 @@
 "use client";
-import { eventsAtom } from "@/util/atoms";
-import { useSetAtom } from "jotai";
+import { walletInfoAtom } from "@/util/atoms";
+import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { NotificationStatusType } from "./Notifications";
 import { getHiroTestnetBtc } from "@/actions/get-testnet-btc";
+import { useNotifications } from "@/hooks/use-notifications";
 
 export function GetTestnetBTC() {
   const [isLoading, setIsLoading] = useState(false);
-  const setEvents = useSetAtom(eventsAtom);
+  const { notify } = useNotifications();
+  const { addresses } = useAtomValue(walletInfoAtom);
   const notifyError = (message: string) => {
-    setEvents([
-      {
-        id: "1",
-        type: NotificationStatusType.ERROR,
-        title: message,
-      },
-    ]);
+    notify({
+      type: NotificationStatusType.ERROR,
+      message,
+    });
   };
 
   const notifySuccess = (message: string) => {
-    setEvents([
-      {
-        id: "1",
-        type: NotificationStatusType.SUCCESS,
-        title: message,
-      },
-    ]);
+    notify({
+      type: NotificationStatusType.SUCCESS,
+      message,
+    });
   };
   const getTestnetBtc = async () => {
     setIsLoading(true);
     let address = "";
     try {
-      const res = await window.LeatherProvider?.request("getAddresses");
-      const nativeSegwit = res?.result.addresses.find((address) => {
-        return address.type === "p2wpkh";
-      });
-
-      if (!nativeSegwit) {
+      if (!addresses.payment) {
         return notifyError(`No native segwit address found`);
       }
-      address = nativeSegwit.address;
+      address = addresses.payment.address;
     } catch (error) {
       setIsLoading(false);
 
@@ -52,10 +43,6 @@ export function GetTestnetBTC() {
       notifyError(`Error sending BTC`);
       setIsLoading(false);
     }
-
-    // clear notifications after 5 seconds
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    setEvents([]);
   };
 
   return (
