@@ -4,18 +4,9 @@ import { FlowContainer } from "./core/FlowContainer";
 import { FlowFormDynamic, NameKeysInfo } from "./core/Form";
 import { Heading, SubText } from "./core/Heading";
 import Header from "./Header";
-import { useEffect } from "react";
-
-import { useSetAtom } from "jotai";
-import { bridgeConfigAtom } from "@/util/atoms";
-import getSbtcBridgeConfig from "@/actions/get-sbtc-bridge-config";
 import { devenvFaucetTransfer } from "@/actions/devenv-faucet-transfer";
 
 const TransferApp = () => {
-  const setConfig = useSetAtom(bridgeConfigAtom);
-  useEffect(() => {
-    getSbtcBridgeConfig().then(setConfig);
-  }, [setConfig]);
   return (
     <>
       <Header />

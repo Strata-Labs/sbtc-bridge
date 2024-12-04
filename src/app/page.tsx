@@ -1,8 +1,7 @@
-import getSbtcBridgeConfig from "@/actions/get-sbtc-bridge-config";
+"use server";
+
 import HomeApp from "@/comps/HomeApp";
 
 export default async function Home() {
-  const sBTCBridgeConfig = await getSbtcBridgeConfig();
-  return <HomeApp config={sBTCBridgeConfig} />;
+  return <HomeApp />;
 }
-export const dynamic = "force-dynamic";
