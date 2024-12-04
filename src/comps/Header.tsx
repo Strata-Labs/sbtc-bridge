@@ -17,6 +17,7 @@ import { GetTestnetBTC } from "./get-testnet-btc";
 import { useAtomValue } from "jotai";
 import { useNotifications } from "@/hooks/use-notifications";
 import { NotificationStatusType } from "./Notifications";
+import SBTCBalance from "./ui/sbtc-balance";
 
 // converting to lower case to avoid case sensitive issue
 
@@ -51,6 +52,7 @@ const Header = () => {
     return (
       <>
         {isTestnet && <GetTestnetBTC />}
+        <SBTCBalance address={walletInfo.addresses.stacks!.address} />
         <button
           onClick={() => handleSignOut()}
           className="px-4 py-2 rounded-md border-2 border-orange"
