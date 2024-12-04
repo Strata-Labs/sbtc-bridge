@@ -18,6 +18,7 @@ import { useAtomValue } from "jotai";
 import { useNotifications } from "@/hooks/use-notifications";
 import { NotificationStatusType } from "./Notifications";
 import SBTCBalance from "./ui/sbtc-balance";
+import Metrics from "./ui/metrics";
 
 // converting to lower case to avoid case sensitive issue
 
@@ -110,6 +111,8 @@ const Header = () => {
           </div>
         </div>
       </header>
+      <Metrics />
+
       <AnimatePresence>
         {showConnectWallet && (
           <ConnectWallet onClose={() => setShowConnectWallet(false)} />
