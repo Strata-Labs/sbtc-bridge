@@ -76,11 +76,15 @@ type DepositFlowAmountProps = DepositFlowStepProps & {
 };
 const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
   const { currentCap, isWithinDepositLimits, isLoading } = useMintCaps();
+  const minDepositAmount = 100_000 / 1e8;
   const validationSchema = yup.object({
     amount: yup
       .number()
       // dust amount is in sats
-      .min(10_000 / 1e8, `Minimum deposit amount is ${10_000 / 1e8} BTC`)
+      .min(
+        minDepositAmount,
+        `Minimum deposit amount is ${minDepositAmount} BTC`,
+      )
       .max(currentCap, `Current deposit cap is ${currentCap / 1e8} BTC`)
       .required(),
   });
