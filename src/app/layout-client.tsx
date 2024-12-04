@@ -1,18 +1,23 @@
 "use client";
 
 import { Provider } from "jotai";
-import { store } from "@/util/atoms";
+import { BridgeConfig, store } from "@/util/atoms";
 
 import RenderNotifications from "@/comps/RenderNotifications";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/query/client";
 import { Suspense } from "react";
+import { bridgeConfigAtom } from "@/util/atoms";
 
 export default function LayoutClient({
   children,
+  config,
 }: Readonly<{
   children: React.ReactNode;
+  config: BridgeConfig;
 }>) {
+  store.set(bridgeConfigAtom, config);
+
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>

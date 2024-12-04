@@ -5,10 +5,6 @@ import Header from "@/comps/Header";
 import { SECTION } from "@/comps/HomeApp";
 import { SectionAction } from "@/comps/HomeSelectedHeader";
 import Status from "./Status";
-import getSbtcBridgeConfig from "@/actions/get-sbtc-bridge-config";
-import { useEffect } from "react";
-import { useSetAtom } from "jotai";
-import { bridgeConfigAtom } from "@/util/atoms";
 
 type SECTION_DATA = {
   title: string;
@@ -19,10 +15,7 @@ sectionsMap.set(SECTION.STATUS, { title: "Status" });
 
 const StatusApp = () => {
   const selectedSectionData = sectionsMap.get(SECTION.STATUS);
-  const setConfig = useSetAtom(bridgeConfigAtom);
-  useEffect(() => {
-    getSbtcBridgeConfig().then(setConfig);
-  }, [setConfig]);
+
   if (selectedSectionData === undefined) {
     return null;
   }

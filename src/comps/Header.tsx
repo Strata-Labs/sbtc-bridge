@@ -66,59 +66,61 @@ const Header = () => {
     );
   };
   return (
-    <>
-      {bridgeConfig.BANNER_CONTENT && (
-        <div className="w-screen bg-[#F26969] text-white text-center py-2">
-          {bridgeConfig.BANNER_CONTENT}
-        </div>
-      )}
-      <header className="w-screen py-6 flex items-center justify-center">
-        <div
-          style={{
-            maxWidth: "1200px",
-          }}
-          className="flex-1 px-4 flex-row flex items-center justify-between"
-        >
-          <Link href="/">
-            <div className="">
-              <Image
-                src="/images/StacksNav.svg"
-                alt="Stacks Logo"
-                width={100}
-                height={100}
-              />
-            </div>
-          </Link>
-          <div className="flex flex-row gap-10 items-center">
-            {/* <h5 className="font-Matter text-xs text-black tracking-wide ">
+    bridgeConfig.WALLET_NETWORK && (
+      <>
+        {bridgeConfig.BANNER_CONTENT && (
+          <div className="w-screen bg-[#F26969] text-white text-center py-2">
+            {bridgeConfig.BANNER_CONTENT}
+          </div>
+        )}
+        <header className="w-screen py-6 flex items-center justify-center">
+          <div
+            style={{
+              maxWidth: "1200px",
+            }}
+            className="flex-1 px-4 flex-row flex items-center justify-between"
+          >
+            <Link href="/">
+              <div className="">
+                <Image
+                  src="/images/StacksNav.svg"
+                  alt="Stacks Logo"
+                  width={100}
+                  height={100}
+                />
+              </div>
+            </Link>
+            <div className="flex flex-row gap-10 items-center">
+              {/* <h5 className="font-Matter text-xs text-black tracking-wide ">
               LEARN MORE
             </h5>
             <h4 className="font-Matter text-xs text-black tracking-wide ">
               HISTORY
             </h4> */}
-            {isConnected ? (
-              renderUserWalletInfo()
-            ) : (
-              <button
-                onClick={() => setShowConnectWallet(true)}
-                className=" bg-orange  px-4 py-2 rounded-md"
-              >
-                <h3 className="font-Matter text-xs font-semibold tracking-wide">
-                  CONNECT WALLET
-                </h3>
-              </button>
-            )}
+              {isConnected ? (
+                renderUserWalletInfo()
+              ) : (
+                <button
+                  onClick={() => setShowConnectWallet(true)}
+                  className=" bg-orange  px-4 py-2 rounded-md"
+                >
+                  <h3 className="font-Matter text-xs font-semibold tracking-wide">
+                    CONNECT WALLET
+                  </h3>
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-      </header>
-      <Metrics />
+        </header>
+        <Metrics />
 
-      <AnimatePresence>
-        {showConnectWallet && (
-          <ConnectWallet onClose={() => setShowConnectWallet(false)} />
-        )}
-      </AnimatePresence>
-    </>
+        <AnimatePresence>
+          {showConnectWallet && (
+            <ConnectWallet onClose={() => setShowConnectWallet(false)} />
+          )}
+        </AnimatePresence>
+      </>
+    )
   );
 };
 
