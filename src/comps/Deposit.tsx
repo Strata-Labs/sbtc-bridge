@@ -76,18 +76,23 @@ type DepositFlowAmountProps = DepositFlowStepProps & {
 };
 const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
   const { currentCap, isWithinDepositLimits, isLoading } = useMintCaps();
+  const minDepositAmount = 100_000 / 1e8;
   const validationSchema = yup.object({
     amount: yup
       .number()
       // dust amount is in sats
-      .min(10_000, `Minimum deposit amount is 10,000 sats`)
-      .max(currentCap, `Current deposit cap is ${currentCap} sats`)
+      .min(
+        minDepositAmount,
+        `Minimum deposit amount is ${minDepositAmount} BTC`,
+      )
+      .max(currentCap, `Current deposit cap is ${currentCap / 1e8} BTC`)
       .required(),
   });
   const handleSubmit = async (value: string | undefined) => {
     if (value) {
-      if (await isWithinDepositLimits(Number(value))) {
-        setAmount(Number(value));
+      const sats = Number(value) * 1e8;
+      if (await isWithinDepositLimits(sats)) {
+        setAmount(Number(sats));
         setStep(DEPOSIT_STEP.ADDRESS);
       }
     }
@@ -344,7 +349,7 @@ const DepositFlowConfirm = ({
           <div className="flex flex-col gap-1">
             <SubText>Amount selected to Transfer</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {amount} sats
+              {amount / 1e8} BTC
             </p>
           </div>
           <div className="flex flex-col gap-1">
@@ -398,7 +403,7 @@ const DepositFlowReview = ({
           <div className="flex flex-col gap-1">
             <SubText>Amount selected to Transfer</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {amount} sats
+              {amount / 1e8} BTC
             </p>
           </div>
           <div className="flex flex-col gap-1">
