@@ -110,7 +110,7 @@ const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
           placeholder={
             currentCap <= 0
               ? "Mint cap reached!"
-              : "BTC amount to transfer (in sats)"
+              : "BTC amount to transfer (e.g. 0.01)"
           }
           disabled={isLoading || currentCap <= 0}
           handleSubmit={(value) => handleSubmit(value)}
