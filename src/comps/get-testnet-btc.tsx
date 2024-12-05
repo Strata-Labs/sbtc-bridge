@@ -40,7 +40,7 @@ export function GetTestnetBTC() {
       await getHiroTestnetBtc(address);
       notifySuccess(`0.5 BTC has been sent to your wallet!`);
     } catch (error) {
-      notifyError(`Error sending BTC`);
+      notifyError(`Error sending BTC plese try again later`);
       setIsLoading(false);
     }
   };

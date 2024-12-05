@@ -1,11 +1,14 @@
 "use server";
 
 export async function getHiroTestnetBtc(address: string) {
-  const data = await fetch(
+  const res = await fetch(
     `https://api.testnet.hiro.so/extended/v1/faucets/btc?address=${address}`,
     {
       method: "POST",
     },
   );
-  return data.json();
+  if (res.status !== 200) {
+    throw new Error("Error sending BTC");
+  }
+  return res.json();
 }
