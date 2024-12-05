@@ -7,14 +7,13 @@ import { useMemo } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useAtom } from "jotai";
 import {
-  bridgeConfigAtom,
+  BridgeConfig,
   showConnectWalletAtom,
   walletInfoAtom,
 } from "@/util/atoms";
 
 import ConnectWallet from "./ConnectWallet";
 import { GetTestnetBTC } from "./get-testnet-btc";
-import { useAtomValue } from "jotai";
 import { useNotifications } from "@/hooks/use-notifications";
 import { NotificationStatusType } from "./Notifications";
 import SBTCBalance from "./ui/sbtc-balance";
@@ -22,10 +21,9 @@ import Metrics from "./ui/metrics";
 
 // converting to lower case to avoid case sensitive issue
 
-const Header = () => {
-  const bridgeConfig = useAtomValue(bridgeConfigAtom);
+const Header = ({ config }: { config: BridgeConfig }) => {
   const isTestnet =
-    bridgeConfig.WALLET_NETWORK?.toLowerCase() === "sbtcTestnet".toLowerCase();
+    config.WALLET_NETWORK?.toLowerCase() === "sbtcTestnet".toLowerCase();
 
   const { notify } = useNotifications();
 
@@ -66,61 +64,59 @@ const Header = () => {
     );
   };
   return (
-    bridgeConfig.WALLET_NETWORK && (
-      <>
-        {bridgeConfig.BANNER_CONTENT && (
-          <div className="w-full bg-[#F26969] text-white text-center py-2">
-            {bridgeConfig.BANNER_CONTENT}
-          </div>
-        )}
-        <header className="w-full py-6 flex items-center justify-center">
-          <div
-            style={{
-              maxWidth: "1200px",
-            }}
-            className="flex-1 px-4 flex-row flex items-center justify-between"
-          >
-            <Link href="/">
-              <div className="">
-                <Image
-                  src="/images/StacksNav.svg"
-                  alt="Stacks Logo"
-                  width={100}
-                  height={100}
-                />
-              </div>
-            </Link>
-            <div className="flex flex-row gap-10 items-center">
-              {/* <h5 className="font-Matter text-xs text-black tracking-wide ">
+    <>
+      {config.BANNER_CONTENT && (
+        <div className="w-full bg-[#F26969] text-white text-center py-2">
+          {config.BANNER_CONTENT}
+        </div>
+      )}
+      <header className="w-full py-6 flex items-center justify-center">
+        <div
+          style={{
+            maxWidth: "1200px",
+          }}
+          className="flex-1 px-4 flex-row flex items-center justify-between"
+        >
+          <Link href="/">
+            <div className="">
+              <Image
+                src="/images/StacksNav.svg"
+                alt="Stacks Logo"
+                width={100}
+                height={100}
+              />
+            </div>
+          </Link>
+          <div className="flex flex-row gap-10 items-center">
+            {/* <h5 className="font-Matter text-xs text-black tracking-wide ">
               LEARN MORE
             </h5>
             <h4 className="font-Matter text-xs text-black tracking-wide ">
               HISTORY
             </h4> */}
-              {isConnected ? (
-                renderUserWalletInfo()
-              ) : (
-                <button
-                  onClick={() => setShowConnectWallet(true)}
-                  className=" bg-orange  px-4 py-2 rounded-md"
-                >
-                  <h3 className="font-Matter text-xs font-semibold tracking-wide">
-                    CONNECT WALLET
-                  </h3>
-                </button>
-              )}
-            </div>
+            {isConnected ? (
+              renderUserWalletInfo()
+            ) : (
+              <button
+                onClick={() => setShowConnectWallet(true)}
+                className=" bg-orange  px-4 py-2 rounded-md"
+              >
+                <h3 className="font-Matter text-xs font-semibold tracking-wide">
+                  CONNECT WALLET
+                </h3>
+              </button>
+            )}
           </div>
-        </header>
-        <Metrics />
+        </div>
+      </header>
+      <Metrics />
 
-        <AnimatePresence>
-          {showConnectWallet && (
-            <ConnectWallet onClose={() => setShowConnectWallet(false)} />
-          )}
-        </AnimatePresence>
-      </>
-    )
+      <AnimatePresence>
+        {showConnectWallet && (
+          <ConnectWallet onClose={() => setShowConnectWallet(false)} />
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

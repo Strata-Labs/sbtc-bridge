@@ -1,7 +1,6 @@
 "use client";
 
 import Faqs from "@/comps/Faqs";
-import Header from "@/comps/Header";
 import { SECTION } from "@/comps/HomeApp";
 import { SectionAction } from "@/comps/HomeSelectedHeader";
 import Status from "./Status";
@@ -22,7 +21,6 @@ const StatusApp = () => {
 
   return (
     <>
-      <Header />
       <div className="flex flex-1 flex-col w-full px-5 gap-6 items-center pt-5">
         <div className="flex  flex-row items-center justify-center">
           <SectionAction

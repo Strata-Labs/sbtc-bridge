@@ -1,6 +1,5 @@
 "use client";
 import { useState } from "react";
-import Header from "./Header";
 import Faqs from "./Faqs";
 import SelectedSection from "./HomeSelectedHeader";
 import DepositFlow from "./Deposit";
@@ -50,7 +49,6 @@ const HomeApp = () => {
 
   return (
     <>
-      <Header />
       <LandingAnimation>
         <SelectedSection
           section={selectedSection}
