@@ -3,16 +3,203 @@ import { useState } from "react";
 
 type FAQItemProps = {
   question: string;
-  answer: string;
+  answer: React.ReactNode;
   index: number;
 };
+
+const faqs = [
+  {
+    question: "What is sBTC?",
+    answer:
+      "sBTC is a non-custodial 1:1 Bitcoin-backed asset on the Stacks Bitcoin Layer.",
+  },
+  {
+    question: "How does sBTC work?",
+    answer: (
+      <ol className="list-inside flex flex-col gap-4">
+        <li>
+          sBTC is a SIP-010 token on the Stacks blockchain that represents
+          Bitcoin (BTC) in a 1:1 ratio. sBTC is always backed 1:1 against BTC.
+        </li>
+        <li>
+          The sBTC peg wallet is maintained and managed by a set of sBTC
+          signers. This decentralized approach enhances security and reduces
+          single points of failure.
+        </li>
+      </ol>
+    ),
+  },
+  {
+    question: "Is my BTC safe?",
+    answer: (
+      <>
+        <p className="text-darkGray font-Matter font-thin mb-4">
+          sBTC is always backed 1:1 against BTC, and it’s verifiably secure
+          through threshold cryptography. sBTC removes the need for 3rd party
+          custodian or trusted setup. Instead, BTC is secured by a decentralized
+          signer set.
+        </p>
+        <ol className="list-decimal list-inside flex flex-col gap-4">
+          <li>
+            <strong>Bitcoin In, Bitcoin Out:</strong> sBTC is a SIP-010 token on
+            the Stacks blockchain that represents Bitcoin (BTC) in a 1:1 ratio.
+            sBTC is always backed 1:1 against BTC.
+          </li>
+          <li>
+            <strong>Bitcoin Security:</strong> Stacks and sBTC state
+            automatically fork with Bitcoin. As such, all transactions settle to
+            Bitcoin with 100% Bitcoin Finality. This protects users against
+            certain attacks that could occur via a Bitcoin hard fork. This is a
+            critical security measure that aligns sBTC security with Bitcoin.
+            <a
+              href="https://docs.stacks.co/concepts/block-production/bitcoin-finality"
+              target="_blank"
+              className="text-blue-600 underline"
+            >
+              Read more.
+            </a>
+          </li>
+          <li>
+            <strong>Trust-Minimized, Decentralized Signer Network:</strong> Most
+            tokenized Bitcoin solutions require a set of federated or
+            centralized parties to custody the underlying BTC**.** Stacks has
+            built sBTC so withdrawals back to BTC are based on a decentralized
+            set of over 15 validator nodes, including names like Blockdaemon,
+            Kiln, Chorus One, and more.
+            <a
+              href="https://docs.stacks.co/concepts/block-production/stackers-and-signing"
+              target="_blank"
+              className="text-blue-600 underline"
+            >
+              Read more.
+            </a>
+          </li>
+        </ol>
+      </>
+    ),
+  },
+  {
+    question:
+      "What security measures have been put in place to ensure sBTC is safe?",
+    answer: (
+      <>
+        <p className="text-darkGray font-Matter font-thin mb-4">
+          Partnerships with top-tier security experts have been established to
+          ensure the protocol is fortified at every level:
+        </p>
+        <ol className="list-decimal list-inside flex flex-col gap-4">
+          <li>
+            <strong>Asymmetric Research:</strong> Known for their rigorous
+            research and protocol audits, Asymmetric brings security expertise
+            to sBTC to identify and mitigate potential vulnerabilities.
+          </li>
+          <li>
+            <strong>ImmuneFi:</strong> A robust bug bounty program incentivizes
+            ethical hackers to uncover and address potential issues, adding an
+            additional layer of defense.
+          </li>
+          <li>
+            <strong>3rd Party Audits:</strong> Independent audit reports will be
+            completed for additional security reviews, ensuring the protocol is
+            thoroughly vetted by external experts.
+          </li>
+        </ol>
+      </>
+    ),
+  },
+  {
+    question: "How long will it take for my BTC deposit to confirm?",
+    answer: (
+      <>
+        <p className="text-darkGray font-Matter font-thin mb-4">
+          sBTC facilitates rapid movement between BTC and sBTC.
+        </p>
+        <ol className="list-inside flex flex-col gap-4">
+          <li>
+            BTC to sBTC conversion can be completed within 3 Bitcoin blocks.
+          </li>
+          <li>
+            sBTC to BTC conversion can be completed within 6 Bitcoin blocks.
+          </li>
+        </ol>
+      </>
+    ),
+  },
+  {
+    question: "Do I get rewards for depositing BTC?",
+    answer: (
+      <>
+        <p className="text-darkGray font-Matter font-thin">
+          Yes. Through the sBTC Rewards Program, early sBTC holders will earn
+          ~5% APY, paid in BTC.
+        </p>
+      </>
+    ),
+  },
+  {
+    question: "Where does the yield come from?",
+    answer: (
+      <>
+        <ol className="list-inside flex flex-col gap-4">
+          <li>
+            BTC yield comes from the Stacks Proof of Transfer (PoX) consensus
+            mechanism via the sBTC Rewards Program.
+          </li>
+          <li>
+            The sBTC Rewards Program generates BTC yield from stacking STX.
+            Under the hood, the program contributes the corresponding Proof of
+            Transfer BTC to the sBTC Rewards pool.
+          </li>
+          <li>
+            Users deposit BTC and enroll in the rewards program to earn up to 5%
+            APY, plus additional opportunities for yield by deploying sBTC into
+            Stacks DeFi protocols.
+          </li>
+        </ol>
+      </>
+    ),
+  },
+  {
+    question: "What wallets are supported for sBTC?",
+    answer: (
+      <>
+        <ol className="list-inside flex flex-col gap-4">
+          <li>
+            <a
+              className="text-blue-600 underline"
+              href="https://www.xverse.app/"
+              target="_blank"
+            >
+              Xverse
+            </a>{" "}
+            and{" "}
+            <a
+              className="text-blue-600 underline"
+              href="https://leather.io/"
+              target="_blank"
+            >
+              Leather
+            </a>{" "}
+            wallets are supported — two leading wallets with seamless
+            integrations designed for Bitcoin and Stacks users.
+          </li>
+          <li>
+            We are actively working with institutional custodians, staking
+            providers, and other 3rd party wallets to support sBTC. More will be
+            announced.
+          </li>
+        </ol>
+      </>
+    ),
+  },
+];
 
 const FAQItem = ({ question, answer, index }: FAQItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="">
-      <p className="text-darkGray font-Matter font-normal tracking-wider text-sm">
+      <p className="text-darkGray font-Matter font-normal tracking-wider">
         {`FAQ ${index}`}
       </p>
       <button
@@ -43,7 +230,7 @@ const FAQItem = ({ question, answer, index }: FAQItemProps) => {
         }`}
       >
         <div className="p-6 bg-[#F5F5F5] rounded-xl w-full">
-          <p className=" break-normal text-[#605D5D]">{answer}</p>
+          <p className=" text-[#605D5D]">{answer}</p>
         </div>
       </div>
     </div>
@@ -56,7 +243,7 @@ const Faqs = () => {
       style={{
         maxWidth: "800px",
       }}
-      className="w-full mb-8 flex-col flex border-2 gap-4 border-lightGray rounded-2xl "
+      className="w-full mb-8 flex-col flex border-2 gap-4 border-lightGray rounded-2xl font-Matter "
     >
       <div className="flex flex-1 gap-4 px-8 p-6 flex-col ">
         <div className="w-full flex flex-row items-center justify-between">
@@ -69,22 +256,14 @@ const Faqs = () => {
         </p>
       </div>
       <div className="flex flex-col w-full px-8 p-6 gap-4  mt-5">
-        <FAQItem
-          question="What does sBTC Enable?"
-          answer="There are quite a few interesting unlocks with sBTC, but to simplify, sBTC enables a kind of ‘write’ for Bitcoin. With sBTC you can effectively take your Bitcoin, move it to the L2, and do all kinds of interesting things with it. Critically, smart contracts can interact with sBTC, opening the door for DeFi and really any type of applications you see in other ecosystems, but with the added security benefits of Bitcoin backing it."
-          index={1}
-        />
-        <FAQItem
-          question="What makes sBTC different than wBTC, tBTC, and other similar assets?"
-          answer="There are other Bitcoin deployed assets on different blockchains with different tradeoffs but most often, these solutions require sending BTC to an intermediary or are reliant on a trusted federation of signers. Open membership and decentralization are key aspects of Bitcoin and will not be compromised on in the final design of sBTC. In addition, sBTC will be the only asset that is secured by 100% of the hash power of Bitcoin itself."
-          index={2}
-        />
-        <FAQItem
-          question="How does sBTC work?"
-          answer="Note: Some aspects of sBTC are still being designed and subject to change. This page will be updated as various elements become finalized. \n sBTC operates by utilizing a synthetic asset model on the Stacks blockchain. To acquire sBTC, users swap their Bitcoin for sBTC through a smart contract. The value of sBTC is pegged to the value of Bitcoin, allowing users to represent their Bitcoin holdings in the form of sBTC on the Stacks blockchain. This synthetic representation enables users to engage in various DeFi applications, such as lending, borrowing, or trading, while still retaining the benefits and ownership of their underlying Bitcoin. The Stacks blockchain ensures the security and integrity of the sBTC ecosystem, while the value of sBTC remains tied to the value of Bitcoin.
-"
-          index={3}
-        />
+        {faqs.map((faq, index) => (
+          <FAQItem
+            key={index}
+            question={faq.question}
+            answer={faq.answer}
+            index={index + 1}
+          />
+        ))}
       </div>
     </div>
   );
