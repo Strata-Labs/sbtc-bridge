@@ -69,11 +69,11 @@ const Header = () => {
     bridgeConfig.WALLET_NETWORK && (
       <>
         {bridgeConfig.BANNER_CONTENT && (
-          <div className="w-screen bg-[#F26969] text-white text-center py-2">
+          <div className="w-full bg-[#F26969] text-white text-center py-2">
             {bridgeConfig.BANNER_CONTENT}
           </div>
         )}
-        <header className="w-screen py-6 flex items-center justify-center">
+        <header className="w-full py-6 flex items-center justify-center">
           <div
             style={{
               maxWidth: "1200px",
