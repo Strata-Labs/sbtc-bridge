@@ -3,13 +3,11 @@
 import { FlowContainer } from "./core/FlowContainer";
 import { FlowFormDynamic, NameKeysInfo } from "./core/Form";
 import { Heading, SubText } from "./core/Heading";
-import Header from "./Header";
 import { devenvFaucetTransfer } from "@/actions/devenv-faucet-transfer";
 
 const TransferApp = () => {
   return (
     <>
-      <Header />
       <div className="flex flex-1 flex-col w-full px-5 gap-6 items-center pt-5">
         <div className="flex  flex-row items-center justify-center"></div>
         <div className="w-screen flex "></div>
