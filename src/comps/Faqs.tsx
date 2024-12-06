@@ -230,7 +230,7 @@ const FAQItem = ({ question, answer, index }: FAQItemProps) => {
         }`}
       >
         <div className="p-6 bg-[#F5F5F5] rounded-xl w-full">
-          <p className=" text-[#605D5D]">{answer}</p>
+          <div className=" text-[#605D5D]">{answer}</div>
         </div>
       </div>
     </div>
