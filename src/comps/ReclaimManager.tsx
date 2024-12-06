@@ -387,6 +387,7 @@ const ReclaimDeposit = ({
       const signPsbtRequestParams: SignPsbtRequestParams = {
         hex: unsignedTxHex,
         network: walletNetwork,
+
         broadcast: true,
       };
 

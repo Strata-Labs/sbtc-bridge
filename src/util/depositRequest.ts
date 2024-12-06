@@ -81,6 +81,11 @@ export const createReclaimScript = (lockTime: number): Uint8Array => {
     opcodes.OP_1,
   ]);
 
+  console.log("reclaim buildScript", buildScript);
+  console.log(bitcoin.script.toASM(buildScript));
+
+  //throw new Error("Not implemented");
+
   return buildScript;
 };
 
