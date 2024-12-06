@@ -167,6 +167,7 @@ export const constructPsbtForReclaim = ({
   const uInt8DepositScript = hexToUint8Array(depositScript);
   const uInt8ReclaimScript = hexToUint8Array(reclaimScript);
 
+  console.log("asm", bitcoin.script.toASM(uInt8ReclaimScript));
   const scriptTree: Taptree = [
     {
       output: uInt8DepositScript,
@@ -214,7 +215,7 @@ export const constructPsbtForReclaim = ({
   psbt.addInput({
     hash: txId,
     index: vout,
-    //sequence: 0xfffffffd,
+    sequence: 0xfffffffd,
     witnessUtxo: {
       script: p2trRes.output,
       value: BigInt(depositAmount),
