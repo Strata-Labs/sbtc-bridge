@@ -1,8 +1,12 @@
 import * as bitcoin from "bitcoinjs-lib";
 import { ECPairFactory, ECPairAPI } from "ecpair";
 
-import { scanTxOutSet } from "../bitcoinClient";
-import { hexToUint8Array, uint8ArrayToHexString } from "./wallet";
+import { scanTxOutSet } from "./bitcoinClient";
+import {
+  bytesToHex as uint8ArrayToHexString,
+  hexToBytes as hexToUint8Array,
+} from "@stacks/common";
+
 import { Taptree } from "bitcoinjs-lib/src/types";
 
 import * as bip341 from "bitcoinjs-lib/src/payments/bip341";
@@ -107,6 +111,7 @@ export const createDepositAddress = (
   signerPubKey: string,
   maxFee: number,
   lockTime: number,
+  network: bitcoin.networks.Network,
 ): string => {
   const internalPubkey = hexToUint8Array(signerPubKey);
 
@@ -175,7 +180,7 @@ export const createDepositAddress = (
   // Step 1: Convert the Taproot public key to a P2TR address
   const p2tr = bitcoin.payments.p2tr({
     internalPubkey: NUMS_X_COORDINATE, // The tweaked Taproot public key
-    network: bitcoin.networks.regtest,
+    network: network,
     scriptTree: scriptTree,
   }) as bitcoin.Payment;
 
@@ -218,6 +223,7 @@ export const createDepositScriptP2TROutput = async (
   signersPublicKey: string,
   maxFee: number,
   lockTime: number,
+  network: bitcoin.networks.Network,
 ) => {
   try {
     // const internalPubkey = hexToUint8Array(
@@ -242,13 +248,12 @@ export const createDepositScriptP2TROutput = async (
 
     */
 
-    const network = bitcoin.networks.regtest;
-
     const p2trAddress = createDepositAddress(
       stxDepositAddress,
       signersPublicKey,
       maxFee,
       lockTime,
+      network,
     );
 
     // Fetch UTXOs for the sender address

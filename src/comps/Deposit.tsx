@@ -8,13 +8,16 @@ import { FlowContainer } from "@/comps/core/FlowContainer";
 import { Heading, SubText } from "@/comps/core/Heading";
 import { FlowForm } from "@/comps/core/Form";
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
-import { hexToUint8Array, uint8ArrayToHexString } from "@/util/regtest/wallet";
+import {
+  bytesToHex as uint8ArrayToHexString,
+  hexToBytes as hexToUint8Array,
+} from "@stacks/common";
 import * as yup from "yup";
 import {
   createDepositAddress,
   createDepositScript,
   createReclaimScript,
-} from "@/util/regtest/depositRequest";
+} from "@/util/depositRequest";
 import { useAtomValue } from "jotai";
 import {
   bridgeConfigAtom,
@@ -38,6 +41,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { sendBTCLeather, sendBTCXverse } from "@/util/wallet-utils";
 import useMintCaps from "@/hooks/use-mint-caps";
 import { getAggregateKey } from "@/util/get-aggregate-key";
+import getBitcoinNetwork from "@/util/get-bitcoin-network";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -228,6 +232,7 @@ const DepositFlowConfirm = ({
   } = useAtomValue(bridgeConfigAtom);
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
+  const config = useAtomValue(bridgeConfigAtom);
 
   const walletInfo = useAtomValue(walletInfoAtom);
   const handleNextClick = async () => {
@@ -258,6 +263,7 @@ const DepositFlowConfirm = ({
         signersAggregatePubKey!,
         maxFee,
         parsedLockTime,
+        getBitcoinNetwork(config.WALLET_NETWORK),
       );
 
       let txId = "";
