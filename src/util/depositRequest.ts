@@ -13,6 +13,7 @@ import * as bip341 from "bitcoinjs-lib/src/payments/bip341";
 
 import ecc from "@bitcoinerlab/secp256k1";
 const ECPair: ECPairAPI = ECPairFactory(ecc);
+bitcoin.initEccLib(ecc);
 
 const NUMS_X_COORDINATE = new Uint8Array([
   0x50, 0x92, 0x9b, 0x74, 0xc1, 0xa0, 0x49, 0x54, 0xb7, 0x8b, 0x4b, 0x60, 0x35,
