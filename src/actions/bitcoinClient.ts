@@ -1,4 +1,6 @@
-"use client";
+"use server";
+
+import { env } from "@/env";
 
 export interface BitcoinTransactionResponse {
   txid: string;
@@ -67,7 +69,9 @@ export interface AddressUtxos {
 export const scanTxOutSet = async (
   address: string,
 ): Promise<AddressUtxos[]> => {
-  const result = await fetch(`/api/proxy/adddress/${address}/utxo`);
+  const baseURL =
+    env.WALLET_NETWORK === "mainnet" ? env.MEMPOOL_API_URL : "/api/proxy";
+  const result = await fetch(`${baseURL}/adddress/${address}/utxo`);
   return await result.json();
 };
 
@@ -75,6 +79,8 @@ export const scanTxOutSet = async (
 export const getRawTransaction = async (
   txid: string,
 ): Promise<BitcoinTransactionResponse> => {
-  const result = await fetch(`/api/proxy/tx/${txid}`);
+  const baseURL =
+    env.WALLET_NETWORK === "mainnet" ? env.MEMPOOL_API_URL : "/api/proxy";
+  const result = await fetch(`${baseURL}/tx/${txid}`);
   return await result.json();
 };

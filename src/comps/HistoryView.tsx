@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FlowContainer } from "./core/FlowContainer";
 import { FlowForm } from "./core/Form";
 import { Heading, SubText } from "./core/Heading";
-import { AddressUtxos, scanTxOutSet } from "@/util/bitcoinClient";
+import { AddressUtxos, scanTxOutSet } from "@/actions/bitcoinClient";
 import { HistoryTx } from "./Status";
 import { useAtom } from "jotai";
 import { eventsAtom } from "@/util/atoms";

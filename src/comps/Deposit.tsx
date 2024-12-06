@@ -95,7 +95,7 @@ const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
   });
   const handleSubmit = async (value: string | undefined) => {
     if (value) {
-      const sats = Number(value) * 1e8;
+      const sats = Math.floor(Number(value) * 1e8);
       if (await isWithinDepositLimits(sats)) {
         setAmount(Number(sats));
         setStep(DEPOSIT_STEP.ADDRESS);
@@ -134,7 +134,7 @@ const DepositFlowAddress = ({
   setStep,
   setStxAddress,
 }: DepositFlowAddressProps) => {
-  const stacksNetwork = useAtomValue(envAtom);
+  const { WALLET_NETWORK: stacksNetwork } = useAtomValue(bridgeConfigAtom);
 
   const { notify } = useNotifications();
   const validateStxAddress = (addressOrContract: string) => {
@@ -158,7 +158,7 @@ const DepositFlowAddress = ({
       const MAINNET_PREFIX = ["SP", "SM"];
       const TESTNET_PREFIX = ["ST", "SN"];
       const validPrefix =
-        stacksNetwork === ENV.MAINNET ? MAINNET_PREFIX : TESTNET_PREFIX;
+        stacksNetwork === "mainnet" ? MAINNET_PREFIX : TESTNET_PREFIX;
 
       if (!validPrefix.some((prefix) => address.startsWith(prefix))) {
         return false;
