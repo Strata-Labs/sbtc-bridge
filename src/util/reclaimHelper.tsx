@@ -3,8 +3,9 @@ import * as bitcoin from "bitcoinjs-lib";
 
 import { Taptree } from "bitcoinjs-lib/src/types";
 import { buildLeafIndexFinalizer } from "./validateTapLeaf";
-import { NUMS_X_COORDINATE } from "./regtest/depositRequest";
+
 import { hexToBytes as hexToUint8Array } from "@stacks/common";
+import { NUMS_X_COORDINATE } from "./depositRequest";
 type Utxo = {
   txid: string;
   vout: number;
@@ -69,7 +70,6 @@ export const constructPsbtForReclaim = ({
 
   bitcoinReturnAddress,
 }: ReclaimDepositProps) => {
-  console.log("reclaimScript", reclaimScript);
   const uInt8DepositScript = hexToUint8Array(depositScript);
   const uInt8ReclaimScript = hexToUint8Array(reclaimScript);
 
@@ -125,6 +125,7 @@ export const constructPsbtForReclaim = ({
       script: p2trRes.output,
       value: BigInt(depositAmount),
     },
+
     tapLeafScript: [tapLeafScript],
   });
 
