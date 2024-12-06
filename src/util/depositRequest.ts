@@ -80,7 +80,14 @@ export const createReclaimScript = (
   const buildScript = script.compile([
     lockTimeEncoded,
     opcodes.OP_CHECKSEQUENCEVERIFY,
+    opcodes.OP_DROP,
+    opcodes.OP_RETURN,
   ]);
+
+  console.log("reclaim buildScript", buildScript);
+  console.log(bitcoin.script.toASM(buildScript));
+
+  //throw new Error("Not implemented");
 
   return buildScript;
 };

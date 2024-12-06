@@ -5,9 +5,8 @@ export async function GET(req: NextRequest) {
     const searchParams = req.nextUrl.searchParams;
 
     const btcAddress = searchParams.get("btcAddress");
-    const txId = searchParams.get("txId");
     // ensure that the btcAddress is not empty
-    if (!btcAddress || txId) {
+    if (!btcAddress) {
       throw new Error("btcAddress is required");
     }
 
@@ -22,7 +21,7 @@ export async function GET(req: NextRequest) {
           rpcMethod: "scantxoutset",
           params: ["start", [{ desc: `addr(${btcAddress})`, range: 10000 }]],
         }),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -34,7 +33,7 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
