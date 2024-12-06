@@ -90,6 +90,9 @@ export async function GET(req: NextRequest) {
       const data = await response.json();
       return NextResponse.json(data, { status: response.status });
     }
+
+    if (response.ok) return response;
+
     return NextResponse.redirect(response.url);
   } catch (error) {
     // good for debugging
