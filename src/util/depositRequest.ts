@@ -81,7 +81,7 @@ export const createReclaimScript = (
     lockTimeEncoded,
     opcodes.OP_CHECKSEQUENCEVERIFY,
     opcodes.OP_DROP,
-    opcodes.OP_RETURN,
+    opcodes.OP_1,
   ]);
 
   console.log("reclaim buildScript", buildScript);
