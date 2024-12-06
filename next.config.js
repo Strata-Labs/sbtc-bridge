@@ -20,7 +20,7 @@ const nextConfig = {
           // Basic redirect
           {
             source: "/transfer",
-            destination: "/" + process.env.WALLET_NETWORK,
+            destination: "/",
             permanent: false,
           },
         ]
