@@ -67,9 +67,13 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
       });
       onClose();
     } catch (error) {
+      if (error instanceof Error) {
+        error = error.message;
+      }
       notify({
         message: String(error),
         type: NotificationStatusType.ERROR,
+        expire: 10000,
       });
     }
   };
@@ -89,7 +93,7 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
         style={{
           backgroundColor: "#FFF5EB",
         }}
-        className=" rounded-lg  flex flex-col items-center justify-between p-6 w-full h-screen lg:h-[400px] lg:w-[340px]  shadow-lg"
+        className=" rounded-lg  flex flex-col items-center justify-between p-6 w-full h-screen sm:h-[400px] sm:w-[340px]  shadow-lg"
       >
         <div className="w-full flex flex-col gap-2 items-center justify-center">
           <Heading>Connect Wallet</Heading>
