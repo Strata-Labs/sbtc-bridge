@@ -22,6 +22,7 @@ export default function LayoutClient({
     store.set(bridgeConfigAtom, config);
   }, []);
 
+  console.log("config", config);
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>

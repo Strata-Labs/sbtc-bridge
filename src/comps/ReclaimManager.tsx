@@ -7,7 +7,7 @@ import { useShortAddress } from "@/hooks/use-short-address";
 import { InformationCircleIcon } from "@heroicons/react/16/solid";
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
 import { useAtomValue } from "jotai";
-import { bridgeConfigAtom, userDataAtom } from "@/util/atoms";
+import { bridgeConfigAtom, walletInfoAtom } from "@/util/atoms";
 import { useNotifications } from "@/hooks/use-notifications";
 import { NotificationStatusType } from "./Notifications";
 import {
@@ -16,6 +16,7 @@ import {
   finalizePsbt,
 } from "@/util/reclaimHelper";
 import { SignatureHash } from "@leather.io/rpc";
+import { useAtom } from "jotai";
 
 enum RECLAIM_STEP {
   LOADING = "LOADING",
@@ -102,6 +103,50 @@ const ReclaimManager = () => {
     }
   };
 
+  const fetchDepositAmount = async () => {
+    try {
+      //https://beta.sbtc-mempool.tech/api/proxy/tx/2e568e4c514906a917d3a6a229b16e10e4922f36e3f7d20135292213053f7750
+      const depositTxId = searchParams.get("depositTxId");
+      const voutIndex = searchParams.get("vout") || 0;
+      // ensure we have the depositTxId
+      if (!depositTxId) {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: "No deposit transaction found",
+        });
+        setStep(RECLAIM_STEP.NOT_FOUND);
+        return;
+      }
+
+      const url = `/api/tx?txId=${depositTxId}`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error with the request");
+      }
+
+      const responseData = await response.json();
+
+      // get the amount from vout array
+      const vout = responseData.vout;
+
+      const depositAmount = vout[voutIndex].value;
+
+      const amount = depositAmount / 1e8;
+
+      setAmount(amount);
+      console.log("fetchDepositAmount - amount", amount);
+    } catch (err) {
+      console.error("Error fetching deposit amount", err);
+      //setStep(RECLAIM_STEP.NOT_FOUND);
+    }
+  };
   const fetchDepositInfoFromEmily = async () => {
     try {
       // get the depositTxId and outputIndex from the query params
@@ -143,6 +188,8 @@ const ReclaimManager = () => {
       const emilyRes = responseData as EmilyDepositTransactionType;
 
       if (emilyRes.status === "pending") setStep(RECLAIM_STEP.RECLAIM);
+
+      fetchDepositAmount();
     } catch (err) {
       console.error("Error fetching deposit info from Emily", err);
       setStep(RECLAIM_STEP.NOT_FOUND);
@@ -236,6 +283,7 @@ const ReclaimDeposit = ({
   depositTransaction,
 }: ReclaimDepositProps) => {
   const { notify } = useNotifications();
+  const [walletInfo, setWalletInfo] = useAtom(walletInfoAtom);
 
   const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
 
@@ -259,23 +307,19 @@ const ReclaimDeposit = ({
 
       //console.log("userData", userData);
       // fetch utxo to covert maxFee
-      const maxReclaimFee = 400000;
+      const maxReclaimFee = 5000;
 
       const btcAddress = getUserBtcAddress();
 
-      const utxo = await constructUtxoInputForFee(maxReclaimFee, btcAddress);
-
-      console.log("utxo", utxo);
-
       const unsignedTxHex = constructPsbtForReclaim({
-        amount: maxReclaimFee,
+        depositAmount: amount * 1e8,
+        feeAmount: maxReclaimFee,
         lockTime: depositTransaction.parameters.lockTime,
         depositScript: depositTransaction.depositScript,
         reclaimScript: depositTransaction.reclaimScript,
         pubkey: signerPubKey || "",
         txId: depositTransaction.bitcoinTxid,
         vout: depositTransaction.bitcoinTxOutputIndex,
-        selectedUtxos: utxo.selectedUtxos,
         bitcoinReturnAddress: btcAddress,
       });
 
@@ -284,10 +328,9 @@ const ReclaimDeposit = ({
       // sign the transaction through api
       const signPsbtRequestParams: SignPsbtRequestParams = {
         hex: unsignedTxHex,
-        allowedSighash: [SignatureHash.DEFAULT],
         network: walletNetwork,
         //signAtIndex: [0, 1],
-        broadcast: false,
+        broadcast: true,
       };
 
       const response = await window.LeatherProvider?.request(
@@ -319,19 +362,23 @@ const ReclaimDeposit = ({
           <div className="flex flex-col gap-1">
             <SubText>Amount To Reclaim</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {100000} sats
+              {amount} BTC
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <SubText>Lock Time</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {100000} blocks
+              {depositTransaction.parameters.lockTime} blocks
             </p>
           </div>
           <div className="flex flex-col gap-1">
             <SubText>Bitcoin address to reclaim to</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {useShortAddress("addressea;ldjfl;ajsd;")}
+              {useShortAddress(
+                walletInfo
+                  ? walletInfo.addresses.payment?.address
+                  : "Loading...",
+              )}
             </p>
           </div>
         </div>
