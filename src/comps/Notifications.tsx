@@ -75,14 +75,14 @@ const AppNotification = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3 }}
-      className="px-4 transition-all absolute left-16  w-72 h-12 flex flex-row items-center justify-between rounded shadow-md z-30"
+      className="px-4 transition-all absolute left-16  w-72 min-h-12 flex flex-row items-center justify-between rounded shadow-md z-30"
       style={{
         backgroundColor: colors.background,
         top: index * 60 + 40,
       }}
       onClick={() => handleExitClick(id)}
     >
-      <div className="w-full   h-10 rounded-lg flex flex-row items-center justify-start gap-2">
+      <div className="w-full rounded-lg flex flex-row items-center justify-start gap-2">
         {renderIcon()}
         <p
           style={{

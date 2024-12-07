@@ -87,7 +87,12 @@ const extractAddressByType = (
 ) => {
   const addressInfo = addresses.find(
     (address) => address.symbol === "BTC" && address.type === addressType,
-  )!;
+  );
+  if (!addressInfo) {
+    throw new Error(
+      "BTC address not found, please make sure to connect your bitcoin wallet on leather and try again",
+    );
+  }
   return {
     address: addressInfo.address,
     publicKey: addressInfo.publicKey,
@@ -104,7 +109,12 @@ export const getAddressesLeather: getAddresses = async () => {
   const { addresses } = response.result;
   const payment = extractAddressByType(addresses, "p2wpkh")!;
   const taproot = extractAddressByType(addresses, "p2tr")!;
-  const stacks = addresses.find((address) => address.symbol === "STX")!;
+  const stacks = addresses.find((address) => address.symbol === "STX");
+  if (!stacks) {
+    throw new Error(
+      "No STX address found, please make sure to connect your stacks wallet on leather and try again",
+    );
+  }
   return {
     payment,
     taproot,
