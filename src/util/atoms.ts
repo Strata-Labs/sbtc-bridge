@@ -18,14 +18,6 @@ export const bridgeConfigAtom = atom<BridgeConfig>({
 });
 export const depositMaxFeeAtom = atom(80000);
 
-export enum ENV {
-  MAINNET = "MAINNET",
-  TESTNET = "TESTNET",
-  DEVENV = "DEVENV",
-}
-
-export const envAtom = atom(ENV.TESTNET);
-
 export const showConnectWalletAtom = atom<boolean>(false);
 
 export const eventsAtom = atom<NotificationEventType[]>([]);
