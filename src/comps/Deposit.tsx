@@ -22,8 +22,6 @@ import { useAtomValue } from "jotai";
 import {
   bridgeConfigAtom,
   depositMaxFeeAtom,
-  ENV,
-  envAtom,
   walletInfoAtom,
   WalletProvider,
 } from "@/util/atoms";
