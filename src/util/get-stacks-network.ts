@@ -1,4 +1,5 @@
-export function getStacksNetwork(walletNetwork?: string) {
+import { DefaultNetworkConfigurations } from "@leather.io/models";
+export function getStacksNetwork(walletNetwork?: DefaultNetworkConfigurations) {
   let network: "testnet" | "devnet" | "mainnet" = "mainnet";
   if (
     walletNetwork === "testnet" ||

@@ -59,6 +59,14 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
         addresses.payment.address.startsWith("bc1")
       ) {
         throw new Error(`Please switch to ${WALLET_NETWORK} network`);
+      } else if (
+        WALLET_NETWORK === "mainnet" &&
+        (!addresses.payment.address.startsWith("bc1") ||
+          // for segwit from xverse
+          !addresses.payment.address.startsWith("1") ||
+          !addresses.payment.address.startsWith("3"))
+      ) {
+        throw new Error(`Please switch to ${WALLET_NETWORK} network`);
       }
 
       setWalletInfo({

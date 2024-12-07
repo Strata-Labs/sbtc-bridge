@@ -8,13 +8,16 @@ import { FlowContainer } from "@/comps/core/FlowContainer";
 import { Heading, SubText } from "@/comps/core/Heading";
 import { FlowForm } from "@/comps/core/Form";
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
-import { hexToUint8Array, uint8ArrayToHexString } from "@/util/regtest/wallet";
+import {
+  bytesToHex as uint8ArrayToHexString,
+  hexToBytes as hexToUint8Array,
+} from "@stacks/common";
 import * as yup from "yup";
 import {
   createDepositAddress,
   createDepositScript,
   createReclaimScript,
-} from "@/util/regtest/depositRequest";
+} from "@/util/depositRequest";
 import { useAtomValue } from "jotai";
 import {
   bridgeConfigAtom,
@@ -38,6 +41,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { sendBTCLeather, sendBTCXverse } from "@/util/wallet-utils";
 import useMintCaps from "@/hooks/use-mint-caps";
 import { getAggregateKey } from "@/util/get-aggregate-key";
+import getBitcoinNetwork from "@/util/get-bitcoin-network";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -91,7 +95,7 @@ const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
   });
   const handleSubmit = async (value: string | undefined) => {
     if (value) {
-      const sats = Number(value) * 1e8;
+      const sats = Math.floor(Number(value) * 1e8);
       if (await isWithinDepositLimits(sats)) {
         setAmount(Number(sats));
         setStep(DEPOSIT_STEP.ADDRESS);
@@ -130,7 +134,7 @@ const DepositFlowAddress = ({
   setStep,
   setStxAddress,
 }: DepositFlowAddressProps) => {
-  const stacksNetwork = useAtomValue(envAtom);
+  const { WALLET_NETWORK: stacksNetwork } = useAtomValue(bridgeConfigAtom);
 
   const { notify } = useNotifications();
   const validateStxAddress = (addressOrContract: string) => {
@@ -154,7 +158,7 @@ const DepositFlowAddress = ({
       const MAINNET_PREFIX = ["SP", "SM"];
       const TESTNET_PREFIX = ["ST", "SN"];
       const validPrefix =
-        stacksNetwork === ENV.MAINNET ? MAINNET_PREFIX : TESTNET_PREFIX;
+        stacksNetwork === "mainnet" ? MAINNET_PREFIX : TESTNET_PREFIX;
 
       if (!validPrefix.some((prefix) => address.startsWith(prefix))) {
         return false;
@@ -228,6 +232,7 @@ const DepositFlowConfirm = ({
   } = useAtomValue(bridgeConfigAtom);
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
+  const config = useAtomValue(bridgeConfigAtom);
 
   const walletInfo = useAtomValue(walletInfoAtom);
   const handleNextClick = async () => {
@@ -258,6 +263,7 @@ const DepositFlowConfirm = ({
         signersAggregatePubKey!,
         maxFee,
         parsedLockTime,
+        getBitcoinNetwork(config.WALLET_NETWORK),
       );
 
       let txId = "";

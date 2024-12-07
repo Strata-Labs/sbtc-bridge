@@ -9,7 +9,7 @@ import { useSearchParams } from "next/navigation";
 import {
   BitcoinTransactionResponse,
   getRawTransaction,
-} from "@/util/bitcoinClient";
+} from "@/actions/bitcoinClient";
 import { useAtomValue } from "jotai";
 import { bridgeConfigAtom } from "@/util/atoms";
 
