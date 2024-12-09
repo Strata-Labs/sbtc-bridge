@@ -25,14 +25,6 @@ export const finalizePsbt = (psbtHex: string) => {
 
     const psbt = bitcoin.Psbt.fromHex(psbtHex, { network });
 
-    console.log("finalizePsbt - psbt", psbt);
-    console.log("hex", psbt.extractTransaction().toHex());
-
-    console.log(
-      "test asm",
-      bitcoin.script.toASM(psbt.data.inputs[0].finalScriptWitness!),
-    );
-
     return psbt.extractTransaction().toHex();
   } catch (err) {
     console.error("Error finalizing PSBT:", err);
