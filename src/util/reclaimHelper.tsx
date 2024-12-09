@@ -6,18 +6,6 @@ import { buildLeafIndexFinalizer } from "./validateTapLeaf";
 
 import { hexToBytes as hexToUint8Array } from "@stacks/common";
 import { NUMS_X_COORDINATE } from "./depositRequest";
-type Utxo = {
-  txid: string;
-  vout: number;
-  scriptPubKey: string;
-  desc: string;
-  amount: number;
-  height: number;
-};
-type SelectUtxos = {
-  selectedUtxos: Utxo[];
-  totalAmount: number;
-};
 
 export const finalizePsbt = (psbtHex: string) => {
   try {

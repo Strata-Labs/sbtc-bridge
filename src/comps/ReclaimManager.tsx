@@ -1,14 +1,11 @@
 "use client";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlowContainer, FlowLoaderContainer } from "./core/FlowContainer";
 import { Heading, SubText } from "./core/Heading";
 import { useShortAddress } from "@/hooks/use-short-address";
-import {
-  CheckCircleIcon,
-  InformationCircleIcon,
-} from "@heroicons/react/16/solid";
-import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
+import { InformationCircleIcon } from "@heroicons/react/16/solid";
+import { PrimaryButton } from "./core/FlowButtons";
 import { useAtomValue } from "jotai";
 import { bridgeConfigAtom, walletInfoAtom } from "@/util/atoms";
 
@@ -20,7 +17,6 @@ import {
   finalizePsbt,
 } from "@/util/reclaimHelper";
 import { SignatureHash } from "@leather.io/rpc";
-import { useAtom } from "jotai";
 import { Step } from "./deposit-stepper";
 import { getReclaimInfo } from "@/util/tx-utils";
 import { ReclaimStatus, useReclaimStatus } from "@/hooks/use-reclaim-status";
@@ -58,12 +54,12 @@ type EmilyDepositTransactionType = {
   };
 };
 
-type ReclaimTxType = {
-  txId: string;
-  status: {
-    confirmed: boolean;
-  };
-};
+// type ReclaimTxType = {
+//   txId: string;
+//   status: {
+//     confirmed: boolean;
+//   };
+// };
 
 const ReclaimManager = () => {
   // const router = useRouter();
@@ -223,14 +219,14 @@ const ReclaimManager = () => {
       const outputIndex = searchParams.get("vout") || 0;
 
       // we want to get the deposit info from Emily
-      /* 
+      /*
         that means we need the txId of the deposit and optinoal the output index
         - if no output index is found in the search params assume its' 0
 
         1) fetch the deposit info from Emily
         2) get the reclaim script and deposit script
         3) parse the amount from the deposit script
-        4) Display the amount and the reclaim script to the user to confirm 
+        4) Display the amount and the reclaim script to the user to confirm
       */
 
       const response = await fetch(
@@ -317,13 +313,13 @@ const CantReclaim = () => {
     <FlowContainer>
       <>
         <div className="w-full flex flex-row items-center justify-between">
-          <Heading>Can't Reclaim Deposit</Heading>
+          <Heading>Cannot Reclaim Deposit</Heading>
         </div>
         <div className="flex flex-1 ">
           <div className="w-full p-4 bg-lightOrange h-24 rounded-lg flex flex-row items-center justify-center gap-2">
             <InformationCircleIcon className="h-10 w-10 text-orange" />
             <p className="text-orange font-Matter font-semibold text-sm break-keep">
-              This deposit can't be reclaimed since it's been minted for sBTC
+              This deposit cannot be reclaimed since it has been minted for sBTC
               and deposited into the Stacks chain.
             </p>
           </div>
@@ -444,7 +440,7 @@ const ReclaimDeposit = ({
             <InformationCircleIcon className="h-10 w-10 text-orange" />
             <p className="text-orange font-Matter font-semibold text-sm break-keep">
               Please note that deposit wont be able to be reclaimed till after
-              enough blocks have passed from it's locktime
+              enough blocks have passed from its locktime
             </p>
           </div>
         </div>

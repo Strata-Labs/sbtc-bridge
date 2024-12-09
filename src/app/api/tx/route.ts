@@ -1,4 +1,3 @@
-import { Waiting_for_the_Sunrise } from "next/font/google";
 import { env } from "@/env";
 import { NextRequest, NextResponse } from "next/server";
 
