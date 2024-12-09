@@ -67,10 +67,7 @@ export const createDepositScript = (
 };
 //the max fee is 8 bytes, big endian
 
-export const createReclaimScript = (
-  lockTime: number,
-  additionalScriptBytes: Uint8Array,
-): Uint8Array => {
+export const createReclaimScript = (lockTime: number): Uint8Array => {
   const { script, opcodes } = bitcoin;
 
   // Encode lockTime using bitcoin.script.number.encode (ensure minimal encoding)
@@ -102,9 +99,7 @@ export const createDepositAddress = (
   const internalPubkey = hexToUint8Array(signerPubKey);
 
   // Create the reclaim script and convert to Buffer
-  const reclaimScript = Buffer.from(
-    createReclaimScript(lockTime, new Uint8Array([])),
-  );
+  const reclaimScript = Buffer.from(createReclaimScript(lockTime));
 
   // Create the deposit script and convert to Buffer
 

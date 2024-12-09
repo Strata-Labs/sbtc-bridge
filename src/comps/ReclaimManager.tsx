@@ -1,10 +1,13 @@
-import { usePathname, useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+"use client";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlowContainer, FlowLoaderContainer } from "./core/FlowContainer";
 import { Heading, SubText } from "./core/Heading";
 import { useShortAddress } from "@/hooks/use-short-address";
-import { InformationCircleIcon } from "@heroicons/react/16/solid";
+import {
+  CheckCircleIcon,
+  InformationCircleIcon,
+} from "@heroicons/react/16/solid";
 import { PrimaryButton, SecondaryButton } from "./core/FlowButtons";
 import { useAtomValue } from "jotai";
 import { bridgeConfigAtom, walletInfoAtom } from "@/util/atoms";
@@ -12,11 +15,14 @@ import { useNotifications } from "@/hooks/use-notifications";
 import { NotificationStatusType } from "./Notifications";
 import {
   constructPsbtForReclaim,
-  constructUtxoInputForFee,
+  createTransactionFromHex,
   finalizePsbt,
 } from "@/util/reclaimHelper";
 import { SignatureHash } from "@leather.io/rpc";
 import { useAtom } from "jotai";
+import { Step } from "./deposit-stepper";
+import { getReclaimInfo } from "@/util/tx-utils";
+import { ReclaimStatus, useReclaimStatus } from "@/hooks/use-reclaim-status";
 
 enum RECLAIM_STEP {
   LOADING = "LOADING",
@@ -51,6 +57,12 @@ type EmilyDepositTransactionType = {
   };
 };
 
+type ReclaimTxType = {
+  txId: string;
+  status: {
+    confirmed: boolean;
+  };
+};
 const ReclaimManager = () => {
   // const router = useRouter();
   // const pathname = usePathname();
@@ -67,7 +79,19 @@ const ReclaimManager = () => {
 
   useEffect(() => {
     // get the txId from the query params
-    fetchDepositInfoFromEmily();
+
+    // based on the query params determine if we fetch a info from emily or fetch a already made reclaim request
+
+    const reclaimTxId = searchParams.get("reclaimTxId");
+    const depositTxId = searchParams.get("depositTxId");
+
+    if (reclaimTxId) {
+      fetchReclaimTransactionStatus();
+      return;
+    } else if (depositTxId) {
+      fetchDepositInfoFromEmily();
+      return;
+    }
   }, []);
 
   const setStep = useCallback((newStep: RECLAIM_STEP) => {
@@ -93,19 +117,63 @@ const ReclaimManager = () => {
           />
         );
       case RECLAIM_STEP.CURRENT_STATUS:
-        return <CurrentStatusReclaim />;
+        // get reclaimTxId from the query params
+        const reclaimTxId = searchParams.get("reclaimTxId") || "";
+
+        if (!reclaimTxId) {
+          notify({
+            type: NotificationStatusType.ERROR,
+            message: "No Reclaim transaction found",
+          });
+          return null;
+        }
+
+        return <CurrentStatusReclaim amount={amount} txId={reclaimTxId} />;
       case RECLAIM_STEP.LOADING:
         return <LoadingInfo />;
       case RECLAIM_STEP.NOT_FOUND:
         return <NotFound />;
+      case RECLAIM_STEP.CANT_RECLAIM:
+        return <CantReclaim />;
       default:
         return null;
     }
   };
 
+  const fetchReclaimTransactionStatus = async () => {
+    try {
+      const reclaimTxId = searchParams.get("reclaimTxId");
+      if (!reclaimTxId) {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: "No Reclaim transaction found",
+        });
+        return;
+      }
+
+      const reclaimTransaction = await getReclaimInfo({ reclaimTxId });
+
+      if (reclaimTransaction) {
+        setStep(RECLAIM_STEP.CURRENT_STATUS);
+
+        const amount = reclaimTransaction.vout[0].value / 1e8;
+        setAmount(amount);
+      } else {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: "No Reclaim transaction found",
+        });
+        setStep(RECLAIM_STEP.NOT_FOUND);
+      }
+    } catch (err) {
+      notify({
+        type: NotificationStatusType.ERROR,
+        message: "No Reclaim transaction found",
+      });
+    }
+  };
   const fetchDepositAmount = async () => {
     try {
-      //https://beta.sbtc-mempool.tech/api/proxy/tx/2e568e4c514906a917d3a6a229b16e10e4922f36e3f7d20135292213053f7750
       const depositTxId = searchParams.get("depositTxId");
       const voutIndex = searchParams.get("vout") || 0;
       // ensure we have the depositTxId
@@ -141,7 +209,6 @@ const ReclaimManager = () => {
       const amount = depositAmount / 1e8;
 
       setAmount(amount);
-      console.log("fetchDepositAmount - amount", amount);
     } catch (err) {
       console.error("Error fetching deposit amount", err);
       //setStep(RECLAIM_STEP.NOT_FOUND);
@@ -178,8 +245,6 @@ const ReclaimManager = () => {
       }
 
       const responseData = await response.json();
-
-      console.log("responseData", responseData);
 
       setAmount(amount);
 
@@ -283,7 +348,8 @@ const ReclaimDeposit = ({
   depositTransaction,
 }: ReclaimDepositProps) => {
   const { notify } = useNotifications();
-  const [walletInfo, setWalletInfo] = useAtom(walletInfoAtom);
+  const walletInfo = useAtomValue(walletInfoAtom);
+  const router = useRouter();
 
   const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
 
@@ -291,27 +357,21 @@ const ReclaimDeposit = ({
     "4ea6e657117bc8168254b8943e55a65997c71b3994e1e2915002a9da0c22ee1e";
   //const userData = useAtomValue(userDataAtom);
 
-  const getUserBtcAddress = () => {
-    return "bcrt1q728h29ejjttmkupwdkyu2x4zcmkuc3q29gvwaa";
-  };
   const buildReclaimTransaction = async () => {
     try {
-      // ensure userData is not empty
-      // if (!userData) {
-      //   notify({
-      //     type: NotificationStatusType.ERROR,
-      //     message: "Wallet not Connected",
-      //   });
-      //   return;
-      // }
-
-      //console.log("userData", userData);
-      // fetch utxo to covert maxFee
       const maxReclaimFee = 5000;
 
-      const btcAddress = getUserBtcAddress();
+      const btcAddress = getWalletAddress();
 
-      const unsignedTxHex = constructPsbtForReclaim({
+      if (!btcAddress) {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: "No Bitcoin address found",
+        });
+        return;
+      }
+
+      const unsignedTxHex = await constructPsbtForReclaim({
         depositAmount: amount * 1e8,
         feeAmount: maxReclaimFee,
         lockTime: depositTransaction.parameters.lockTime,
@@ -330,7 +390,7 @@ const ReclaimDeposit = ({
         hex: unsignedTxHex,
         network: walletNetwork,
         //signAtIndex: [0, 1],
-        broadcast: true,
+        broadcast: false,
       };
 
       const response = await window.LeatherProvider?.request(
@@ -347,10 +407,22 @@ const ReclaimDeposit = ({
         const finalizedTxHex = finalizePsbt(signedTxHex);
 
         console.log("finalizedTxHex", finalizedTxHex);
+
+        const transactionId = createTransactionFromHex(finalizedTxHex);
+
+        console.log("transactionId", transactionId);
+
+        // set a query params to the transaction id as reclaimTxId and updated the status
+
+        router.push(`/reclaim?reclaimTxId=${transactionId}`);
       }
     } catch (err) {
       console.error("Error building reclaim transaction", err);
     }
+  };
+
+  const getWalletAddress = () => {
+    return walletInfo?.addresses.payment?.address;
   };
   return (
     <FlowContainer>
@@ -374,11 +446,7 @@ const ReclaimDeposit = ({
           <div className="flex flex-col gap-1">
             <SubText>Bitcoin address to reclaim to</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {useShortAddress(
-                walletInfo
-                  ? walletInfo.addresses.payment?.address
-                  : "Loading...",
-              )}
+              {useShortAddress(getWalletAddress() || "")}
             </p>
           </div>
         </div>
@@ -405,19 +473,75 @@ const ReclaimDeposit = ({
   );
 };
 
-const CurrentStatusReclaim = () => {
-  const [showLoader, setShowLoader] = useState<boolean>(false);
+const CurrentStatusReclaim = ({
+  txId,
+  amount,
+}: {
+  txId: string;
+  amount: number;
+}) => {
+  const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
 
+  const status = useReclaimStatus(txId);
+
+  const showLoader = status === ReclaimStatus.Pending;
+
+  const currentStep = useMemo(() => {
+    const steps = [ReclaimStatus.Pending, ReclaimStatus.Completed];
+    return steps.findIndex((step) => step === status);
+  }, [status]);
+
+  const memepoolUrl = useMemo(() => {
+    const testNetUrl = "https://mempool.bitcoin.regtest.hiro.so/tx/";
+    const mainnetUrl = "https://mempool.space/tx/";
+
+    const apiUrl = walletNetwork === "sbtcTestnet" ? testNetUrl : mainnetUrl;
+
+    return `${apiUrl}${txId}`;
+  }, []);
   return (
     <FlowLoaderContainer showLoader={showLoader}>
       <>
         <div className="w-full flex flex-row items-center justify-between">
-          <Heading>Review Reclaim Transaction</Heading>
+          <Heading>Reclaim Transaction Status</Heading>
         </div>
         <div className="flex flex-col  gap-2">
           <div className="flex flex-col gap-1">
-            <SubText>Amount selected to Reclaim</SubText>
+            <SubText>Amount To Reclaim</SubText>
+            <p className="text-black font-Matter font-semibold text-sm">
+              {amount} BTC
+            </p>
           </div>
+          <div className="flex flex-col gap-1">
+            <SubText>View In Mempool</SubText>
+            <p className="text-black font-Matter font-semibold text-sm">
+              <a
+                href={memepoolUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-orange"
+              >
+                Link
+              </a>
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col mt-8 gap-4 w-full ">
+          <ol className="flex items-center w-full text-xs text-gray-900 font-medium sm:text-base text-black">
+            <Step
+              currentStep={currentStep}
+              index={0}
+              name="Pending"
+              lastStep={1}
+            />
+            <Step
+              currentStep={currentStep}
+              index={1}
+              name="Completed"
+              lastStep={1}
+            />
+          </ol>
         </div>
       </>
     </FlowLoaderContainer>
