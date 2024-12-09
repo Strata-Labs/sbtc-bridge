@@ -1,9 +1,9 @@
 import * as bitcoin from "bitcoinjs-lib";
-import { ECPairFactory, ECPairAPI } from "ecpair";
+// import { ECPairFactory, ECPairAPI } from "ecpair";
 
-import { scanTxOutSet } from "@/actions/bitcoinClient";
+// import { scanTxOutSet } from "@/actions/bitcoinClient";
 import {
-  bytesToHex as uint8ArrayToHexString,
+  // bytesToHex as uint8ArrayToHexString,
   hexToBytes as hexToUint8Array,
 } from "@stacks/common";
 
@@ -12,7 +12,7 @@ import { Taptree } from "bitcoinjs-lib/src/types";
 import * as bip341 from "bitcoinjs-lib/src/payments/bip341";
 
 import ecc from "@bitcoinerlab/secp256k1";
-const ECPair: ECPairAPI = ECPairFactory(ecc);
+// const ECPair: ECPairAPI = ECPairFactory(ecc);
 bitcoin.initEccLib(ecc);
 
 export const NUMS_X_COORDINATE = new Uint8Array([
@@ -108,8 +108,8 @@ export const createDepositAddress = (
 
   //  Hash the leaf scripts using tapLeafHash
 
-  const reclaimScriptHash = bip341.tapleafHash({ output: reclaimScript });
-  const reclaimScriptHashHex = uint8ArrayToHexString(reclaimScriptHash);
+  // const reclaimScriptHash = bip341.tapleafHash({ output: reclaimScript });
+  // const reclaimScriptHashHex = uint8ArrayToHexString(reclaimScriptHash);
   // Combine the leaf hashes into a Merkle root using tapBranch
   const merkleRoot = bip341.toHashTree([
     { output: depositScript },
@@ -125,7 +125,7 @@ export const createDepositAddress = (
     },
   ];
 
-  const merkleRootHex = uint8ArrayToHexString(merkleRoot.hash);
+  // const merkleRootHex = uint8ArrayToHexString(merkleRoot.hash);
   // Create an internal public key (replace with actual internal public key if available)
 
   // Create the final taproot public key by tweaking internalPubkey with merkleRoot
@@ -134,7 +134,7 @@ export const createDepositAddress = (
 
   const tweak = bip341.tapTweakHash(NUMS_X_COORDINATE, merkleRoot.hash);
 
-  const tweakHex = uint8ArrayToHexString(tweak);
+  // const tweakHex = uint8ArrayToHexString(tweak);
   // Step 2: Apply the tweak to the internal public key to get the tweaked Taproot output key
 
   const taprootPubKey = bip341.tweakKey(NUMS_X_COORDINATE, tweak);
@@ -142,7 +142,7 @@ export const createDepositAddress = (
   if (taprootPubKey === null) {
     throw new Error("Failed to tweak the internal public key.");
   }
-  const taprootPubKeyHex = uint8ArrayToHexString(taprootPubKey.x);
+  // const taprootPubKeyHex = uint8ArrayToHexString(taprootPubKey.x);
 
   // Step 1: Convert the Taproot public key to a P2TR address
   const p2tr = bitcoin.payments.p2tr({
