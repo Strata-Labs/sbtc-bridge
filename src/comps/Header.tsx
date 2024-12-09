@@ -22,9 +22,8 @@ import Metrics from "./ui/metrics";
 // converting to lower case to avoid case sensitive issue
 
 const Header = ({ config }: { config: BridgeConfig }) => {
-  const isTestnet =
-    config.WALLET_NETWORK?.toLowerCase() === "sbtcTestnet".toLowerCase();
-
+  //const isTestnet = config.WALLET_NETWORK?.toLowerCase() === "sbtcTestnet".toLowerCase();
+  const isTestnet = true;
   const { notify } = useNotifications();
 
   const [walletInfo, setWalletInfo] = useAtom(walletInfoAtom);
@@ -63,6 +62,10 @@ const Header = ({ config }: { config: BridgeConfig }) => {
       </>
     );
   };
+
+  if (!config) {
+    return null;
+  }
   return (
     <>
       {config.BANNER_CONTENT && (

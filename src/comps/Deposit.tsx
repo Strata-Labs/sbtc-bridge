@@ -226,7 +226,7 @@ const DepositFlowConfirm = ({
   const {
     EMILY_URL: emilyUrl,
     WALLET_NETWORK: walletNetwork,
-    RECLAIM_LOCK_TIME: lockTime,
+    // RECLAIM_LOCK_TIME: lockTime,
   } = useAtomValue(bridgeConfigAtom);
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
@@ -240,12 +240,24 @@ const DepositFlowConfirm = ({
       // Combine the version and hash into a single Uint8Array
       const serializedAddress = serializeCVBytes(principalCV(stxAddress));
 
+      // get teh publicKey from the user payment address
+      const paymentAddress = walletInfo.addresses.payment;
+      if (!paymentAddress) {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: `Payment address not found`,
+        });
+        return;
+      }
+
+      // const reclaimPublicKey = paymentAddress.publicKey;
+
       // Parse lockTime from env variable
-      const parsedLockTime = parseInt(lockTime || "144");
+      //const parsedLockTime = parseInt(lockTime || "144");
+      // FIXME: need to get the locktime from the env variable
+      const parsedLockTime = 2;
       // Create the reclaim script and convert to Buffer
-      const reclaimScript = Buffer.from(
-        createReclaimScript(parsedLockTime, new Uint8Array([])),
-      );
+      const reclaimScript = Buffer.from(createReclaimScript(parsedLockTime));
 
       const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
 
