@@ -22,8 +22,6 @@ export async function GET(req: NextRequest) {
 
     const url = `${apiUrl}${txId}`;
 
-    console.log("url", url);
-
     const response = await fetch(url, {
       method: "GET",
       headers: {

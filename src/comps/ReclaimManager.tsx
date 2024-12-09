@@ -381,8 +381,6 @@ const ReclaimDeposit = ({
         bitcoinReturnAddress: btcAddress,
       });
 
-      console.log("unsignedTxHex", unsignedTxHex);
-
       // sign the transaction through api
       const signPsbtRequestParams: SignPsbtRequestParams = {
         hex: unsignedTxHex,
@@ -396,19 +394,12 @@ const ReclaimDeposit = ({
         signPsbtRequestParams,
       );
 
-      console.log("response", response);
       if (response && response.result) {
-        console.log("response", response);
-
         const signedTxHex = response.result.hex;
 
         const finalizedTxHex = finalizePsbt(signedTxHex);
 
-        console.log("finalizedTxHex", finalizedTxHex);
-
         const transactionId = createTransactionFromHex(finalizedTxHex);
-
-        console.log("transactionId", transactionId);
 
         // set a query params to the transaction id as reclaimTxId and updated the status
 
