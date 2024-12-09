@@ -39,50 +39,6 @@ const faqs = [
           custodian or trusted setup. Instead, BTC is secured by a decentralized
           signer set.
         </p>
-        <ol className="list-decimal list-inside flex flex-col gap-4">
-          <li>
-            <strong>Bitcoin In, Bitcoin Out:</strong> sBTC is a SIP-010 token on
-            the Stacks blockchain that represents Bitcoin (BTC) in a 1:1 ratio.
-            sBTC is always backed 1:1 against BTC.
-          </li>
-          <li>
-            <strong>Bitcoin Security:</strong> Stacks and sBTC state
-            automatically fork with Bitcoin. As such, all transactions settle to
-            Bitcoin with 100% Bitcoin Finality. This protects users against
-            certain attacks that could occur via a Bitcoin hard fork. This is a
-            critical security measure that aligns sBTC security with Bitcoin.
-            <a
-              href="https://docs.stacks.co/concepts/block-production/bitcoin-finality"
-              target="_blank"
-              className="text-blue-600 underline"
-            >
-              Read more.
-            </a>
-          </li>
-          <li>
-            <strong>Trust-Minimized, Decentralized Signer Network:</strong> Most
-            tokenized Bitcoin solutions require a set of federated or
-            centralized parties to custody the underlying BTC**.** Stacks has
-            built sBTC so withdrawals back to BTC are based on a decentralized
-            set of over 15 validator nodes, including names like Blockdaemon,
-            Kiln, Chorus One, and more.
-            <a
-              href="https://docs.stacks.co/concepts/block-production/stackers-and-signing"
-              target="_blank"
-              className="text-blue-600 underline"
-            >
-              Read more.
-            </a>
-          </li>
-        </ol>
-      </>
-    ),
-  },
-  {
-    question:
-      "What security measures have been put in place to ensure sBTC is safe?",
-    answer: (
-      <>
         <p className="text-darkGray font-Matter font-thin mb-4">
           Partnerships with top-tier security experts have been established to
           ensure the protocol is fortified at every level:
@@ -107,6 +63,7 @@ const faqs = [
       </>
     ),
   },
+
   {
     question: "How long will it take for my BTC deposit to confirm?",
     answer: (
@@ -116,44 +73,12 @@ const faqs = [
         </p>
         <ol className="list-inside flex flex-col gap-4">
           <li>
-            BTC to sBTC conversion can be completed within 3 Bitcoin blocks.
+            BTC to sBTC conversion can be completed within 3 Bitcoin blocks
+            (under an hour).
           </li>
           <li>
-            sBTC to BTC conversion can be completed within 6 Bitcoin blocks.
-          </li>
-        </ol>
-      </>
-    ),
-  },
-  {
-    question: "Do I get rewards for depositing BTC?",
-    answer: (
-      <>
-        <p className="text-darkGray font-Matter font-thin">
-          Yes. Through the sBTC Rewards Program, early sBTC holders will earn
-          ~5% APY, paid in BTC.
-        </p>
-      </>
-    ),
-  },
-  {
-    question: "Where does the yield come from?",
-    answer: (
-      <>
-        <ol className="list-inside flex flex-col gap-4">
-          <li>
-            BTC yield comes from the Stacks Proof of Transfer (PoX) consensus
-            mechanism via the sBTC Rewards Program.
-          </li>
-          <li>
-            The sBTC Rewards Program generates BTC yield from stacking STX.
-            Under the hood, the program contributes the corresponding Proof of
-            Transfer BTC to the sBTC Rewards pool.
-          </li>
-          <li>
-            Users deposit BTC and enroll in the rewards program to earn up to 5%
-            APY, plus additional opportunities for yield by deploying sBTC into
-            Stacks DeFi protocols.
+            sBTC to BTC conversion can be completed within 6 Bitcoin blocks
+            (Approximately two hours)
           </li>
         </ol>
       </>
