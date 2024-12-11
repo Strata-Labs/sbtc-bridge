@@ -63,7 +63,6 @@ const Header = ({ config }: { config: BridgeConfig }) => {
       </>
     );
   };
-
   return (
     <>
       {config.BANNER_CONTENT && (
