@@ -465,7 +465,7 @@ const CurrentStatusReclaim = ({
   txId: string;
   amount: number;
 }) => {
-  const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
+  const { MEMPOOL_URL } = useAtomValue(bridgeConfigAtom);
 
   const status = useReclaimStatus(txId);
 
@@ -476,14 +476,9 @@ const CurrentStatusReclaim = ({
     return steps.findIndex((step) => step === status);
   }, [status]);
 
-  const memepoolUrl = useMemo(() => {
-    const testNetUrl = "https://mempool.bitcoin.regtest.hiro.so/tx/";
-    const mainnetUrl = "https://mempool.space/tx/";
-
-    const apiUrl = walletNetwork === "sbtcTestnet" ? testNetUrl : mainnetUrl;
-
-    return `${apiUrl}${txId}`;
-  }, []);
+  const mempoolUrl = useMemo(() => {
+    return `${MEMPOOL_URL}/tx/${txId}`;
+  }, [MEMPOOL_URL, txId]);
   return (
     <FlowLoaderContainer showLoader={showLoader}>
       <>
@@ -501,7 +496,7 @@ const CurrentStatusReclaim = ({
             <SubText>View In Mempool</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
               <a
-                href={memepoolUrl}
+                href={mempoolUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="text-orange"
