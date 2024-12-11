@@ -25,10 +25,10 @@ export const createTransactionFromHex = (hex: string) => {
   const transaction = bitcoin.Transaction.fromHex(hex);
   return transaction.getId();
 };
+
 type ReclaimDepositProps = {
   feeAmount: number;
   depositAmount: number;
-
   lockTime: number;
   depositScript: string;
   reclaimScript: string;
@@ -108,10 +108,6 @@ export const constructPsbtForReclaim = ({
     },
     tapLeafScript: [tapLeafScript],
   });
-
-  const leafIndexFinalizerFn = buildLeafIndexFinalizer(tapLeafScript, lockTime);
-
-  //psbt.finalizeInput(0, leafIndexFinalizerFn);
 
   // Add the fee payer inputs
 
