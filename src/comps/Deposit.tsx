@@ -226,7 +226,7 @@ const DepositFlowConfirm = ({
   const {
     EMILY_URL: emilyUrl,
     WALLET_NETWORK: walletNetwork,
-    // RECLAIM_LOCK_TIME: lockTime,
+    RECLAIM_LOCK_TIME: lockTime,
   } = useAtomValue(bridgeConfigAtom);
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
@@ -253,9 +253,8 @@ const DepositFlowConfirm = ({
       // const reclaimPublicKey = paymentAddress.publicKey;
 
       // Parse lockTime from env variable
-      //const parsedLockTime = parseInt(lockTime || "144");
-      // FIXME: need to get the locktime from the env variable
-      const parsedLockTime = 2;
+      const parsedLockTime = parseInt(lockTime || "144");
+
       // Create the reclaim script and convert to Buffer
       const reclaimScript = Buffer.from(createReclaimScript(parsedLockTime));
 
