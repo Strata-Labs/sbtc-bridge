@@ -1,11 +1,6 @@
 import * as bitcoin from "bitcoinjs-lib";
-// import { ECPairFactory, ECPairAPI } from "ecpair";
 
-// import { scanTxOutSet } from "@/actions/bitcoinClient";
-import {
-  // bytesToHex as uint8ArrayToHexString,
-  hexToBytes as hexToUint8Array,
-} from "@stacks/common";
+import { hexToBytes as hexToUint8Array } from "@stacks/common";
 
 import { Taptree } from "bitcoinjs-lib/src/types";
 
