@@ -1,5 +1,6 @@
 "use server";
 
+import { getUtxosBitcoinDaemon } from "@/app/api/proxy/[...proxy]/rpc-handler-core";
 import { env } from "@/env";
 
 export interface BitcoinTransactionResponse {
@@ -69,9 +70,10 @@ export interface AddressUtxos {
 export const scanTxOutSet = async (
   address: string,
 ): Promise<AddressUtxos[]> => {
-  const baseURL =
-    env.WALLET_NETWORK === "mainnet" ? env.MEMPOOL_API_URL : "/api/proxy";
-  const result = await fetch(`${baseURL}/adddress/${address}/utxo`);
+  if (env.WALLET_NETWORK !== "mainnet") {
+    return getUtxosBitcoinDaemon(address);
+  }
+  const result = await fetch(`${env.MEMPOOL_API_URL}/adddress/${address}/utxo`);
   return await result.json();
 };
 
@@ -79,9 +81,7 @@ export const scanTxOutSet = async (
 export const getRawTransaction = async (
   txid: string,
 ): Promise<BitcoinTransactionResponse> => {
-  const baseURL =
-    env.WALLET_NETWORK === "mainnet" ? env.MEMPOOL_API_URL : "/api/proxy";
-  const result = await fetch(`${baseURL}/tx/${txid}`);
+  const result = await fetch(`${env.MEMPOOL_API_URL}/tx/${txid}`);
   return await result.json();
 };
 
