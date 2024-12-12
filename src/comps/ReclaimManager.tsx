@@ -366,16 +366,16 @@ const ReclaimDeposit = ({
         return;
       }
 
-      const unsignedTxHex = await constructPsbtForReclaim({
+      const unsignedTxHex = constructPsbtForReclaim({
         depositAmount: amount * 1e8,
         feeAmount: maxReclaimFee,
-
         lockTime: depositTransaction.parameters.lockTime,
         depositScript: depositTransaction.depositScript,
         reclaimScript: depositTransaction.reclaimScript,
         txId: depositTransaction.bitcoinTxid,
         vout: depositTransaction.bitcoinTxOutputIndex,
         bitcoinReturnAddress: btcAddress,
+        walletNetwork,
       });
 
       await signPSBT(unsignedTxHex);
@@ -401,7 +401,7 @@ const ReclaimDeposit = ({
       if (response && response.result) {
         const signedTxHex = response.result.hex;
 
-        const finalizedTxHex = finalizePsbt(signedTxHex);
+        const finalizedTxHex = finalizePsbt(signedTxHex, walletNetwork);
 
         await broadcastTransaction(finalizedTxHex);
       } else {

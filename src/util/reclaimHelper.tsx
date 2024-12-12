@@ -1,3 +1,5 @@
+import { DefaultNetworkConfigurations } from "@leather.io/models";
+
 import * as bip341 from "bitcoinjs-lib/src/payments/bip341";
 import * as bitcoin from "bitcoinjs-lib";
 
@@ -5,10 +7,14 @@ import { Taptree } from "bitcoinjs-lib/src/types";
 
 import { hexToBytes as hexToUint8Array } from "@stacks/common";
 import { NUMS_X_COORDINATE } from "./depositRequest";
+import getBitcoinNetwork from "./get-bitcoin-network";
 
-export const finalizePsbt = (psbtHex: string) => {
+export const finalizePsbt = (
+  psbtHex: string,
+  walletNetwork?: DefaultNetworkConfigurations,
+) => {
   try {
-    const network = bitcoin.networks.regtest;
+    const network = getBitcoinNetwork(walletNetwork);
 
     const psbt = bitcoin.Psbt.fromHex(psbtHex, { network });
     psbt.finalizeAllInputs();
@@ -33,22 +39,20 @@ type ReclaimDepositProps = {
   reclaimScript: string;
   txId: string;
   vout: number;
-
   bitcoinReturnAddress: string;
+  walletNetwork?: DefaultNetworkConfigurations;
 };
 
 export const constructPsbtForReclaim = ({
   depositAmount,
   feeAmount,
-
   lockTime,
   depositScript,
   reclaimScript,
-
   txId,
   vout,
-
   bitcoinReturnAddress,
+  walletNetwork,
 }: ReclaimDepositProps) => {
   const uInt8DepositScript = hexToUint8Array(depositScript);
   const uInt8ReclaimScript = hexToUint8Array(reclaimScript);
@@ -72,7 +76,8 @@ export const constructPsbtForReclaim = ({
     throw new Error("Failed to compute Merkle root.");
   }
 
-  const network = bitcoin.networks.regtest;
+  const network = getBitcoinNetwork(walletNetwork);
+
   const psbt = new bitcoin.Psbt({ network });
 
   const p2trRes = bitcoin.payments.p2tr({
