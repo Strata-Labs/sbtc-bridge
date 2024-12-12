@@ -91,14 +91,11 @@ const ReclaimManager = () => {
       fetchDepositInfoFromEmily();
       return;
     }
-  }, []);
+  }, [searchParams]);
 
-  const setStep = useCallback(
-    (newStep: RECLAIM_STEP) => {
-      _setStep(newStep);
-    },
-    [searchParams],
-  );
+  const setStep = useCallback((newStep: RECLAIM_STEP) => {
+    _setStep(newStep);
+  }, []);
 
   const renderStep = () => {
     switch (step) {
@@ -381,12 +378,19 @@ const ReclaimDeposit = ({
         bitcoinReturnAddress: btcAddress,
       });
 
-      // sign the transaction through api
+      await signPSBT(unsignedTxHex);
+    } catch (err) {
+      console.error("Error building reclaim transaction", err);
+    }
+  };
+
+  const signPSBT = async (psbtHex: string) => {
+    try {
       const signPsbtRequestParams: SignPsbtRequestParams = {
-        hex: unsignedTxHex,
+        hex: psbtHex,
         network: walletNetwork,
 
-        broadcast: true,
+        broadcast: false,
       };
 
       const response = await window.LeatherProvider?.request(
@@ -401,21 +405,41 @@ const ReclaimDeposit = ({
         const finalizedTxHex = finalizePsbt(signedTxHex);
 
         console.log("finalizedTxHex", finalizedTxHex);
-        const transactionId = createTransactionFromHex(finalizedTxHex);
 
-        const broadcastTransaction = await transmitRawTransaction(
-          finalizedTxHex,
-        );
-
-        console.log("broadcastTransaction", broadcastTransaction);
-
-        console.log("transactionId", transactionId);
-        // set a query params to the transaction id as reclaimTxId and updated the status
-
-        router.push(`/reclaim?reclaimTxId=${transactionId}`);
+        await broadcastTransaction(finalizedTxHex);
+      } else {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: "Error signing PSBT",
+        });
       }
     } catch (err) {
-      console.error("Error building reclaim transaction", err);
+      console.warn("Error signing PSBT", err);
+      throw new Error("Error signing PSBT");
+    }
+  };
+
+  const broadcastTransaction = async (finalizedTxHex: string) => {
+    try {
+      const broadcastTransaction = await transmitRawTransaction(finalizedTxHex);
+
+      if (!broadcastTransaction) {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: "Error broadcasting transaction",
+        });
+        return;
+      }
+      const transactionId = createTransactionFromHex(finalizedTxHex);
+
+      console.log("broadcastTransaction", broadcastTransaction);
+
+      console.log("transactionId", transactionId);
+      // set a query params to the transaction id as reclaimTxId and updated the status
+
+      router.push(`/reclaim?reclaimTxId=${transactionId}`);
+    } catch (err) {
+      console.warn("Error broadcasting transaction", err);
     }
   };
 
@@ -489,19 +513,9 @@ const CurrentStatusReclaim = ({
     return steps.findIndex((step) => step === status);
   }, [status]);
 
-<<<<<<< HEAD
   const mempoolUrl = useMemo(() => {
     return `${MEMPOOL_URL}/tx/${txId}`;
   }, [MEMPOOL_URL, txId]);
-=======
-  const memepoolUrl = useMemo(() => {
-    const testNetUrl = "https://mempool.bitcoin.regtest.hiro.so/tx/";
-    const mainnetUrl = "https://mempool.space/tx/";
-
-    const apiUrl = walletNetwork === "sbtcTestnet" ? testNetUrl : mainnetUrl;
-
-    return `${apiUrl}${txId}`;
-  }, []);
 
   const renderCurrenStatusText = () => {
     if (status === ReclaimStatus.Pending) {
@@ -518,7 +532,6 @@ const CurrentStatusReclaim = ({
       );
     }
   };
->>>>>>> e9d5523 (feature - add broadcast)
   return (
     <FlowLoaderContainer showLoader={showLoader}>
       <>
