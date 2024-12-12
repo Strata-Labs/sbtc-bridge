@@ -7,7 +7,7 @@ import { Taptree } from "bitcoinjs-lib/src/types";
 import * as bip341 from "bitcoinjs-lib/src/payments/bip341";
 
 import ecc from "@bitcoinerlab/secp256k1";
-// const ECPair: ECPairAPI = ECPairFactory(ecc);
+
 bitcoin.initEccLib(ecc);
 
 export const NUMS_X_COORDINATE = new Uint8Array([
@@ -15,8 +15,6 @@ export const NUMS_X_COORDINATE = new Uint8Array([
   0xe9, 0x7a, 0x5e, 0x07, 0x8a, 0x5a, 0x0f, 0x28, 0xec, 0x96, 0xd5, 0x47, 0xbf,
   0xee, 0x9a, 0xce, 0x80, 0x3a, 0xc0,
 ]);
-
-//depositRequest.ts;
 
 // Helper function to convert a little-endian 8-byte number to big-endian
 const flipEndian = (buffer: Uint8Array): Uint8Array => {
@@ -51,16 +49,13 @@ export const createDepositScript = (
   opDropDataTogether.set(BEmaxFee);
   opDropDataTogether.set(opDropData, BEmaxFee.length);
 
-  const ting = bitcoin.script.compile([
+  return bitcoin.script.compile([
     opDropDataTogether,
     bitcoin.opcodes.OP_DROP,
     signersPubKey,
     bitcoin.opcodes.OP_CHECKSIG,
   ]);
-
-  return ting;
 };
-//the max fee is 8 bytes, big endian
 
 export const createReclaimScript = (
   lockTime: number,
@@ -71,9 +66,9 @@ export const createReclaimScript = (
   // Convert the user public key to a Uint8Array
   const pubkey = hexToUint8Array(userPublicKey);
   // remove the 0x04 prefix
-  const schnorPublicKey = pubkey.slice(1);
+  const schnorrPublicKey = pubkey.slice(1);
 
-  // Encode lockTime using bitcoin.script.number.encode (ensure minimal encoding)
+  // Encode lockTime
   const lockTimeEncoded = script.number.encode(lockTime);
 
   // Return the combined Uint8Array
@@ -81,11 +76,9 @@ export const createReclaimScript = (
     lockTimeEncoded,
     opcodes.OP_CHECKSEQUENCEVERIFY,
     opcodes.OP_DROP,
-    schnorPublicKey,
+    schnorrPublicKey,
     opcodes.OP_CHECKSIG,
   ]);
-
-  //throw new Error("Not implemented");
 
   return buildScript;
 };
@@ -111,13 +104,8 @@ export const createDepositAddress = (
   const depositScript = Buffer.from(
     createDepositScript(internalPubkey, maxFee, recipientBytes),
   );
-  // convert buffer to hex
 
-  //  Hash the leaf scripts using tapLeafHash
-
-  // const reclaimScriptHash = bip341.tapleafHash({ output: reclaimScript });
-  // const reclaimScriptHashHex = uint8ArrayToHexString(reclaimScriptHash);
-  // Combine the leaf hashes into a Merkle root using tapBranch
+  // Combine the leaves into a Merkle root
   const merkleRoot = bip341.toHashTree([
     { output: depositScript },
     { output: reclaimScript },
@@ -132,7 +120,6 @@ export const createDepositAddress = (
     },
   ];
 
-  // const merkleRootHex = uint8ArrayToHexString(merkleRoot.hash);
   // Create an internal public key (replace with actual internal public key if available)
 
   // Create the final taproot public key by tweaking internalPubkey with merkleRoot
@@ -141,7 +128,6 @@ export const createDepositAddress = (
 
   const tweak = bip341.tapTweakHash(NUMS_X_COORDINATE, merkleRoot.hash);
 
-  // const tweakHex = uint8ArrayToHexString(tweak);
   // Step 2: Apply the tweak to the internal public key to get the tweaked Taproot output key
 
   const taprootPubKey = bip341.tweakKey(NUMS_X_COORDINATE, tweak);
@@ -149,7 +135,6 @@ export const createDepositAddress = (
   if (taprootPubKey === null) {
     throw new Error("Failed to tweak the internal public key.");
   }
-  // const taprootPubKeyHex = uint8ArrayToHexString(taprootPubKey.x);
 
   // Step 1: Convert the Taproot public key to a P2TR address
   const p2tr = bitcoin.payments.p2tr({
@@ -158,9 +143,6 @@ export const createDepositAddress = (
     scriptTree: scriptTree,
   }) as bitcoin.Payment;
 
-  // ensure
-
-  // key: toXOnly(keypair.publicKey),
   // Validate the output script is correct (P2TR has a specific witness program structure)
   const outputScript = p2tr.output;
   if (outputScript) {
@@ -172,17 +154,11 @@ export const createDepositAddress = (
     throw new Error("Failed to generate P2TR output.");
   }
 
-  console.log("p2tr 0x01", p2tr.address);
   if (p2tr === undefined) {
     throw new Error("Output is undefined");
   }
 
-  if (p2tr?.address === undefined) {
-    console.log("Address is undefined");
-  }
-
   if ("address" in p2tr && typeof p2tr.address === "string") {
-    console.log("Address exists:", p2tr.address);
     return p2tr.address;
   } else {
     throw new Error("Could not create address");
