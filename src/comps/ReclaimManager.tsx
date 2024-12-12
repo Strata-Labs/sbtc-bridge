@@ -21,7 +21,6 @@ import {
   createTransactionFromHex,
   finalizePsbt,
 } from "@/util/reclaimHelper";
-import { SignatureHash } from "@leather.io/rpc";
 import {
   getRawTransaction,
   transmitRawTransaction,
@@ -326,14 +325,6 @@ type ReclaimDepositProps = {
   amount: number;
   depositTransaction: EmilyDepositTransactionType;
 };
-interface SignPsbtRequestParams {
-  hex: string;
-  allowedSighash?: SignatureHash[];
-  signAtIndex?: number | number[];
-  network?: string;
-  account?: number;
-  broadcast?: boolean;
-}
 
 const ReclaimDeposit = ({
   amount,
