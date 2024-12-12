@@ -221,7 +221,7 @@ const ReclaimManager = () => {
 
       // we want to get the deposit info from Emily
       /*
-        that means we need the txId of the deposit and optinoal the output index
+        that means we need the txId of the deposit and optionally the output index
         - if no output index is found in the search params assume its' 0
 
         1) fetch the deposit info from Emily
