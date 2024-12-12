@@ -25,8 +25,10 @@ export const useReclaimStatus = (txId: string) => {
         });
 
         let status = ReclaimStatus.Pending;
+
         if (reclaimTx.status.confirmed) {
           status = ReclaimStatus.Completed;
+          clearInterval(interval);
         }
 
         setReclaimStatus(status);
