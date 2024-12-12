@@ -89,7 +89,6 @@ export const getRawTransaction = async (
 export const transmitRawTransaction = async (hex: string): Promise<any> => {
   const baseURL = env.MEMPOOL_API_URL;
 
-  console.log("hex", hex);
   const result = await fetch(`${baseURL}/tx`, {
     method: "POST",
     headers: {
@@ -99,7 +98,11 @@ export const transmitRawTransaction = async (hex: string): Promise<any> => {
   });
 
   const res = await result.text();
-  console.log("res", res);
 
   return res;
+};
+
+export const getCurrentBlockHeight = async () => {
+  const result = await fetch(`${env.MEMPOOL_API_URL}/blocks/tip/height`);
+  return Number(await result.text());
 };

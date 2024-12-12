@@ -1,7 +1,8 @@
 import { DepositStatus, useDepositStatus } from "@/hooks/use-deposit-status";
-import { CheckCircleIcon } from "@heroicons/react/24/outline";
+import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 import { useMemo } from "react";
+import Link from "next/link";
 
 export function Step({
   name,
@@ -65,24 +66,49 @@ export function DepositStepper({ txId }: { txId: string }) {
   }, [status]);
   return (
     <div className="flex flex-col gap-4 w-full ">
-      {status !== DepositStatus.Completed ? (
+      {(status === DepositStatus.PendingConfirmation ||
+        status === DepositStatus.PendingMint) && (
         <div
           className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-orange"
           role="status"
         ></div>
-      ) : (
+      )}
+      {status === DepositStatus.Completed && (
         <CheckCircleIcon className="text-green-600 w-12" />
       )}
-      <ol className="flex items-center w-full text-xs text-gray-900 font-medium sm:text-base text-black">
-        <Step currentStep={currentStep} index={0} name="Pending" lastStep={2} />
-        <Step currentStep={currentStep} index={1} name="Minting" lastStep={2} />
-        <Step
-          currentStep={currentStep}
-          index={2}
-          name="Completed"
-          lastStep={2}
-        />
-      </ol>
+      {status === DepositStatus.Failed && (
+        <XCircleIcon className="text-red-500 w-12" />
+      )}
+      {status !== DepositStatus.Failed && (
+        <ol className="flex items-center w-full text-xs text-gray-900 font-medium sm:text-base text-black">
+          <Step
+            currentStep={currentStep}
+            index={0}
+            name="Pending"
+            lastStep={2}
+          />
+          <Step
+            currentStep={currentStep}
+            index={1}
+            name="Minting"
+            lastStep={2}
+          />
+          <Step
+            currentStep={currentStep}
+            index={2}
+            name="Completed"
+            lastStep={2}
+          />
+        </ol>
+      )}
+      {status === DepositStatus.Failed && (
+        <Link
+          href={`/reclaim?depositTxId=${txId}`}
+          className="w-40 rounded-lg py-3 flex justify-center items-center flex-row bg-orange disabled:opacity-50 disabled:cursor-not-allowed "
+        >
+          Reclaim Deposit
+        </Link>
+      )}
     </div>
   );
 }

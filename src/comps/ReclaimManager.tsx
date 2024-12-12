@@ -21,9 +21,11 @@ import {
 } from "@/util/reclaimHelper";
 import { SignatureHash } from "@leather.io/rpc";
 import { Step } from "./deposit-stepper";
-import { getReclaimInfo } from "@/util/tx-utils";
 import { ReclaimStatus, useReclaimStatus } from "@/hooks/use-reclaim-status";
-import { transmitRawTransaction } from "@/actions/bitcoinClient";
+import {
+  getRawTransaction,
+  transmitRawTransaction,
+} from "@/actions/bitcoinClient";
 
 enum RECLAIM_STEP {
   LOADING = "LOADING",
@@ -153,7 +155,7 @@ const ReclaimManager = () => {
         return;
       }
 
-      const reclaimTransaction = await getReclaimInfo({ reclaimTxId });
+      const reclaimTransaction = await getRawTransaction(reclaimTxId);
 
       if (reclaimTransaction) {
         setStep(RECLAIM_STEP.CURRENT_STATUS);
@@ -177,7 +179,7 @@ const ReclaimManager = () => {
   const fetchDepositAmount = async () => {
     try {
       const depositTxId = searchParams.get("depositTxId");
-      const voutIndex = searchParams.get("vout") || 0;
+      const voutIndex = Number(searchParams.get("vout") || 0);
       // ensure we have the depositTxId
       if (!depositTxId) {
         notify({
@@ -187,21 +189,7 @@ const ReclaimManager = () => {
         setStep(RECLAIM_STEP.NOT_FOUND);
         return;
       }
-
-      const url = `/api/tx?txId=${depositTxId}`;
-
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error with the request");
-      }
-
-      const responseData = await response.json();
+      const responseData = await getRawTransaction(depositTxId);
 
       // get the amount from vout array
       const vout = responseData.vout;
@@ -414,7 +402,6 @@ const ReclaimDeposit = ({
         });
       }
     } catch (err) {
-      console.warn("Error signing PSBT", err);
       throw new Error("Error signing PSBT");
     }
   };
@@ -478,8 +465,8 @@ const ReclaimDeposit = ({
           <div className="w-full p-4 bg-lightOrange h-20 rounded-lg flex flex-row items-center justify-center gap-2">
             <InformationCircleIcon className="h-10 w-10 text-orange" />
             <p className="text-orange font-Matter font-semibold text-sm break-keep">
-              Please note that deposit wont be able to be reclaimed till after
-              enough blocks have passed from its locktime
+              Please note that deposit will not be available for reclaiming
+              until after enough blocks have passed from its locktime
             </p>
           </div>
         </div>
@@ -511,7 +498,7 @@ const CurrentStatusReclaim = ({
   const showLoader = status === ReclaimStatus.Pending;
 
   const currentStep = useMemo(() => {
-    const steps = [ReclaimStatus.Pending, ReclaimStatus.Completed];
+    const steps = [ReclaimStatus.Pending, 0, ReclaimStatus.Completed];
     return steps.findIndex((step) => step === status);
   }, [status]);
 

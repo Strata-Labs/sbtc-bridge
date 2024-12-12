@@ -1,5 +1,5 @@
+import { getRawTransaction } from "@/actions/bitcoinClient";
 import { useEffect, useState } from "react";
-import { getReclaimInfo } from "@/util/tx-utils";
 
 export enum ReclaimStatus {
   Pending = "pending",
@@ -20,10 +20,7 @@ export const useReclaimStatus = (txId: string) => {
       // setReclaimStatus(ReclaimStatus.Completed);
 
       const interval = setInterval(async () => {
-        const reclaimTx = await getReclaimInfo({
-          reclaimTxId: txId,
-        });
-
+        const reclaimTx = await getRawTransaction(txId);
         let status = ReclaimStatus.Pending;
 
         if (reclaimTx.status.confirmed) {
@@ -35,7 +32,7 @@ export const useReclaimStatus = (txId: string) => {
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [txId]);
+  }, [reclaimStatus, txId]);
 
   return reclaimStatus;
 };
