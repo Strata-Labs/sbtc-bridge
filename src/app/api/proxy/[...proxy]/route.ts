@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Proxy all other routes to the base proxy URL
-    const proxyUrl = `${MEMPOOL_API_URL}${path}`;
+    const proxyUrl = `${MEMPOOL_API_URL}/${path}`;
     const response = await fetch(proxyUrl, {
       method: req.method,
       headers: req.headers, // Pass along incoming headers

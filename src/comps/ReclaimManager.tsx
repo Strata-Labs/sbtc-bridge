@@ -4,7 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlowContainer, FlowLoaderContainer } from "./core/FlowContainer";
 import { Heading, SubText } from "./core/Heading";
 import { useShortAddress } from "@/hooks/use-short-address";
-import { InformationCircleIcon } from "@heroicons/react/16/solid";
+import {
+  InformationCircleIcon,
+  ArrowTopRightOnSquareIcon,
+} from "@heroicons/react/16/solid";
 import { PrimaryButton } from "./core/FlowButtons";
 import { useAtomValue } from "jotai";
 import { bridgeConfigAtom, walletInfoAtom } from "@/util/atoms";
@@ -63,8 +66,6 @@ type EmilyDepositTransactionType = {
 // };
 
 const ReclaimManager = () => {
-  // const router = useRouter();
-  // const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const { notify } = useNotifications();
@@ -91,6 +92,8 @@ const ReclaimManager = () => {
       fetchDepositInfoFromEmily();
       return;
     }
+    // no need to include the fetch fns
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const setStep = useCallback((newStep: RECLAIM_STEP) => {
@@ -546,15 +549,10 @@ const CurrentStatusReclaim = ({
             </p>
           </div>
           <div className="flex flex-col gap-1">
-            <SubText>View In Mempool</SubText>
-            <p className="text-black font-Matter font-semibold text-sm">
-              <a
-                href={mempoolUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-orange"
-              >
-                Link
+            <p className="text-orange underline underline-offset-1 font-Matter font-semibold text-sm ">
+              <a href={mempoolUrl} target="_blank" rel="noreferrer">
+                View in mempool
+                <ArrowTopRightOnSquareIcon className="inline-block w-4 h-4 ml-1" />
               </a>
             </p>
           </div>
