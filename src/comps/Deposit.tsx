@@ -241,14 +241,8 @@ const DepositFlowConfirm = ({
       const serializedAddress = serializeCVBytes(principalCV(stxAddress));
 
       // get the publicKey from the user payment address
-      const paymentAddress = walletInfo.addresses.payment;
-      if (!paymentAddress) {
-        notify({
-          type: NotificationStatusType.ERROR,
-          message: `Payment address not found`,
-        });
-        return;
-      }
+      // user cannot continue if they're not connected
+      const paymentAddress = walletInfo.addresses.payment!;
 
       const reclaimPublicKey = paymentAddress.publicKey;
 
