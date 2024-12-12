@@ -32,7 +32,7 @@ import {
   signPSBTXverse,
 } from "@/util/wallet-utils/src/sign-psbt";
 
-/* 
+/*
   Goal : User server side rendering as much as possible
   - Break down the components into either their own file or smaller components
 */
@@ -377,43 +377,39 @@ const ReclaimDeposit = ({
   };
 
   const signPSBT = async (psbtHex: string) => {
-    try {
-      // const signPsbtRequestParams: SignPsbtRequestParams = {
-      //   hex: psbtHex,
-      //   network: walletNetwork,
+    // const signPsbtRequestParams: SignPsbtRequestParams = {
+    //   hex: psbtHex,
+    //   network: walletNetwork,
 
-      //   broadcast: false,
-      // };
+    //   broadcast: false,
+    // };
 
-      // const response = await window.LeatherProvider?.request(
-      //   "signPsbt",
-      //   signPsbtRequestParams,
-      // );
-      const params = {
-        hex: psbtHex,
-        address: walletInfo.addresses.payment!.address,
-        network: walletNetwork,
-      };
-      let signedPsbt = "";
-      if (walletInfo.selectedWallet === WalletProvider.LEATHER) {
-        signedPsbt = await signPSBTLeather(params);
-      }
-      if (walletInfo.selectedWallet === WalletProvider.XVERSE) {
-        signedPsbt = await signPSBTXverse(params);
-      }
+    // const response = await window.LeatherProvider?.request(
+    //   "signPsbt",
+    //   signPsbtRequestParams,
+    // );
+    const params = {
+      hex: psbtHex,
+      address: walletInfo.addresses.payment!.address,
+      network: walletNetwork,
+    };
+    let signedPsbt = "";
+    if (walletInfo.selectedWallet === WalletProvider.LEATHER) {
+      signedPsbt = await signPSBTLeather(params);
+    }
+    if (walletInfo.selectedWallet === WalletProvider.XVERSE) {
+      signedPsbt = await signPSBTXverse(params);
+    }
 
-      if (signedPsbt) {
-        const finalizedTxHex = finalizePsbt(signedPsbt, walletNetwork);
+    if (signedPsbt) {
+      const finalizedTxHex = finalizePsbt(signedPsbt, walletNetwork);
 
-        await broadcastTransaction(finalizedTxHex);
-      } else {
-        notify({
-          type: NotificationStatusType.ERROR,
-          message: "Error signing PSBT",
-        });
-      }
-    } catch (err) {
-      throw new Error("Error signing PSBT");
+      await broadcastTransaction(finalizedTxHex);
+    } else {
+      notify({
+        type: NotificationStatusType.ERROR,
+        message: "Error signing PSBT",
+      });
     }
   };
 
