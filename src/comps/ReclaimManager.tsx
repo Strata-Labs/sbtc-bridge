@@ -580,14 +580,3 @@ const CurrentStatusReclaim = ({
     </FlowLoaderContainer>
   );
 };
-
-const TransactionConfirmation = () => {
-  return (
-    <div
-      style={{
-        backgroundColor: "rgba(253, 157, 65, 0.1)",
-      }}
-      className="absolute m-auto inset-0 w-96 h-96 rounded-lg flex flex-col items-center justify-center gap"
-    ></div>
-  );
-};
