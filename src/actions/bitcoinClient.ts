@@ -87,10 +87,10 @@ export const getRawTransaction = async (
 
 // Function to transmit a raw transaction to the network
 export const transmitRawTransaction = async (hex: string): Promise<any> => {
-  const baseURL = env.MEMPOOL_URL;
+  const baseURL = env.MEMPOOL_API_URL;
 
   console.log("hex", hex);
-  const result = await fetch(`${baseURL}/api/tx`, {
+  const result = await fetch(`${baseURL}/tx`, {
     method: "POST",
     headers: {
       "Content-Type": "text/plain",
