@@ -1,16 +1,18 @@
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FlowContainer, FlowLoaderContainer } from "./core/FlowContainer";
+import { useCallback, useEffect, useState } from "react";
+import { FlowContainer } from "./core/FlowContainer";
 import { Heading, SubText } from "./core/Heading";
 import { useShortAddress } from "@/hooks/use-short-address";
-import {
-  InformationCircleIcon,
-  ArrowTopRightOnSquareIcon,
-} from "@heroicons/react/16/solid";
+import { InformationCircleIcon } from "@heroicons/react/16/solid";
 import { PrimaryButton } from "./core/FlowButtons";
-import { useAtomValue } from "jotai";
-import { bridgeConfigAtom, walletInfoAtom } from "@/util/atoms";
+import { useAtomValue, useSetAtom } from "jotai";
+import {
+  bridgeConfigAtom,
+  walletInfoAtom,
+  showConnectWalletAtom,
+  WalletProvider,
+} from "@/util/atoms";
 
 import { useNotifications } from "@/hooks/use-notifications";
 import { NotificationStatusType } from "./Notifications";
@@ -20,13 +22,20 @@ import {
   finalizePsbt,
 } from "@/util/reclaimHelper";
 import { SignatureHash } from "@leather.io/rpc";
-import { Step } from "./deposit-stepper";
-import { ReclaimStatus, useReclaimStatus } from "@/hooks/use-reclaim-status";
 import {
   getRawTransaction,
   transmitRawTransaction,
 } from "@/actions/bitcoinClient";
+import ReclaimStepper from "./reclaim/reclaim-stepper";
+import {
+  signPSBTLeather,
+  signPSBTXverse,
+} from "@/util/wallet-utils/src/sign-psbt";
 
+/* 
+  Goal : User server side rendering as much as possible
+  - Break down the components into either their own file or smaller components
+*/
 enum RECLAIM_STEP {
   LOADING = "LOADING",
   NOT_FOUND = "NOT_FOUND",
@@ -59,13 +68,6 @@ type EmilyDepositTransactionType = {
     BtcFee: number;
   };
 };
-
-// type ReclaimTxType = {
-//   txId: string;
-//   status: {
-//     confirmed: boolean;
-//   };
-// };
 
 const ReclaimManager = () => {
   const searchParams = useSearchParams();
@@ -132,7 +134,7 @@ const ReclaimManager = () => {
           return null;
         }
 
-        return <CurrentStatusReclaim amount={amount} txId={reclaimTxId} />;
+        return <ReclaimStepper amount={amount} txId={reclaimTxId} />;
       case RECLAIM_STEP.LOADING:
         return <LoadingInfo />;
       case RECLAIM_STEP.NOT_FOUND:
@@ -339,24 +341,23 @@ const ReclaimDeposit = ({
 }: ReclaimDepositProps) => {
   const { notify } = useNotifications();
   const walletInfo = useAtomValue(walletInfoAtom);
+  const setShowWallet = useSetAtom(showConnectWalletAtom);
   const router = useRouter();
 
   const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
 
   const buildReclaimTransaction = async () => {
     try {
+      // FIXME: move to env
       const maxReclaimFee = 5000;
 
       const btcAddress = getWalletAddress();
 
       if (!btcAddress) {
-        notify({
-          type: NotificationStatusType.ERROR,
-          message: "No Bitcoin address found",
-        });
-        return;
+        return setShowWallet(true);
       }
 
+      // FIXME: move to util or its own file
       const unsignedTxHex = constructPsbtForReclaim({
         depositAmount: amount * 1e8,
         feeAmount: maxReclaimFee,
@@ -377,22 +378,32 @@ const ReclaimDeposit = ({
 
   const signPSBT = async (psbtHex: string) => {
     try {
-      const signPsbtRequestParams: SignPsbtRequestParams = {
+      // const signPsbtRequestParams: SignPsbtRequestParams = {
+      //   hex: psbtHex,
+      //   network: walletNetwork,
+
+      //   broadcast: false,
+      // };
+
+      // const response = await window.LeatherProvider?.request(
+      //   "signPsbt",
+      //   signPsbtRequestParams,
+      // );
+      const params = {
         hex: psbtHex,
+        address: walletInfo.addresses.payment!.address,
         network: walletNetwork,
-
-        broadcast: false,
       };
+      let signedPsbt = "";
+      if (walletInfo.selectedWallet === WalletProvider.LEATHER) {
+        signedPsbt = await signPSBTLeather(params);
+      }
+      if (walletInfo.selectedWallet === WalletProvider.XVERSE) {
+        signedPsbt = await signPSBTXverse(params);
+      }
 
-      const response = await window.LeatherProvider?.request(
-        "signPsbt",
-        signPsbtRequestParams,
-      );
-
-      if (response && response.result) {
-        const signedTxHex = response.result.hex;
-
-        const finalizedTxHex = finalizePsbt(signedTxHex, walletNetwork);
+      if (signedPsbt) {
+        const finalizedTxHex = finalizePsbt(signedPsbt, walletNetwork);
 
         await broadcastTransaction(finalizedTxHex);
       } else {
@@ -471,97 +482,11 @@ const ReclaimDeposit = ({
           </div>
         </div>
         <div className="w-full flex-row flex justify-between items-center">
-          <PrimaryButton
-            onClick={() => {
-              buildReclaimTransaction();
-            }}
-          >
+          <PrimaryButton onClick={buildReclaimTransaction}>
             RECLAIM
           </PrimaryButton>
         </div>
       </>
     </FlowContainer>
-  );
-};
-
-const CurrentStatusReclaim = ({
-  txId,
-  amount,
-}: {
-  txId: string;
-  amount: number;
-}) => {
-  const { MEMPOOL_URL } = useAtomValue(bridgeConfigAtom);
-
-  const status = useReclaimStatus(txId);
-
-  const showLoader = status === ReclaimStatus.Pending;
-
-  const currentStep = useMemo(() => {
-    const steps = [ReclaimStatus.Pending, 0, ReclaimStatus.Completed];
-    return steps.findIndex((step) => step === status);
-  }, [status]);
-
-  const mempoolUrl = useMemo(() => {
-    return `${MEMPOOL_URL}/tx/${txId}`;
-  }, [MEMPOOL_URL, txId]);
-
-  const renderCurrenStatusText = () => {
-    if (status === ReclaimStatus.Pending) {
-      return (
-        <SubText>Reclaim transaction is pending confirmation on chain</SubText>
-      );
-    } else if (status === ReclaimStatus.Completed) {
-      return <SubText>Reclaim transaction has been confirmed on chain</SubText>;
-    } else {
-      return (
-        <SubText>
-          Something went wrong getting the status, please reach out for help
-        </SubText>
-      );
-    }
-  };
-  return (
-    <FlowLoaderContainer showLoader={showLoader}>
-      <>
-        <div className="w-full flex flex-row items-center justify-between">
-          <Heading>Reclaim Status</Heading>
-        </div>
-        {renderCurrenStatusText()}
-        <div className="flex flex-col  gap-2">
-          <div className="flex flex-col gap-1">
-            <SubText>Amount To Reclaim</SubText>
-            <p className="text-black font-Matter font-semibold text-sm">
-              {amount} BTC
-            </p>
-          </div>
-          <div className="flex flex-col gap-1">
-            <p className="text-orange underline underline-offset-1 font-Matter font-semibold text-sm ">
-              <a href={mempoolUrl} target="_blank" rel="noreferrer">
-                View in mempool
-                <ArrowTopRightOnSquareIcon className="inline-block w-4 h-4 ml-1" />
-              </a>
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-col mt-2 gap-4 w-full ">
-          <ol className="flex items-center w-full text-xs text-gray-900 font-medium sm:text-base text-black">
-            <Step
-              currentStep={currentStep}
-              index={0}
-              name="Pending"
-              lastStep={1}
-            />
-            <Step
-              currentStep={currentStep}
-              index={1}
-              name="Completed"
-              lastStep={1}
-            />
-          </ol>
-        </div>
-      </>
-    </FlowLoaderContainer>
   );
 };
