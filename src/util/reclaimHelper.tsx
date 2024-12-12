@@ -2,7 +2,6 @@ import * as bip341 from "bitcoinjs-lib/src/payments/bip341";
 import * as bitcoin from "bitcoinjs-lib";
 
 import { Taptree } from "bitcoinjs-lib/src/types";
-import { buildLeafIndexFinalizer } from "./validateTapLeaf";
 
 import { hexToBytes as hexToUint8Array } from "@stacks/common";
 import { NUMS_X_COORDINATE } from "./depositRequest";
