@@ -20,6 +20,7 @@ import { SignatureHash } from "@leather.io/rpc";
 import { Step } from "./deposit-stepper";
 import { getReclaimInfo } from "@/util/tx-utils";
 import { ReclaimStatus, useReclaimStatus } from "@/hooks/use-reclaim-status";
+import { transmitRawTransaction } from "@/actions/bitcoinClient";
 
 enum RECLAIM_STEP {
   LOADING = "LOADING",
@@ -90,7 +91,7 @@ const ReclaimManager = () => {
       fetchDepositInfoFromEmily();
       return;
     }
-  }, []);
+  }, [searchParams]);
 
   const setStep = useCallback((newStep: RECLAIM_STEP) => {
     _setStep(newStep);
@@ -377,12 +378,19 @@ const ReclaimDeposit = ({
         bitcoinReturnAddress: btcAddress,
       });
 
-      // sign the transaction through api
+      await signPSBT(unsignedTxHex);
+    } catch (err) {
+      console.error("Error building reclaim transaction", err);
+    }
+  };
+
+  const signPSBT = async (psbtHex: string) => {
+    try {
       const signPsbtRequestParams: SignPsbtRequestParams = {
-        hex: unsignedTxHex,
+        hex: psbtHex,
         network: walletNetwork,
 
-        broadcast: true,
+        broadcast: false,
       };
 
       const response = await window.LeatherProvider?.request(
@@ -395,14 +403,42 @@ const ReclaimDeposit = ({
 
         const finalizedTxHex = finalizePsbt(signedTxHex);
 
-        const transactionId = createTransactionFromHex(finalizedTxHex);
-
-        // set a query params to the transaction id as reclaimTxId and updated the status
-
-        router.push(`/reclaim?reclaimTxId=${transactionId}`);
+        await broadcastTransaction(finalizedTxHex);
+      } else {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: "Error signing PSBT",
+        });
       }
     } catch (err) {
-      console.error("Error building reclaim transaction", err);
+      console.warn("Error signing PSBT", err);
+      throw new Error("Error signing PSBT");
+    }
+  };
+
+  const broadcastTransaction = async (finalizedTxHex: string) => {
+    try {
+      const broadcastTransaction = await transmitRawTransaction(finalizedTxHex);
+
+      if (!broadcastTransaction) {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: "Error broadcasting transaction",
+        });
+        return;
+      }
+      notify({
+        type: NotificationStatusType.SUCCESS,
+        message: "Reclaim transaction broadcasted",
+      });
+
+      const transactionId = createTransactionFromHex(finalizedTxHex);
+
+      // set a query params to the transaction id as reclaimTxId and updated the status
+
+      router.push(`/reclaim?reclaimTxId=${transactionId}`);
+    } catch (err) {
+      console.warn("Error broadcasting transaction", err);
     }
   };
 
@@ -479,12 +515,29 @@ const CurrentStatusReclaim = ({
   const mempoolUrl = useMemo(() => {
     return `${MEMPOOL_URL}/tx/${txId}`;
   }, [MEMPOOL_URL, txId]);
+
+  const renderCurrenStatusText = () => {
+    if (status === ReclaimStatus.Pending) {
+      return (
+        <SubText>Reclaim transaction is pending confirmation on chain</SubText>
+      );
+    } else if (status === ReclaimStatus.Completed) {
+      return <SubText>Reclaim transaction has been confirmed on chain</SubText>;
+    } else {
+      return (
+        <SubText>
+          Something went wrong getting the status, please reach out for help
+        </SubText>
+      );
+    }
+  };
   return (
     <FlowLoaderContainer showLoader={showLoader}>
       <>
         <div className="w-full flex flex-row items-center justify-between">
-          <Heading>Reclaim Transaction Status</Heading>
+          <Heading>Reclaim Status</Heading>
         </div>
+        {renderCurrenStatusText()}
         <div className="flex flex-col  gap-2">
           <div className="flex flex-col gap-1">
             <SubText>Amount To Reclaim</SubText>
@@ -507,7 +560,7 @@ const CurrentStatusReclaim = ({
           </div>
         </div>
 
-        <div className="flex flex-col mt-8 gap-4 w-full ">
+        <div className="flex flex-col mt-2 gap-4 w-full ">
           <ol className="flex items-center w-full text-xs text-gray-900 font-medium sm:text-base text-black">
             <Step
               currentStep={currentStep}
@@ -525,5 +578,16 @@ const CurrentStatusReclaim = ({
         </div>
       </>
     </FlowLoaderContainer>
+  );
+};
+
+const TransactionConfirmation = () => {
+  return (
+    <div
+      style={{
+        backgroundColor: "rgba(253, 157, 65, 0.1)",
+      }}
+      className="absolute m-auto inset-0 w-96 h-96 rounded-lg flex flex-col items-center justify-center gap"
+    ></div>
   );
 };

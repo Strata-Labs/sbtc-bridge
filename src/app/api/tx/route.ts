@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
       throw new Error("btcAddress is required");
     }
 
-    const url = `${env.MEMPOOL_API_URL}/tx/${txId}`;
+    const url = `${env.MEMPOOL_URL}/api/tx/${txId}`;
 
     const response = await fetch(url, {
       method: "GET",
