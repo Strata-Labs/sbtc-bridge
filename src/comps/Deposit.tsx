@@ -240,7 +240,7 @@ const DepositFlowConfirm = ({
       // Combine the version and hash into a single Uint8Array
       const serializedAddress = serializeCVBytes(principalCV(stxAddress));
 
-      // get teh publicKey from the user payment address
+      // get the publicKey from the user payment address
       const paymentAddress = walletInfo.addresses.payment;
       if (!paymentAddress) {
         notify({
