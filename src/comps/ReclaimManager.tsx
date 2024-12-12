@@ -20,6 +20,7 @@ import { SignatureHash } from "@leather.io/rpc";
 import { Step } from "./deposit-stepper";
 import { getReclaimInfo } from "@/util/tx-utils";
 import { ReclaimStatus, useReclaimStatus } from "@/hooks/use-reclaim-status";
+import { transmitRawTransaction } from "@/actions/bitcoinClient";
 
 enum RECLAIM_STEP {
   LOADING = "LOADING",
@@ -92,9 +93,12 @@ const ReclaimManager = () => {
     }
   }, []);
 
-  const setStep = useCallback((newStep: RECLAIM_STEP) => {
-    _setStep(newStep);
-  }, []);
+  const setStep = useCallback(
+    (newStep: RECLAIM_STEP) => {
+      _setStep(newStep);
+    },
+    [searchParams],
+  );
 
   const renderStep = () => {
     switch (step) {
@@ -399,6 +403,12 @@ const ReclaimDeposit = ({
         console.log("finalizedTxHex", finalizedTxHex);
         const transactionId = createTransactionFromHex(finalizedTxHex);
 
+        const broadcastTransaction = await transmitRawTransaction(
+          finalizedTxHex,
+        );
+
+        console.log("broadcastTransaction", broadcastTransaction);
+
         console.log("transactionId", transactionId);
         // set a query params to the transaction id as reclaimTxId and updated the status
 
@@ -479,15 +489,43 @@ const CurrentStatusReclaim = ({
     return steps.findIndex((step) => step === status);
   }, [status]);
 
+<<<<<<< HEAD
   const mempoolUrl = useMemo(() => {
     return `${MEMPOOL_URL}/tx/${txId}`;
   }, [MEMPOOL_URL, txId]);
+=======
+  const memepoolUrl = useMemo(() => {
+    const testNetUrl = "https://mempool.bitcoin.regtest.hiro.so/tx/";
+    const mainnetUrl = "https://mempool.space/tx/";
+
+    const apiUrl = walletNetwork === "sbtcTestnet" ? testNetUrl : mainnetUrl;
+
+    return `${apiUrl}${txId}`;
+  }, []);
+
+  const renderCurrenStatusText = () => {
+    if (status === ReclaimStatus.Pending) {
+      return (
+        <SubText>Reclaim transaction is pending confirmation on chain</SubText>
+      );
+    } else if (status === ReclaimStatus.Completed) {
+      return <SubText>Reclaim transaction has been confirmed on chain</SubText>;
+    } else {
+      return (
+        <SubText>
+          Something went wrong getting the status, please reach out for help
+        </SubText>
+      );
+    }
+  };
+>>>>>>> e9d5523 (feature - add broadcast)
   return (
     <FlowLoaderContainer showLoader={showLoader}>
       <>
         <div className="w-full flex flex-row items-center justify-between">
-          <Heading>Reclaim Transaction Status</Heading>
+          <Heading>Reclaim Status</Heading>
         </div>
+        {renderCurrenStatusText()}
         <div className="flex flex-col  gap-2">
           <div className="flex flex-col gap-1">
             <SubText>Amount To Reclaim</SubText>
@@ -510,7 +548,7 @@ const CurrentStatusReclaim = ({
           </div>
         </div>
 
-        <div className="flex flex-col mt-8 gap-4 w-full ">
+        <div className="flex flex-col mt-2 gap-4 w-full ">
           <ol className="flex items-center w-full text-xs text-gray-900 font-medium sm:text-base text-black">
             <Step
               currentStep={currentStep}
@@ -528,5 +566,16 @@ const CurrentStatusReclaim = ({
         </div>
       </>
     </FlowLoaderContainer>
+  );
+};
+
+const TransactionConfirmation = () => {
+  return (
+    <div
+      style={{
+        backgroundColor: "rgba(253, 157, 65, 0.1)",
+      }}
+      className="absolute m-auto inset-0 w-96 h-96 rounded-lg flex flex-col items-center justify-center gap"
+    ></div>
   );
 };

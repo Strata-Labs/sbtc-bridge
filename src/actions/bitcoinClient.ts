@@ -84,3 +84,19 @@ export const getRawTransaction = async (
   const result = await fetch(`${baseURL}/tx/${txid}`);
   return await result.json();
 };
+
+// Function to transmit a raw transaction to the network
+export const transmitRawTransaction = async (hex: string): Promise<any> => {
+  const baseURL =
+    env.WALLET_NETWORK === "mainnet" ? env.MEMPOOL_API_URL : "/api/proxy";
+  const result = await fetch(`${baseURL}/tx`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ hex }),
+  });
+
+  console.log("result", result.json());
+  return await result.json();
+};
