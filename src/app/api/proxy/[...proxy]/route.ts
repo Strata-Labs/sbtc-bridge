@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
     if (path.endsWith("/utxo")) {
       // Special route for `/transaction/utxo`
 
-      // get teh second to last part of the url
+      // get the second to last part of the url
 
       // get the second to last part of the url
       const address = path.split("/")[1];

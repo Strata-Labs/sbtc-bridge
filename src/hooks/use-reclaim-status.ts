@@ -17,7 +17,6 @@ export const useReclaimStatus = (txId: string) => {
     if (txId && reclaimStatus !== ReclaimStatus.Completed) {
       // fetch the status of the reclaim tx from the bitcoin rpc
       // and update the reclaimStatus
-      // setReclaimStatus(ReclaimStatus.Completed);
 
       const interval = setInterval(async () => {
         const reclaimTx = await getRawTransaction(txId);
