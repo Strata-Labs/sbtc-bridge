@@ -27,35 +27,32 @@ export function useDepositStatus(txId: string) {
       transferTxStatus !== DepositStatus.Completed &&
       transferTxStatus !== DepositStatus.Failed
     ) {
+      const check = async () => {
+        const info = await getRawTransaction(txId);
+        if (info.status.confirmed) {
+          const currentBlockHeight = await getCurrentBlockHeight();
+          const unlockBlock =
+            Number(RECLAIM_LOCK_TIME || 144) + info.status.block_height;
+          const isPastLockTime = currentBlockHeight > unlockBlock;
+          if (isPastLockTime) {
+            setTransferTxStatus(DepositStatus.Failed);
+            clearInterval(interval);
+            return;
+          }
+          const txInfo = await getEmilyDepositInfo({
+            txId,
+            emilyURL: emilyUrl!,
+          });
+          setTransferTxStatus(txInfo.status as DepositStatus);
+        }
+      };
+
       const interval = setInterval(async () => {
-        const txInfo = await getEmilyDepositInfo({
-          txId,
-          emilyURL: emilyUrl!,
-        });
-        setTransferTxStatus(txInfo.status as DepositStatus);
-      }, 1000);
+        check();
+      }, 5000);
       return () => clearInterval(interval);
     }
-  }, [emilyUrl, transferTxStatus, txId]);
-
-  useEffect(() => {
-    const check = async () => {
-      const info = await getRawTransaction(txId);
-      if (info.status.confirmed) {
-        const currentBlockHeight = await getCurrentBlockHeight();
-        const unlockBlock =
-          Number(RECLAIM_LOCK_TIME || 144) + info.status.block_height;
-        const isPastLockTime = currentBlockHeight > unlockBlock;
-        if (isPastLockTime) {
-          setTransferTxStatus(DepositStatus.Failed);
-          clearInterval(interval);
-        }
-      }
-    };
-    check();
-    const interval = setInterval(check, 5000);
-    return () => clearInterval(interval);
-  }, [RECLAIM_LOCK_TIME, txId]);
+  }, [RECLAIM_LOCK_TIME, emilyUrl, transferTxStatus, txId]);
 
   return transferTxStatus;
 }
