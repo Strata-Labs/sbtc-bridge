@@ -7,7 +7,10 @@ export const env = {
   MEMPOOL_API_URL: (
     process.env.MEMPOOL_API_URL || "http://localhost:8083/api"
   ).replace(/\/$/, ""),
-  MEMPOOL_URL: process.env.MEMPOOL_URL,
+  MEMPOOL_URL: (process.env.MEMPOOL_URL || "http://localhost:8083").replace(
+    /\/$/,
+    "",
+  ),
 
   BITCOIN_RPC_USER_NAME: process.env.BITCOIN_RPC_USER_NAME || "devnet",
   BITCOIN_RPC_PASSWORD: process.env.BITCOIN_RPC_PASSWORD || "devnet",
