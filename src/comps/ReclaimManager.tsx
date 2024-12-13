@@ -252,14 +252,9 @@ const ReclaimManager = () => {
     }
   };
   return (
-    <>
+    <div className="flex flex-1 flex-col w-full px-5 gap-6 items-center py-5">
       {renderStep()}
-      <div
-        style={{
-          margin: "16px 0",
-        }}
-      />
-    </>
+    </div>
   );
 };
 
