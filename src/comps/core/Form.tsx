@@ -72,12 +72,11 @@ export const FlowForm = ({
           </PrimaryButton>
         ) : (
           <button
+            type="button"
             onClick={() => setShowConnectWallet(true)}
-            className=" bg-orange  px-4 py-2 rounded-md"
+            className="bg-orange px-4 py-2 rounded-md font-Matter text-xs font-semibold tracking-wide"
           >
-            <h3 className="font-Matter text-xs font-semibold	 tracking-wide">
-              CONNECT WALLET
-            </h3>
+            CONNECT WALLET
           </button>
         )}
       </div>

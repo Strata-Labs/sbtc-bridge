@@ -51,3 +51,22 @@ export const rpcHandlerCore = async (
     throw new Error(err instanceof Error ? err.message : String(err));
   }
 };
+
+export async function getUtxosBitcoinDaemon(address: string) {
+  const args = ["start", [{ desc: `addr(${address})`, range: 10000 }]];
+
+  const result = await rpcHandlerCore(RpcMethods.scantxoutset, args);
+  const utxos = result.unspents.map((utxo: any) => ({
+    txid: utxo.txid,
+    vout: utxo.vout,
+    scriptPubKey: utxo.scriptPubKey,
+    status: {
+      confirmed: true,
+      block_height: utxo.height, // Use the height from the main RPC result
+      block_hash: result.bestblock, // Use the bestblock from the RPC result
+      block_time: Math.floor(Date.now() / 1000), // You can replace this with an actual block time if available
+    },
+    value: Math.round(utxo.amount * 1e8), // Convert BTC amount to satoshis
+  }));
+  return utxos;
+}

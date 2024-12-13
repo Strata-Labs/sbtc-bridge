@@ -4,7 +4,7 @@ export default function getBitcoinNetwork(
   walletNetwork?: DefaultNetworkConfigurations,
 ) {
   let network = networks.bitcoin;
-  if (walletNetwork !== "mainnet") {
+  if (walletNetwork && walletNetwork !== "mainnet") {
     network = networks.regtest;
   }
   return network;

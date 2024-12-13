@@ -240,11 +240,18 @@ const DepositFlowConfirm = ({
       // Combine the version and hash into a single Uint8Array
       const serializedAddress = serializeCVBytes(principalCV(stxAddress));
 
+      // get the publicKey from the user payment address
+      // user cannot continue if they're not connected
+      const paymentAddress = walletInfo.addresses.payment!;
+
+      const reclaimPublicKey = paymentAddress.publicKey;
+
       // Parse lockTime from env variable
       const parsedLockTime = parseInt(lockTime || "144");
+
       // Create the reclaim script and convert to Buffer
       const reclaimScript = Buffer.from(
-        createReclaimScript(parsedLockTime, new Uint8Array([])),
+        createReclaimScript(parsedLockTime, reclaimPublicKey),
       );
 
       const reclaimScriptHex = uint8ArrayToHexString(reclaimScript);
@@ -262,6 +269,7 @@ const DepositFlowConfirm = ({
         maxFee,
         parsedLockTime,
         getBitcoinNetwork(config.WALLET_NETWORK),
+        reclaimPublicKey,
       );
 
       let txId = "";
