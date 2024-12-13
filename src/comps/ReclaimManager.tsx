@@ -417,7 +417,7 @@ const ReclaimDeposit = ({
       }
       notify({
         type: NotificationStatusType.SUCCESS,
-        message: "Reclaim transaction broadcasted",
+        message: "Reclaim transaction broadcast",
       });
 
       const transactionId = createTransactionFromHex(finalizedTxHex);
