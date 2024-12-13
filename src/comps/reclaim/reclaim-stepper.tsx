@@ -8,7 +8,7 @@ import { ArrowTopRightOnSquareIcon } from "@heroicons/react/20/solid";
 import { Step } from "../deposit-stepper";
 
 const ReclaimStepper = ({ txId, amount }: { txId: string; amount: number }) => {
-  const { MEMPOOL_URL } = useAtomValue(bridgeConfigAtom);
+  const { PUBLIC_MEMPOOL_URL } = useAtomValue(bridgeConfigAtom);
 
   const status = useReclaimStatus(txId);
 
@@ -20,8 +20,8 @@ const ReclaimStepper = ({ txId, amount }: { txId: string; amount: number }) => {
   }, [status]);
 
   const mempoolUrl = useMemo(() => {
-    return `${MEMPOOL_URL}/tx/${txId}`;
-  }, [MEMPOOL_URL, txId]);
+    return `${PUBLIC_MEMPOOL_URL}/tx/${txId}`;
+  }, [PUBLIC_MEMPOOL_URL, txId]);
 
   const renderCurrenStatusText = () => {
     if (status === ReclaimStatus.Pending) {
