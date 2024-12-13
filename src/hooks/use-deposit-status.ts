@@ -32,7 +32,7 @@ export function useDepositStatus(txId: string) {
         if (info.status.confirmed) {
           const currentBlockHeight = await getCurrentBlockHeight();
           const unlockBlock =
-            Number(RECLAIM_LOCK_TIME || 144) + info.status.block_height;
+            Number(RECLAIM_LOCK_TIME || 144) + info.status.block_height - 1;
           const isPastLockTime = currentBlockHeight >= unlockBlock;
           if (isPastLockTime) {
             setTransferTxStatus(DepositStatus.Failed);
