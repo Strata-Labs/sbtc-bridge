@@ -54,16 +54,6 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
           addresses = await getAddressesXverse();
       }
 
-      console.log("WALLET_NETWORK", WALLET_NETWORK);
-      console.log("addresses", addresses);
-      console.log(
-        "test main net thing",
-        !addresses.payment.address.startsWith("bc1") ||
-          // for segwit from xverse
-          !addresses.payment.address.startsWith("1") ||
-          !addresses.payment.address.startsWith("3"),
-      );
-
       if (
         WALLET_NETWORK !== "mainnet" &&
         addresses.payment.address.startsWith("bc1")
