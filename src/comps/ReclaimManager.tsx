@@ -350,7 +350,7 @@ const ReclaimDeposit = ({
 
       // FIXME: move to util or its own file
       const unsignedTxHex = constructPsbtForReclaim({
-        depositAmount: amount * 1e8,
+        depositAmount: Math.floor(amount * 1e8),
         feeAmount: maxReclaimFee,
         lockTime: depositTransaction.parameters.lockTime,
         depositScript: depositTransaction.depositScript,
