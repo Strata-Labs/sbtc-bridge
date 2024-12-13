@@ -54,6 +54,16 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
           addresses = await getAddressesXverse();
       }
 
+      console.log("WALLET_NETWORK", WALLET_NETWORK);
+      console.log("addresses", addresses);
+      console.log(
+        "test main net thing",
+        !addresses.payment.address.startsWith("bc1") ||
+          // for segwit from xverse
+          !addresses.payment.address.startsWith("1") ||
+          !addresses.payment.address.startsWith("3"),
+      );
+
       if (
         WALLET_NETWORK !== "mainnet" &&
         addresses.payment.address.startsWith("bc1")
@@ -61,10 +71,14 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
         throw new Error(`Please switch to ${WALLET_NETWORK} network`);
       } else if (
         WALLET_NETWORK === "mainnet" &&
-        (!addresses.payment.address.startsWith("bc1") ||
-          // for segwit from xverse
-          !addresses.payment.address.startsWith("1") ||
-          !addresses.payment.address.startsWith("3"))
+        !addresses.payment.address.startsWith("bc1")
+        /*
+        *readme these checks may not be needed since the address of a wallet for segwit will never start with 1
+        * they may start with 3 if a nested segwit address is used ex (P2SH-Wrapped SegWit)
+           for segwit from xverse
+            ||  !addresses.payment.address.startsWith("1") ||
+           !addresses.payment.address.startsWith("3"))
+          */
       ) {
         throw new Error(`Please switch to ${WALLET_NETWORK} network`);
       }
