@@ -7,6 +7,7 @@ import HistoryView from "./HistoryView";
 import { TransferAction } from "./TransferHome";
 import LandingAnimation from "./core/LandingAnimation";
 import { usePathname, useRouter } from "next/navigation";
+import AppNav from "./core/app-nav";
 
 export enum SECTION {
   DEPOSIT = "DEPOSIT",
@@ -49,18 +50,22 @@ const HomeApp = () => {
 
   return (
     <>
+      <AppNav
+        section={selectedSection}
+        onClickSection={(section) => setSelectedSection(section)}
+      />
       <LandingAnimation>
-        <SelectedSection
+        {/* <SelectedSection
           section={selectedSection}
           onClickSection={(section) => setSelectedSection(section)}
-        />
+        /> */}
         <div className="w-screen flex "></div>
         {selectedSection === SECTION.DEPOSIT && <DepositFlow />}
         {selectedSection === SECTION.WITHDRAW && <p>Coming Soon :)</p>}
         {selectedSection === SECTION.HISTORY && <HistoryView />}
         {selectedSection === SECTION.TRANSFER && <TransferAction />}
       </LandingAnimation>
-      <Faqs />
+      {/* <Faqs /> */}
     </>
   );
 };

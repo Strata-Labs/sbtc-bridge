@@ -9,7 +9,7 @@ const sectionTextStyle = (isActive: boolean) =>
 const sectionStyle = (isActive: boolean) =>
   isActive ? " border-orange" : " border-gray";
 
-type SectionActionProps = {
+export type SectionActionProps = {
   section: SECTION;
   onClickSection?: (section: SECTION) => void;
   activeSection: SECTION;
@@ -41,7 +41,7 @@ export const SectionAction = ({
   );
 };
 
-type SectionSelection = {
+export type SectionSelection = {
   section: SECTION;
   onClickSection: (section: SECTION) => void;
 };

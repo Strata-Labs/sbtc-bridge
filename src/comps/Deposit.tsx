@@ -40,6 +40,11 @@ import { sendBTCLeather, sendBTCXverse } from "@/util/wallet-utils";
 import useMintCaps from "@/hooks/use-mint-caps";
 import { getAggregateKey } from "@/util/get-aggregate-key";
 import getBitcoinNetwork from "@/util/get-bitcoin-network";
+import DepositTimeline from "./deposit/deposit-timeline";
+import DepositAmount from "./deposit/deposit-amount";
+import DepositAddress from "./deposit/add-stacks-address";
+import ConfirmDeposit from "./deposit/confirm-deposit";
+import TransactionConfirmed from "./deposit/transaction-confirmed";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -55,7 +60,7 @@ import getBitcoinNetwork from "@/util/get-bitcoin-network";
   - we should create bulding blocks by not try to create dynamic views
 */
 
-enum DEPOSIT_STEP {
+export enum DEPOSIT_STEP {
   AMOUNT,
   ADDRESS,
   CONFIRM,
@@ -73,7 +78,7 @@ type DepositFlowStepProps = {
   setStep: (step: DEPOSIT_STEP) => void;
 };
 
-type DepositFlowAmountProps = DepositFlowStepProps & {
+export type DepositFlowAmountProps = DepositFlowStepProps & {
   setAmount: (amount: number) => void;
 };
 const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
@@ -124,8 +129,10 @@ const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
   );
 };
 
-type DepositFlowAddressProps = DepositFlowStepProps & {
+export type DepositFlowAddressProps = DepositFlowStepProps & {
   setStxAddress: (address: string) => void;
+  stxAddress: string;
+  amount: number;
 };
 
 const DepositFlowAddress = ({
@@ -209,7 +216,7 @@ const DepositFlowAddress = ({
   );
 };
 
-type DepositFlowConfirmProps = DepositFlowStepProps & {
+export type DepositFlowConfirmProps = DepositFlowStepProps & {
   amount: number;
   stxAddress: string;
   handleUpdatingTransactionInfo: (info: TransactionInfo) => void;
@@ -512,33 +519,32 @@ const DepositFlow = () => {
     switch (step) {
       case DEPOSIT_STEP.AMOUNT:
         return (
-          <DepositFlowAmount setAmount={setAmount} setStep={handleUpdateStep} />
+          <DepositAmount
+            amount={amount}
+            setAmount={setAmount}
+            setStep={handleUpdateStep}
+          />
         );
       case DEPOSIT_STEP.ADDRESS:
         return (
-          <DepositFlowAddress
+          <DepositAddress
+            stxAddress={stxAddress}
             setStxAddress={setStxAddress}
             setStep={handleUpdateStep}
+            amount={amount}
           />
         );
       case DEPOSIT_STEP.CONFIRM:
         return (
-          <DepositFlowConfirm
-            setStep={handleUpdateStep}
+          <ConfirmDeposit
             amount={amount}
             stxAddress={stxAddress}
+            setStep={handleUpdateStep}
             handleUpdatingTransactionInfo={handleUpdatingTransactionInfo}
           />
         );
       case DEPOSIT_STEP.REVIEW:
-        return (
-          <DepositFlowReview
-            txId={txId}
-            amount={amount}
-            stxAddress={stxAddress}
-            setStep={handleUpdateStep}
-          />
-        );
+        return <TransactionConfirmed />;
       default:
         return <div> Something went wrong</div>;
     }
@@ -546,7 +552,56 @@ const DepositFlow = () => {
 
   return (
     <>
-      {renderStep()}
+      <div
+        style={{
+          maxWidth: "1152px",
+        }}
+        className="w-full flex flex-row gap-4 mt-16"
+      >
+        {renderStep()}
+        <DepositTimeline activeStep={step} />
+      </div>
+      {/* <div
+        style={{
+          maxWidth: "1152px",
+        }}
+        className="w-full flex flex-row gap-4 mt-16"
+      >
+        <DepositAddress
+          stxAddress={stxAddress}
+          setStxAddress={setStxAddress}
+          setStep={handleUpdateStep}
+          amount={amount}
+        />
+        <DepositTimeline activeStep={step} />
+      </div> */}
+      {/* <div
+        style={{
+          maxWidth: "1152px",
+        }}
+        className="w-full flex flex-row gap-4 mt-16"
+      >
+        <ConfirmDeposit
+          amount={amount}
+          stxAddress={stxAddress}
+          setStep={handleUpdateStep}
+          handleUpdatingTransactionInfo={handleUpdatingTransactionInfo}
+        />
+        <DepositTimeline activeStep={step} />
+      </div> */}
+      {/* <div
+        style={{
+          maxWidth: "1152px",
+        }}
+        className="w-full flex flex-row gap-4 mt-16"
+      >
+        <TransactionConfirmed />
+        <DepositTimeline activeStep={step} />
+      </div> */}
+
+      {
+        //renderStep()
+      }
       <div
         style={{
           margin: "16px 0",
