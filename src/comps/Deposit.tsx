@@ -84,11 +84,10 @@ const DepositFlowAmount = ({
   setAmount,
   btcBalance,
 }: DepositFlowAmountProps) => {
-  const { currentCap, isWithinDepositLimits, isLoading } = useMintCaps();
+  const { currentCap, isWithinDepositLimits, isLoading, perDepositMinimum } =
+    useMintCaps();
   const maxDepositAmount = currentCap / 1e8;
-  let { MINIMUM_DEPOSIT_AMOUNT_IN_SATS: minDepositAmount } =
-    useAtomValue(bridgeConfigAtom);
-  minDepositAmount = minDepositAmount / 1e8;
+  let minDepositAmount = perDepositMinimum / 1e8;
 
   const validationSchema = useMemo(
     () =>

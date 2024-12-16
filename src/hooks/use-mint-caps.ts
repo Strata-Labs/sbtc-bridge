@@ -39,8 +39,9 @@ export default function useMintCaps() {
         return false;
       }
       const withinMintCap =
+        currentEmilyLimitsData.perDepositMinimum < amount &&
         currentEmilyLimitsData.pegCap >
-        Number(currentSbtcSupplyData.value.value) + amount;
+          Number(currentSbtcSupplyData.value.value) + amount;
       const depositLessThanMax = currentEmilyLimitsData.perDepositCap >= amount;
       return withinMintCap && depositLessThanMax;
     },
@@ -59,6 +60,7 @@ export default function useMintCaps() {
   ]);
   return {
     currentCap,
+    perDepositMinimum: emilyLimitsData?.perDepositMinimum ?? 0,
     isWithinDepositLimits,
     isLoading,
   };
