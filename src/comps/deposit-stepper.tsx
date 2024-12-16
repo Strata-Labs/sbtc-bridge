@@ -1,4 +1,4 @@
-import { DepositStatus, useDepositStatus } from "@/hooks/use-deposit-status";
+import { DepositStatus } from "@/hooks/use-deposit-status";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 import { useMemo } from "react";
@@ -52,9 +52,13 @@ export function Step({
     </li>
   );
 }
-export function DepositStepper({ txId }: { txId: string }) {
-  const status = useDepositStatus(txId);
-
+export function DepositStepper({
+  status,
+  txId,
+}: {
+  status: DepositStatus;
+  txId: string;
+}) {
   const currentStep = useMemo(() => {
     const steps = [
       DepositStatus.PendingConfirmation,

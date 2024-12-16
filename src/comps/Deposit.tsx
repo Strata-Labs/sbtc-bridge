@@ -42,6 +42,7 @@ import { getAggregateKey } from "@/util/get-aggregate-key";
 import getBitcoinNetwork from "@/util/get-bitcoin-network";
 import { useQuery } from "@tanstack/react-query";
 import getBtcBalance from "@/actions/get-btc-balance";
+import { useDepositStatus } from "@/hooks/use-deposit-status";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -433,6 +434,8 @@ const DepositFlowReview = ({
   amount,
   stxAddress,
 }: DepositFlowReviewProps) => {
+  const { status, recipient, stacksTxId } = useDepositStatus(txId);
+  const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
   return (
     <FlowContainer>
       <>
@@ -449,7 +452,7 @@ const DepositFlowReview = ({
           <div className="flex flex-col gap-1">
             <SubText>Stacks address to transfer to</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {useShortAddress(stxAddress)}
+              {useShortAddress(recipient)}
             </p>
           </div>
         </div>
@@ -459,17 +462,21 @@ const DepositFlowReview = ({
           </SubText>
         </div>
         <div className="flex flex-1 items-end">
-          <DepositStepper txId={txId} />
+          <DepositStepper status={status} txId={txId} />
         </div>
 
-        {/* <div className="w-full flex-row flex justify-between items-center">
-          <PrimaryButton onClick={() => handleNextClick()}>
-            VIEW TX INFO
-          </PrimaryButton>
-          <PrimaryButton onClick={() => handleTxStatusClick()}>
-            VIEW STATUS
-          </PrimaryButton>
-        </div> */}
+        {stacksTxId && (
+          <div className="w-full flex-row flex justify-between items-center">
+            <a
+              className="w-40 rounded-lg py-3 flex justify-center items-center flex-row bg-orange"
+              href={`https://explorer.hiro.so/txid/${stacksTxId}?chain=${walletNetwork === "mainnet" ? "mainnet" : "testnet"}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View stacks tx
+            </a>
+          </div>
+        )}
       </>
     </FlowContainer>
   );

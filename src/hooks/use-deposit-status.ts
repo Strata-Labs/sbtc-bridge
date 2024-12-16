@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAtomValue } from "jotai";
 import { getEmilyDepositInfo } from "@/util/tx-utils";
 import { bridgeConfigAtom } from "@/util/atoms";
@@ -6,6 +6,7 @@ import {
   getCurrentBlockHeight,
   getRawTransaction,
 } from "@/actions/bitcoinClient";
+import { Cl, PrincipalCV } from "@stacks/transactions";
 
 export enum DepositStatus {
   PendingConfirmation = "pending",
@@ -18,8 +19,24 @@ export function useDepositStatus(txId: string) {
   const [transferTxStatus, setTransferTxStatus] = useState<DepositStatus>(
     DepositStatus.PendingConfirmation,
   );
+  const [emilyResponse, setEmilyResponse] = useState<Awaited<
+    ReturnType<typeof getEmilyDepositInfo>
+  > | null>(null);
+
   const { EMILY_URL: emilyUrl, RECLAIM_LOCK_TIME } =
     useAtomValue(bridgeConfigAtom);
+
+  const recipient = useMemo(() => {
+    return emilyResponse?.recipient || "";
+  }, [emilyResponse]);
+
+  const stacksTxId = useMemo(() => {
+    return (
+      (emilyResponse?.status === DepositStatus.Completed &&
+        emilyResponse.fulfillment.StacksTxid) ||
+      ""
+    );
+  }, [emilyResponse]);
 
   useEffect(() => {
     if (
@@ -34,6 +51,9 @@ export function useDepositStatus(txId: string) {
             txId,
             emilyURL: emilyUrl!,
           });
+
+          setEmilyResponse(txInfo);
+
           if (txInfo.status === DepositStatus.Completed) {
             setTransferTxStatus(DepositStatus.Completed);
             clearInterval(interval);
@@ -52,11 +72,15 @@ export function useDepositStatus(txId: string) {
           setTransferTxStatus(txInfo.status as DepositStatus);
         }
       };
-
+      check();
       const interval = setInterval(check, 5000);
       return () => clearInterval(interval);
     }
   }, [RECLAIM_LOCK_TIME, emilyUrl, transferTxStatus, txId]);
 
-  return transferTxStatus;
+  return {
+    status: transferTxStatus,
+    recipient: recipient && (Cl.deserialize(recipient) as PrincipalCV).value,
+    stacksTxId: stacksTxId,
+  };
 }
