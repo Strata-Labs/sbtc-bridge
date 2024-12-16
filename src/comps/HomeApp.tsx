@@ -1,12 +1,12 @@
 "use client";
 import { useState } from "react";
 import Faqs from "./Faqs";
-import SelectedSection from "./HomeSelectedHeader";
 import DepositFlow from "./Deposit";
 import HistoryView from "./HistoryView";
 import { TransferAction } from "./TransferHome";
 import LandingAnimation from "./core/LandingAnimation";
 import { usePathname, useRouter } from "next/navigation";
+import AppNav from "./core/app-nav";
 
 export enum SECTION {
   DEPOSIT = "DEPOSIT",
@@ -15,6 +15,7 @@ export enum SECTION {
   STATUS = "STATUS",
   TRANSFER = "TRANSFER",
   SETTINGS = "SETTINGS",
+  RECLAIM = "RECLAIM",
 }
 
 type SECTION_DATA = {
@@ -49,17 +50,22 @@ const HomeApp = () => {
 
   return (
     <>
+      <AppNav
+        section={selectedSection}
+        onClickSection={(section) => setSelectedSection(section)}
+      />
       <LandingAnimation>
-        <SelectedSection
+        {/* <SelectedSection
           section={selectedSection}
           onClickSection={(section) => setSelectedSection(section)}
-        />
+        /> */}
         <div className="w-screen flex "></div>
         {selectedSection === SECTION.DEPOSIT && <DepositFlow />}
-        {selectedSection === SECTION.WITHDRAW && <p>Coming Soon :)</p>}
+        {selectedSection === SECTION.WITHDRAW && <HistoryView />}
         {selectedSection === SECTION.HISTORY && <HistoryView />}
         {selectedSection === SECTION.TRANSFER && <TransferAction />}
       </LandingAnimation>
+      <div className="m-8" />
       <Faqs />
     </>
   );
