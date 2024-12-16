@@ -61,7 +61,7 @@ const HomeApp = () => {
         /> */}
         <div className="w-screen flex "></div>
         {selectedSection === SECTION.DEPOSIT && <DepositFlow />}
-        {selectedSection === SECTION.WITHDRAW && <p>Coming Soon :)</p>}
+        {selectedSection === SECTION.WITHDRAW && <HistoryView />}
         {selectedSection === SECTION.HISTORY && <HistoryView />}
         {selectedSection === SECTION.TRANSFER && <TransferAction />}
       </LandingAnimation>
