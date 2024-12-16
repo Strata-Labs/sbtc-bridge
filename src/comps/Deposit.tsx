@@ -223,11 +223,8 @@ const DepositFlowConfirm = ({
 }: DepositFlowConfirmProps) => {
   const { notify } = useNotifications();
 
-  const {
-    EMILY_URL: emilyUrl,
-    WALLET_NETWORK: walletNetwork,
-    RECLAIM_LOCK_TIME: lockTime,
-  } = useAtomValue(bridgeConfigAtom);
+  const { WALLET_NETWORK: walletNetwork, RECLAIM_LOCK_TIME: lockTime } =
+    useAtomValue(bridgeConfigAtom);
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
   const config = useAtomValue(bridgeConfigAtom);
@@ -306,7 +303,6 @@ const DepositFlowConfirm = ({
         bitcoinTxOutputIndex: 0,
         reclaimScript: reclaimScriptHex,
         depositScript: depositScriptHexPreHash,
-        url: emilyUrl,
       };
 
       // make emily post request
