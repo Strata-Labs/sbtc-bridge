@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="w-full flex flex-col items-center justify-center py-10 px-4 bg-white font-Matter">
+    <footer className="w-full flex flex-col items-center justify-center py-10 px-4 bg-[#272628] font-Matter">
       <div className="w-full flex flex-row items-center justify-between">
         <div className="flex flex-col gap-2">
           <p className="text-black font-semibold text-sm">sBTC Bridge</p>
