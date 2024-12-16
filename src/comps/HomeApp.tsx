@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import Faqs from "./Faqs";
-import SelectedSection from "./HomeSelectedHeader";
 import DepositFlow from "./Deposit";
 import HistoryView from "./HistoryView";
 import { TransferAction } from "./TransferHome";
