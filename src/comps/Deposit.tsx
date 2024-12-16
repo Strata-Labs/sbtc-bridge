@@ -297,6 +297,15 @@ const DepositFlowConfirm = ({
           amountInSats: amount,
           network: walletNetwork,
         };
+        console.log({
+          preSendParams: {
+            bitcoinTxid: txId,
+            bitcoinTxOutputIndex: 0,
+            reclaimScript: reclaimScriptHex,
+            depositScript: depositScriptHexPreHash,
+          },
+        });
+
         switch (walletInfo.selectedWallet) {
           case WalletProvider.LEATHER:
             txId = await sendBTCLeather(params);
