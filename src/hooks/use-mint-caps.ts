@@ -38,10 +38,11 @@ export default function useMintCaps() {
       if (!currentEmilyLimitsData || !currentSbtcSupplyData) {
         return false;
       }
+      const supplyPlusDeposit =
+        Number(currentSbtcSupplyData.value.value) + amount;
       const withinMintCap =
-        currentEmilyLimitsData.perDepositMinimum < amount &&
-        currentEmilyLimitsData.pegCap >
-          Number(currentSbtcSupplyData.value.value) + amount;
+        amount > currentEmilyLimitsData.perDepositMinimum &&
+        supplyPlusDeposit < currentEmilyLimitsData.pegCap;
       const depositLessThanMax = currentEmilyLimitsData.perDepositCap >= amount;
       return withinMintCap && depositLessThanMax;
     },
