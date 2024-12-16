@@ -2,7 +2,13 @@ import { motion } from "framer-motion";
 import { Heading, SubText } from "./core/Heading";
 import Image from "next/image";
 import { ArrowRightIcon, ArrowUpRightIcon } from "@heroicons/react/20/solid";
-import { bridgeConfigAtom, walletInfoAtom, WalletProvider } from "@/util/atoms";
+import {
+  bridgeConfigAtom,
+  showConnectWalletAtom,
+  showTosAtom,
+  walletInfoAtom,
+  WalletProvider,
+} from "@/util/atoms";
 import {
   checkAvailableWallets,
   getAddressesLeather,
@@ -43,6 +49,9 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
     checkAvailableWallets().then(setAvailableWallets);
   }, []);
   const setWalletInfo = useSetAtom(walletInfoAtom);
+
+  const setShowTos = useSetAtom(showTosAtom);
+
   const { notify } = useNotifications();
   const { WALLET_NETWORK } = useAtomValue(bridgeConfigAtom);
   const handleSelectWallet = async (wallet: WalletProvider) => {
@@ -71,6 +80,8 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
         addresses: addresses,
       });
       onClose();
+
+      setShowTos(true);
     } catch (error) {
       console.warn(error);
       if (error instanceof Error) {
