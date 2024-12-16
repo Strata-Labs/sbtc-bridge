@@ -78,8 +78,11 @@ type DepositFlowAmountProps = DepositFlowStepProps & {
 };
 const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
   const { currentCap, isWithinDepositLimits, isLoading } = useMintCaps();
-  const minDepositAmount = 100_000 / 1e8;
   const maxDepositAmount = currentCap / 1e8;
+  let { MINIMUM_DEPOSIT_AMOUNT_IN_SATS: minDepositAmount } =
+    useAtomValue(bridgeConfigAtom);
+  minDepositAmount = minDepositAmount / 1e8;
+
   const validationSchema = yup.object({
     amount: yup
       .number()
