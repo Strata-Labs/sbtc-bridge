@@ -291,6 +291,7 @@ const DepositFlowConfirm = ({
         }
       } catch (error) {
         let errorMessage = error;
+        console.warn(error);
         if (error instanceof Error) {
           errorMessage = error.message;
         }
@@ -336,6 +337,7 @@ const DepositFlowConfirm = ({
         txId: txId,
       });
     } catch (error) {
+      console.warn(error);
       let errorMessage = error;
       if (error instanceof Error) {
         errorMessage = error.message;

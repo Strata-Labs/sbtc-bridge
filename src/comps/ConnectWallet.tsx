@@ -70,6 +70,7 @@ const ConnectWallet = ({ onClose }: ConnectWalletProps) => {
       });
       onClose();
     } catch (error) {
+      console.warn(error);
       if (error instanceof Error) {
         error = error.message;
       }
