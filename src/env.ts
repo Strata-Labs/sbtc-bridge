@@ -19,5 +19,4 @@ export const env = {
   SBTC_CONTRACT_DEPLOYER: process.env.SBTC_CONTRACT_DEPLOYER,
   BANNER_CONTENT: process.env.BANNER_CONTENT,
   RECLAIM_LOCK_TIME: process.env.RECLAIM_LOCK_TIME,
-  EMILY_API_KEY: process.env.EMILY_API_KEY,
 };

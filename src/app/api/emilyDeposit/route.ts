@@ -23,7 +23,6 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": env.EMILY_API_KEY || "",
       },
       body: JSON.stringify(paramsBody),
     });
@@ -81,7 +80,6 @@ export async function GET(req: NextRequest) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": env.EMILY_API_KEY || "",
       },
     });
 
