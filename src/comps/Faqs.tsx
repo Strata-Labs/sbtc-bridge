@@ -124,12 +124,12 @@ const FAQItem = ({ question, answer, index }: FAQItemProps) => {
 
   return (
     <div className="">
-      <p className="text-darkGray font-Matter font-normal tracking-wider">
+      <p className="text-white font-Matter font-normal tracking-wider">
         {`FAQ ${index}`}
       </p>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="faq-question flex justify-between text-black items-center w-full py-4 text-left text-lg font-medium"
+        className="faq-question flex justify-between text-white items-center w-full py-4 text-left text-lg font-medium"
       >
         <span>{question}</span>
         <svg
@@ -154,8 +154,8 @@ const FAQItem = ({ question, answer, index }: FAQItemProps) => {
           isOpen ? "h-max" : "h-0"
         }`}
       >
-        <div className="p-6 bg-[#F5F5F5] rounded-xl w-full">
-          <div className=" text-[#605D5D]">{answer}</div>
+        <div className="p-6 bg-[#272628] rounded-xl w-full">
+          <div className=" text-white">{answer}</div>
         </div>
       </div>
     </div>
@@ -165,30 +165,37 @@ const FAQItem = ({ question, answer, index }: FAQItemProps) => {
 const Faqs = () => {
   return (
     <div
+      className="w-full flex flex-col  items-center gap-4 "
       style={{
-        maxWidth: "800px",
+        backgroundColor: "#333135",
       }}
-      className="w-full mb-8 flex-col flex border-2 gap-4 border-lightGray rounded-2xl font-Matter "
     >
-      <div className="flex flex-1 gap-4 px-8 p-6 flex-col ">
-        <div className="w-full flex flex-row items-center justify-between">
-          <h1 className="text-2xl text-black font-Matter font-normal">
-            Learn more about sBTC
-          </h1>
+      <div
+        style={{
+          maxWidth: "800px",
+        }}
+        className="w-full mb-8 flex-col flex  gap-4  rounded-2xl font-Matter "
+      >
+        <div className="flex flex-1 gap-4 px-8 p-6 flex-col ">
+          <div className="w-full flex flex-row items-center justify-between">
+            <h1 className="text-2xl text-white font-Matter font-normal">
+              Learn more about sBTC
+            </h1>
+          </div>
+          <p className="text-white font-Matter font-thin text-sm">
+            Enter into the world of sBTC with these resources
+          </p>
         </div>
-        <p className="text-darkGray font-Matter font-thin text-sm">
-          Enter into the world of sBTC with these resources
-        </p>
-      </div>
-      <div className="flex flex-col w-full px-8 p-6 gap-4  mt-5">
-        {faqs.map((faq, index) => (
-          <FAQItem
-            key={index}
-            question={faq.question}
-            answer={faq.answer}
-            index={index + 1}
-          />
-        ))}
+        <div className="flex flex-col w-full px-8 p-6 gap-4  mt-5">
+          {faqs.map((faq, index) => (
+            <FAQItem
+              key={index}
+              question={faq.question}
+              answer={faq.answer}
+              index={index + 1}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
