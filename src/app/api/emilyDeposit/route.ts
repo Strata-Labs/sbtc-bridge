@@ -6,7 +6,6 @@ interface CreateDepositRequestBody {
   bitcoinTxOutputIndex: number;
   reclaimScript: string;
   depositScript: string;
-  url: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -20,7 +19,7 @@ export async function POST(req: NextRequest) {
       depositScript: body.depositScript,
     };
     // Forward the request to the Rust server
-    const response = await fetch(`${body.url}/deposit`, {
+    const response = await fetch(`${env.EMILY_URL}/deposit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
