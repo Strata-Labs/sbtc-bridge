@@ -11,11 +11,7 @@ type EmilyLimits = {
 type AccountCaps = {};
 
 export default async function getEmilyLimits() {
-  const res = await fetch(`${env.EMILY_URL}/limits`, {
-    headers: {
-      "x-api-key": env.EMILY_API_KEY || "",
-    },
-  });
+  const res = await fetch(`${env.EMILY_URL}/limits`);
   const json = (await res.json()) as EmilyLimits;
   // exclude account caps
   return {

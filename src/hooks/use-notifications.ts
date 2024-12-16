@@ -26,9 +26,12 @@ export function useNotifications() {
             title: message,
           },
         ];
-        setTimeout(() => {
-          setEvents((prev) => prev.filter((e) => e.id !== id));
-        }, expire);
+        setTimeout(
+          () => {
+            setEvents((prev) => prev.filter((e) => e.id !== id));
+          },
+          type === NotificationStatusType.ERROR ? 30000 : expire,
+        );
         return newEvents;
       });
     },

@@ -6,7 +6,6 @@ interface CreateDepositRequestBody {
   bitcoinTxOutputIndex: number;
   reclaimScript: string;
   depositScript: string;
-  url: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -19,12 +18,13 @@ export async function POST(req: NextRequest) {
       reclaimScript: body.reclaimScript,
       depositScript: body.depositScript,
     };
+    console.log({ emilyReqPayloadServer: paramsBody });
+
     // Forward the request to the Rust server
-    const response = await fetch(`${body.url}/deposit`, {
+    const response = await fetch(`${env.EMILY_URL}/deposit`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": env.EMILY_API_KEY || "",
       },
       body: JSON.stringify(paramsBody),
     });
@@ -82,7 +82,6 @@ export async function GET(req: NextRequest) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": env.EMILY_API_KEY || "",
       },
     });
 

@@ -28,7 +28,9 @@ export async function POST(req: NextRequest) {
     });
 
     const res = await rpcHandlerCore(RpcMethods.sendRawTransaction, [body]);
-
+    if (typeof res === "string") {
+      return new Response(res);
+    }
     return NextResponse.json(res);
   } catch (error) {
     // good for debugging

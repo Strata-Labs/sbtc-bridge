@@ -78,8 +78,11 @@ type DepositFlowAmountProps = DepositFlowStepProps & {
 };
 const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
   const { currentCap, isWithinDepositLimits, isLoading } = useMintCaps();
-  const minDepositAmount = 100_000 / 1e8;
   const maxDepositAmount = currentCap / 1e8;
+  let { MINIMUM_DEPOSIT_AMOUNT_IN_SATS: minDepositAmount } =
+    useAtomValue(bridgeConfigAtom);
+  minDepositAmount = minDepositAmount / 1e8;
+
   const validationSchema = yup.object({
     amount: yup
       .number()
@@ -223,11 +226,8 @@ const DepositFlowConfirm = ({
 }: DepositFlowConfirmProps) => {
   const { notify } = useNotifications();
 
-  const {
-    EMILY_URL: emilyUrl,
-    WALLET_NETWORK: walletNetwork,
-    RECLAIM_LOCK_TIME: lockTime,
-  } = useAtomValue(bridgeConfigAtom);
+  const { WALLET_NETWORK: walletNetwork, RECLAIM_LOCK_TIME: lockTime } =
+    useAtomValue(bridgeConfigAtom);
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
   const config = useAtomValue(bridgeConfigAtom);
@@ -291,6 +291,7 @@ const DepositFlowConfirm = ({
         }
       } catch (error) {
         let errorMessage = error;
+        console.warn(error);
         if (error instanceof Error) {
           errorMessage = error.message;
         }
@@ -306,8 +307,9 @@ const DepositFlowConfirm = ({
         bitcoinTxOutputIndex: 0,
         reclaimScript: reclaimScriptHex,
         depositScript: depositScriptHexPreHash,
-        url: emilyUrl,
       };
+
+      console.log({ emilyReqPayloadClient: emilyReqPayload });
 
       // make emily post request
       const response = await fetch("/api/emilyDeposit", {
@@ -337,6 +339,7 @@ const DepositFlowConfirm = ({
         txId: txId,
       });
     } catch (error) {
+      console.warn(error);
       let errorMessage = error;
       if (error instanceof Error) {
         errorMessage = error.message;

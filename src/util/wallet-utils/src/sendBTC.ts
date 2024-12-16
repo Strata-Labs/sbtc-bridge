@@ -29,7 +29,7 @@ export async function sendBTCLeather({
   });
 
   const result = response.result;
-  return JSON.parse(result.txid);
+  return result.txid.replace(/"|'/g, "");
 }
 
 export async function sendBTCXverse({ amountInSats, recipient }: Payload) {
