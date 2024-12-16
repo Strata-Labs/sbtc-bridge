@@ -309,6 +309,8 @@ const DepositFlowConfirm = ({
         depositScript: depositScriptHexPreHash,
       };
 
+      console.log({ emilyReqPayloadClient: emilyReqPayload });
+
       // make emily post request
       const response = await fetch("/api/emilyDeposit", {
         method: "POST",
