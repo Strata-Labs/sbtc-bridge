@@ -454,6 +454,11 @@ const DepositFlowReview = ({
           </div>
         </div>
         <div className="flex flex-1 items-end">
+          <SubText>
+            To avoid losing your progress, please keep this page open.
+          </SubText>
+        </div>
+        <div className="flex flex-1 items-end">
           <DepositStepper txId={txId} />
         </div>
 

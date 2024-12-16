@@ -30,6 +30,15 @@ export function useDepositStatus(txId: string) {
       const check = async () => {
         const info = await getRawTransaction(txId);
         if (info.status.confirmed) {
+          const txInfo = await getEmilyDepositInfo({
+            txId,
+            emilyURL: emilyUrl!,
+          });
+          if (txInfo.status === DepositStatus.Completed) {
+            setTransferTxStatus(DepositStatus.Completed);
+            clearInterval(interval);
+            return;
+          }
           const currentBlockHeight = await getCurrentBlockHeight();
           const unlockBlock =
             Number(RECLAIM_LOCK_TIME || 144) + info.status.block_height - 1;
@@ -39,17 +48,12 @@ export function useDepositStatus(txId: string) {
             clearInterval(interval);
             return;
           }
-          const txInfo = await getEmilyDepositInfo({
-            txId,
-            emilyURL: emilyUrl!,
-          });
+
           setTransferTxStatus(txInfo.status as DepositStatus);
         }
       };
 
-      const interval = setInterval(async () => {
-        check();
-      }, 5000);
+      const interval = setInterval(check, 5000);
       return () => clearInterval(interval);
     }
   }, [RECLAIM_LOCK_TIME, emilyUrl, transferTxStatus, txId]);
