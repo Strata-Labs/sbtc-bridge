@@ -109,7 +109,7 @@ const Header = ({ config }: { config: BridgeConfig }) => {
           </div>
         </div>
       </header>
-      <Metrics />
+      {/* <Metrics /> */}
 
       <AnimatePresence>
         {showConnectWallet && (
