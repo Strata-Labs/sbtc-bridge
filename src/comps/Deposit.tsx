@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 
@@ -40,6 +40,8 @@ import { sendBTCLeather, sendBTCXverse } from "@/util/wallet-utils";
 import useMintCaps from "@/hooks/use-mint-caps";
 import { getAggregateKey } from "@/util/get-aggregate-key";
 import getBitcoinNetwork from "@/util/get-bitcoin-network";
+import { useQuery } from "@tanstack/react-query";
+import getBtcBalance from "@/actions/get-btc-balance";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -75,25 +77,39 @@ type DepositFlowStepProps = {
 
 type DepositFlowAmountProps = DepositFlowStepProps & {
   setAmount: (amount: number) => void;
+  btcBalance: number;
 };
-const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
+const DepositFlowAmount = ({
+  setStep,
+  setAmount,
+  btcBalance,
+}: DepositFlowAmountProps) => {
   const { currentCap, isWithinDepositLimits, isLoading } = useMintCaps();
   const maxDepositAmount = currentCap / 1e8;
   let { MINIMUM_DEPOSIT_AMOUNT_IN_SATS: minDepositAmount } =
     useAtomValue(bridgeConfigAtom);
   minDepositAmount = minDepositAmount / 1e8;
 
-  const validationSchema = yup.object({
-    amount: yup
-      .number()
-      // dust amount is in sats
-      .min(
-        minDepositAmount,
-        `Minimum deposit amount is ${minDepositAmount} BTC`,
-      )
-      .max(maxDepositAmount, `Current deposit cap is ${maxDepositAmount} BTC`)
-      .required(),
-  });
+  const validationSchema = useMemo(
+    () =>
+      yup.object({
+        amount: yup
+          .number()
+          // dust amount is in sats
+          .min(
+            minDepositAmount,
+            `Minimum deposit amount is ${minDepositAmount} BTC`,
+          )
+          .max(
+            Math.min(btcBalance, maxDepositAmount),
+            btcBalance < maxDepositAmount
+              ? `The deposit amount exceeds your current balance of ${btcBalance} BTC`
+              : `Current deposit cap is ${maxDepositAmount} BTC`,
+          )
+          .required(),
+      }),
+    [btcBalance, maxDepositAmount, minDepositAmount],
+  );
   const handleSubmit = async (value: string | undefined) => {
     if (value) {
       const sats = Math.floor(Number(value) * 1e8);
@@ -511,11 +527,27 @@ const DepositFlow = () => {
     },
     [setTxId],
   );
+  const { addresses } = useAtomValue(walletInfoAtom);
+  const btcAddress = addresses.payment?.address;
+  const { data: btcBalance } = useQuery({
+    queryKey: ["btcBalance", btcAddress],
+    queryFn: async () => {
+      if (!btcAddress) {
+        return 0;
+      }
+      return await getBtcBalance(btcAddress);
+    },
+    enabled: !!btcAddress,
+  });
   const renderStep = () => {
     switch (step) {
       case DEPOSIT_STEP.AMOUNT:
         return (
-          <DepositFlowAmount setAmount={setAmount} setStep={handleUpdateStep} />
+          <DepositFlowAmount
+            btcBalance={btcBalance || 0}
+            setAmount={setAmount}
+            setStep={handleUpdateStep}
+          />
         );
       case DEPOSIT_STEP.ADDRESS:
         return (
