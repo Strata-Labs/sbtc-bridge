@@ -7,6 +7,8 @@ COPY yarn.lock ./
 RUN yarn install --frozen-lockfile
 
 COPY . .
+
+ENV NEXT_TELEMETRY_DISABLED="1"
 RUN npm run build
 
 FROM node:18
@@ -19,4 +21,5 @@ COPY --from=builder /code/package.json .
 
 EXPOSE 3000
 
+ENV NEXT_TELEMETRY_DISABLED="1"
 CMD ["npm", "start"]
