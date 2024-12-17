@@ -14,6 +14,7 @@ export default cache(async function getSbtcBridgeConfig() {
   const RECLAIM_LOCK_TIME = env.RECLAIM_LOCK_TIME;
   const PUBLIC_MEMPOOL_URL = env.PUBLIC_MEMPOOL_URL;
   const MINIMUM_DEPOSIT_AMOUNT_IN_SATS = env.MINIMUM_DEPOSIT_AMOUNT_IN_SATS;
+  const LIVECHAT_ID = env.LIVECHAT_ID;
 
   return {
     EMILY_URL,
@@ -23,5 +24,6 @@ export default cache(async function getSbtcBridgeConfig() {
     RECLAIM_LOCK_TIME,
     PUBLIC_MEMPOOL_URL,
     MINIMUM_DEPOSIT_AMOUNT_IN_SATS,
+    LIVECHAT_ID,
   };
 });
