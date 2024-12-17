@@ -23,12 +23,13 @@ import {
   hexToBytes as hexToUint8Array,
 } from "@stacks/common";
 import { FlowContainer } from "./core/FlowContainer";
-import { Heading } from "./core/Heading";
+import { Heading, SubText } from "./core/Heading";
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import { PrimaryButton } from "./core/FlowButtons";
 
 import { getEmilyDepositInfo } from "@/util/tx-utils";
 import RecoverReview from "./recover-review";
+import { useShortAddress } from "@/hooks/use-short-address";
 
 const RecoverManager = () => {
   const [showStepper, setShowStepper] = useState(false);
@@ -169,6 +170,13 @@ const RecoverManager = () => {
     }
   };
 
+  const renderTxId = () => {
+    const txId = searchParams.get("txId") || "";
+    if (txId.length > 10) {
+      return `${txId.slice(0, 5)}...${txId.slice(-5)}`;
+    }
+    return txId;
+  };
   if (showStepper) {
     return <RecoverReview txId={searchParams.get("txId") || ""} />;
   }
@@ -180,26 +188,25 @@ const RecoverManager = () => {
           <div className="w-full flex flex-row items-center justify-between">
             <Heading>Recover Lost Transaction</Heading>
           </div>
-          {/* <div className="flex flex-col  gap-2">
+          <div className="flex flex-col  gap-2">
             <div className="flex flex-col gap-1">
               <SubText>Transaction ID</SubText>
               <p className="text-black font-Matter font-semibold text-sm">
-                {useShortAddress(searchParams.get("txId") || "")}
+                {renderTxId()}
               </p>
             </div>
             <div className="flex flex-col gap-1">
               <SubText>Stacks address to transfer to</SubText>
               <p className="text-black font-Matter font-semibold text-sm">
-                {useShortAddress(searchParams.get("stxAddress") || "")}
+                {searchParams.get("stxAddress") || ""}
               </p>
             </div>
-          </div> */}
+          </div>
           <div className="flex flex-1 ">
             <div className="w-full p-4 bg-lightOrange h-10 rounded-lg flex flex-row items-center justify-center gap-2">
               <InformationCircleIcon className="h-6 w-6 text-orange" />
               <p className="text-orange font-Matter font-semibold text-sm break-keep">
-                This send our signers the information lost to be able to reclaim
-                your lost script or have your transaction successful deposited
+                Please ensure the stacks address is correct before proceeding.
               </p>
             </div>
           </div>
