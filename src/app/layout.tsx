@@ -27,11 +27,13 @@ export default async function RootLayout({
         <meta name="twitter:description" content="sBTC Bridge" />
         <meta name="twitter:image" content="/images/icon.png" />
         <meta name="twitter:image:alt" content="sBTC Bridge" />
-        <script
+        {process.env.NEXT_PUBLIC_LIVECHAT_ID && (
+          <>
+          <script
           dangerouslySetInnerHTML={{
             __html: `
               window.__lc = window.__lc || {};
-              window.__lc.license = 18945692;
+              window.__lc.license = ${process.env.NEXT_PUBLIC_LIVECHAT_ID};
               window.__lc.integration_name = "manual_onboarding";
               window.__lc.product_name = "livechat";
               ;(function(n,t,c){
@@ -59,7 +61,7 @@ export default async function RootLayout({
           }}
         />
         <noscript>
-          <a href="https://www.livechat.com/chat-with/18945692/" rel="nofollow">
+          <a href={"https://www.livechat.com/chat-with/" + process.env.NEXT_PUBLIC_LIVECHAT_ID + "/"} rel="nofollow">
             Chat with us
           </a>
           , powered by{" "}
@@ -71,6 +73,8 @@ export default async function RootLayout({
             LiveChat
           </a>
         </noscript>
+        </>
+        )}
       </head>
       <body className={inter.className}>
         <LayoutClient config={sBTCBridgeConfig}>{children}</LayoutClient>

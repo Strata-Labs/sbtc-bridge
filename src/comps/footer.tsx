@@ -6,6 +6,16 @@ export default function Footer() {
           <p className="text-black font-semibold text-sm">sBTC Bridge</p>
         </div>
         <div className="flex flex-row gap-4">
+          {process.env.NEXT_PUBLIC_LIVECHAT_ID && (
+            <a
+              href={"https://direct.lc.chat/" + process.env.NEXT_PUBLIC_LIVECHAT_ID + "/"}
+              target="_blank"
+              rel="noreferrer"
+              className="text-black font-light text-sm"
+            >
+              Live support
+            </a>
+          )}
           <a
             href="https://docs.stacks.co"
             target="_blank"
