@@ -4,11 +4,12 @@ import { useNotifications } from "@/hooks/use-notifications";
 import {
   bridgeConfigAtom,
   depositMaxFeeAtom,
+  showConnectWalletAtom,
   walletInfoAtom,
 } from "@/util/atoms";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { NotificationStatusType } from "./Notifications";
 import { getAggregateKey } from "@/util/get-aggregate-key";
 import { principalCV, serializeCVBytes } from "@stacks/transactions";
@@ -48,6 +49,10 @@ const RecoverManager = () => {
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
   const config = useAtomValue(bridgeConfigAtom);
+
+  const setShowConnectWallet = useSetAtom(showConnectWalletAtom);
+
+  const isConnected = useMemo(() => !!walletInfo.selectedWallet, [walletInfo]);
 
   useEffect(() => {
     checkIfEmilyIsAware();
@@ -203,9 +208,19 @@ const RecoverManager = () => {
             </div>
           </div>
           <div className="w-full flex-row flex justify-between items-center">
-            <PrimaryButton onClick={() => generateScripts()}>
-              NEXT
-            </PrimaryButton>
+            {isConnected ? (
+              <PrimaryButton onClick={() => generateScripts()}>
+                RECOVER
+              </PrimaryButton>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowConnectWallet(true)}
+                className="bg-orange px-4 py-2 rounded-md font-Matter text-xs font-semibold tracking-wide"
+              >
+                CONNECT WALLET
+              </button>
+            )}
           </div>
         </>
       </FlowContainer>
