@@ -399,20 +399,6 @@ const DepositFlowConfirm = ({
               {useShortAddress(stxAddress)}
             </p>
           </div>
-          <div className="flex flex-col gap-1">
-            <SubText>
-              Note that there is an additional fee (max 80k sats) that will be
-              automatically deducted from your deposited sBTC.{" "}
-              <a
-                className="text-blue-500 underline"
-                href="https://docs.stacks.co/guides-and-tutorials/sbtc/how-to-use-the-sbtc-bridge#choose-the-amount-to-deposit"
-                target="_blank"
-                rel="noreferrer"
-              >
-                More Info here
-              </a>
-            </SubText>
-          </div>
         </div>
         <div className="flex flex-1 ">
           <div className="w-full p-4 bg-lightOrange h-10 rounded-lg flex flex-row items-center justify-center gap-2">

@@ -125,6 +125,29 @@ const faqs = [
       </p>
     ),
   },
+  {
+    question: "Are there any associated fees with minting sBTC?",
+    answer: (
+      <ol className="list-inside flex flex-col gap-4">
+        <li>
+          There are two transaction fees required to mint your sBTC. The first
+          is set by the user manually when they initiate the deposit transaction
+          within their wallet.
+        </li>
+        <li>
+          The second is a fee used to consolidate the deposit UTXOs into the
+          single signer UTXO. This separate transaction fee happens
+          automatically and is set to a max of 80k sats. This is automatically
+          deducted from your minted sBTC. This is not a signer fee but a regular
+          Bitcoin transaction fee.
+        </li>
+        <li>
+          Note that there is an additional fee (max 80k sats) that will be
+          automatically deducted from your deposited sBTC
+        </li>
+      </ol>
+    ),
+  },
 ];
 
 const FAQItem = ({ question, answer, index }: FAQItemProps) => {
