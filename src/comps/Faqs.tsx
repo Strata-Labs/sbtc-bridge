@@ -63,7 +63,6 @@ const faqs = [
       </>
     ),
   },
-
   {
     question: "How long will it take for my BTC deposit to confirm?",
     answer: (
@@ -73,8 +72,9 @@ const faqs = [
         </p>
         <ol className="list-inside flex flex-col gap-4">
           <li>
-            BTC to sBTC conversion can be completed within 3 Bitcoin blocks
-            (under an hour).
+            BTC to sBTC conversions are typically completed within 3 Bitcoin
+            blocks. Due to the speed of Bitcoin blocks, deposits can take up to
+            two hours to see sBTC in your wallet.
           </li>
           <li>
             sBTC to BTC conversion can be completed within 6 Bitcoin blocks
@@ -115,6 +115,14 @@ const faqs = [
           </li>
         </ol>
       </>
+    ),
+  },
+  {
+    question: "Is there a minimum amount of BTC I must deposit?",
+    answer: (
+      <p className="text-darkGray font-Matter font-thin">
+        Yes. A .01 BTC minimum is imposed for BTC to sBTC deposits.
+      </p>
     ),
   },
 ];
