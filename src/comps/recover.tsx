@@ -165,14 +165,16 @@ const RecoverManager = () => {
 
         throw new Error("Error with the request");
       }
-
+      notify({
+        type: NotificationStatusType.SUCCESS,
+        message: `Request successful`,
+      });
       setShowStepper(true);
     } catch (err: any) {
       throw new Error(err);
     }
   };
 
-  console.log("showStepper", showStepper);
   if (showStepper) {
     return <RecoverReview txId={searchParams.get("txId") || ""} />;
   }
