@@ -21,6 +21,14 @@ export default function Footer() {
             </a>
           )}
           <a
+            href="https://docs.stacks.co/guides-and-tutorials/sbtc/how-to-use-the-sbtc-bridge"
+            target="_blank"
+            rel="noreferrer"
+            className="text-black font-light text-sm"
+          >
+            How to use this bridge
+          </a>
+          <a
             href="https://docs.stacks.co"
             target="_blank"
             rel="noreferrer"
