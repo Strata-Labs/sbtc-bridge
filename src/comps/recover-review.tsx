@@ -1,34 +1,13 @@
 "use client";
 
-import { useNotifications } from "@/hooks/use-notifications";
-import {
-  bridgeConfigAtom,
-  depositMaxFeeAtom,
-  walletInfoAtom,
-} from "@/util/atoms";
+import { bridgeConfigAtom } from "@/util/atoms";
 import { useAtomValue } from "jotai";
-import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { NotificationStatusType } from "./Notifications";
-import { getAggregateKey } from "@/util/get-aggregate-key";
-import { principalCV, serializeCVBytes } from "@stacks/transactions";
-import {
-  createDepositScript,
-  createReclaimScript,
-} from "@/util/depositRequest";
 
-import {
-  bytesToHex as uint8ArrayToHexString,
-  hexToBytes as hexToUint8Array,
-} from "@stacks/common";
 import { FlowContainer } from "./core/FlowContainer";
 import { Heading, SubText } from "./core/Heading";
-import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import { useShortAddress } from "@/hooks/use-short-address";
-import { PrimaryButton } from "./core/FlowButtons";
 import { useDepositStatus } from "@/hooks/use-deposit-status";
 import { DepositStepper } from "./deposit-stepper";
-import { getEmilyDepositInfo } from "@/util/tx-utils";
 
 const RecoverReview = ({ txId }: { txId: string }) => {
   const { status, recipient, stacksTxId } = useDepositStatus(txId);
