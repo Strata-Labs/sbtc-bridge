@@ -63,7 +63,6 @@ const faqs = [
       </>
     ),
   },
-
   {
     question: "How long will it take for my BTC deposit to confirm?",
     answer: (
@@ -115,6 +114,14 @@ const faqs = [
           </li>
         </ol>
       </>
+    ),
+  },
+  {
+    question: "Is there a minimum amount of BTC I must deposit?",
+    answer: (
+      <p className="text-darkGray font-Matter font-thin">
+        Yes. A .01 BTC minimum is imposed for BTC to sBTC deposits.
+      </p>
     ),
   },
 ];
