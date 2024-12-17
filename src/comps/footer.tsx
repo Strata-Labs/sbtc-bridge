@@ -1,10 +1,6 @@
-import { bridgeConfigAtom } from "@/util/atoms";
-import { useAtomValue } from "jotai";
-
 import Image from "next/image";
 
-export default function Footer() {
-  const { LIVECHAT_ID } = useAtomValue(bridgeConfigAtom);
+export default function Footer({ liveChatId }: { liveChatId?: string }) {
   return (
     <footer className="w-full flex flex-col items-center justify-center py-10 px-4 bg-white font-Matter">
       <div
@@ -22,9 +18,10 @@ export default function Footer() {
           />
         </div>
         <div className="flex flex-row gap-4">
-          {LIVECHAT_ID && (
+          {liveChatId && (
             <a
-              href={`https://direct.lc.chat/${LIVECHAT_ID}/`}
+              suppressHydrationWarning
+              href={`https://direct.lc.chat/${liveChatId}/`}
               target="_blank"
               rel="noreferrer"
               className="text-black font-light text-sm"
@@ -33,6 +30,7 @@ export default function Footer() {
             </a>
           )}
           <a
+            key="how-to-use"
             href="https://docs.stacks.co/guides-and-tutorials/sbtc/how-to-use-the-sbtc-bridge"
             target="_blank"
             rel="noreferrer"
@@ -41,6 +39,7 @@ export default function Footer() {
             How to use this bridge
           </a>
           <a
+            key="docs"
             href="https://docs.stacks.co"
             target="_blank"
             rel="noreferrer"
@@ -49,6 +48,7 @@ export default function Footer() {
             Docs
           </a>
           <a
+            key="github"
             href="https://github.com/stacks-network/sbtc"
             target="_blank"
             rel="noreferrer"
