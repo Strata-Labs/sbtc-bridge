@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import LayoutClient from "./layout-client";
 import getSbtcBridgeConfig from "@/actions/get-sbtc-bridge-config";
+import { ChatBubbleLeftIcon } from "@heroicons/react/20/solid";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,6 +31,20 @@ export default async function RootLayout({
       </head>
       <body className={inter.className}>
         <LayoutClient config={sBTCBridgeConfig}>{children}</LayoutClient>
+        {sBTCBridgeConfig.LIVECHAT_ID && (
+          <a
+            href={`https://direct.lc.chat/${sBTCBridgeConfig.LIVECHAT_ID}/`}
+            target="_blank"
+            title="Support"
+            className={
+              "fixed z-90 bottom-10 right-8 bg-orange w-20 " +
+              "h-20 rounded-full drop-shadow-lg flex justify-center " +
+              "items-center text-white text-4xl"
+            }
+          >
+            <ChatBubbleLeftIcon className="w-8 h-8 text-black" />
+          </a>
+        )}
       </body>
     </html>
   );

@@ -22,4 +22,5 @@ export const env = {
   MINIMUM_DEPOSIT_AMOUNT_IN_SATS: Number(
     process.env.MINIMUM_DEPOSIT_AMOUNT_IN_SATS || 1000,
   ),
+  LIVECHAT_ID: process.env.LIVECHAT_ID,
 };
