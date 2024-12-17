@@ -4,7 +4,6 @@ import Image from "next/image";
 import { ArrowRightIcon, ArrowUpRightIcon } from "@heroicons/react/20/solid";
 import {
   bridgeConfigAtom,
-  showConnectWalletAtom,
   showTosAtom,
   walletInfoAtom,
   WalletProvider,

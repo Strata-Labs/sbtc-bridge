@@ -3,7 +3,6 @@ import { useState } from "react";
 import Faqs from "./Faqs";
 import SelectedSection from "./HomeSelectedHeader";
 import DepositFlow from "./Deposit";
-import HistoryView from "./HistoryView";
 import { TransferAction } from "./TransferHome";
 import LandingAnimation from "./core/LandingAnimation";
 import { usePathname, useRouter } from "next/navigation";
