@@ -21,8 +21,6 @@ const TOS = () => {
   };
 
   const downloadPDF = () => {
-    // download pdf to the user from public/document 241212 - BitcoinL2 Labs - Terms of Use (Optimised) - v3.0.docx.pdf
-
     const link = document.createElement("a");
     link.href = "/documents/Terms of Service.pdf";
     link.download = "BitcoinL2 Labs - Terms of Use.pdf";
