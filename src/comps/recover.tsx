@@ -29,7 +29,6 @@ import { PrimaryButton } from "./core/FlowButtons";
 
 import { getEmilyDepositInfo } from "@/util/tx-utils";
 import RecoverReview from "./recover-review";
-import { useShortAddress } from "@/hooks/use-short-address";
 
 const RecoverManager = () => {
   const [showStepper, setShowStepper] = useState(false);
