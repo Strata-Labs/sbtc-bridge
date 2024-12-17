@@ -141,10 +141,6 @@ const faqs = [
           deducted from your minted sBTC. This is not a signer fee but a regular
           Bitcoin transaction fee.
         </li>
-        <li>
-          Note that there is an additional fee (max 80k sats) that will be
-          automatically deducted from your deposited sBTC
-        </li>
       </ol>
     ),
   },
