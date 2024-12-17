@@ -5,10 +5,11 @@ import Link from "next/link";
 import { useMemo } from "react";
 
 import { AnimatePresence } from "framer-motion";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import {
   BridgeConfig,
   showConnectWalletAtom,
+  showTosAtom,
   walletInfoAtom,
 } from "@/util/atoms";
 
@@ -17,11 +18,13 @@ import { GetTestnetBTC } from "./get-testnet-btc";
 import { useNotifications } from "@/hooks/use-notifications";
 import { NotificationStatusType } from "./Notifications";
 import SBTCBalance from "./ui/sbtc-balance";
-import Metrics from "./ui/metrics";
+import TOS from "./tos";
 
 // converting to lower case to avoid case sensitive issue
 
 const Header = ({ config }: { config: BridgeConfig }) => {
+  const showTos = useAtomValue(showTosAtom);
+
   const isTestnet =
     config.WALLET_NETWORK?.toLowerCase() === "sbtcTestnet".toLowerCase();
 
@@ -109,13 +112,14 @@ const Header = ({ config }: { config: BridgeConfig }) => {
           </div>
         </div>
       </header>
-      <Metrics />
+      {/* <Metrics /> */}
 
       <AnimatePresence>
         {showConnectWallet && (
           <ConnectWallet onClose={() => setShowConnectWallet(false)} />
         )}
       </AnimatePresence>
+      <AnimatePresence>{showTos && <TOS />}</AnimatePresence>
     </>
   );
 };
