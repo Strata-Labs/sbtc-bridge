@@ -88,7 +88,7 @@ const DepositFlowAmount = ({
   const { currentCap, isWithinDepositLimits, isLoading, perDepositMinimum } =
     useMintCaps();
   const maxDepositAmount = currentCap / 1e8;
-  let minDepositAmount = perDepositMinimum / 1e8;
+  const minDepositAmount = perDepositMinimum / 1e8;
 
   const validationSchema = useMemo(
     () =>
@@ -334,7 +334,7 @@ const DepositFlowConfirm = ({
         depositScript: depositScriptHexPreHash,
       };
 
-      console.log({ emilyReqPayloadClient: emilyReqPayload });
+      console.log({ emilyReqPayloadClient: JSON.stringify(emilyReqPayload) });
 
       // make emily post request
       const response = await fetch("/api/emilyDeposit", {
@@ -564,7 +564,7 @@ const DepositFlow = () => {
       case DEPOSIT_STEP.AMOUNT:
         return (
           <DepositFlowAmount
-            btcBalance={btcBalance || 0}
+            btcBalance={btcBalance || Infinity}
             setAmount={setAmount}
             setStep={handleUpdateStep}
           />

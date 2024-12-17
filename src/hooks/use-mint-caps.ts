@@ -41,7 +41,7 @@ export default function useMintCaps() {
       const supplyPlusDeposit =
         Number(currentSbtcSupplyData.value.value) + amount;
       const withinMintCap =
-        amount > currentEmilyLimitsData.perDepositMinimum &&
+        amount >= currentEmilyLimitsData.perDepositMinimum &&
         supplyPlusDeposit < currentEmilyLimitsData.pegCap;
       const depositLessThanMax = currentEmilyLimitsData.perDepositCap >= amount;
       return withinMintCap && depositLessThanMax;
