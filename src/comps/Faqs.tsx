@@ -72,8 +72,9 @@ const faqs = [
         </p>
         <ol className="list-inside flex flex-col gap-4">
           <li>
-            BTC to sBTC conversions are completed within 3 Bitcoin blocks. Due to the speed
-            of Bitcoin blocks, deposits can take up to two hours.
+            BTC to sBTC conversions are typically completed within 3 Bitcoin
+            blocks. Due to the speed of Bitcoin blocks, deposits can take up to
+            two hours to see sBTC in your wallet.
           </li>
           <li>
             sBTC to BTC conversion can be completed within 6 Bitcoin blocks
