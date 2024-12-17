@@ -57,7 +57,11 @@ const HomeApp = () => {
         <div className="w-screen flex "></div>
         {selectedSection === SECTION.DEPOSIT && <DepositFlow />}
         {selectedSection === SECTION.WITHDRAW && <p>Coming Soon :)</p>}
-        {selectedSection === SECTION.HISTORY && <HistoryView />}
+        {selectedSection === SECTION.HISTORY && (
+          <p className="text-center text-lg mb-4 font-Matter font-bold text-black">
+            Coming Soon :)
+          </p>
+        )}
         {selectedSection === SECTION.TRANSFER && <TransferAction />}
       </LandingAnimation>
       <Faqs />

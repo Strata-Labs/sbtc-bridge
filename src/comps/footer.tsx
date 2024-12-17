@@ -1,13 +1,25 @@
 import { bridgeConfigAtom } from "@/util/atoms";
 import { useAtomValue } from "jotai";
 
+import Image from "next/image";
+
 export default function Footer() {
   const { LIVECHAT_ID } = useAtomValue(bridgeConfigAtom);
   return (
     <footer className="w-full flex flex-col items-center justify-center py-10 px-4 bg-white font-Matter">
-      <div className="w-full flex flex-row items-center justify-between">
-        <div className="flex flex-col gap-2">
-          <p className="text-black font-semibold text-sm">sBTC Bridge</p>
+      <div
+        style={{
+          maxWidth: "1200px",
+        }}
+        className="flex-1 w-full px-4 flex-row flex items-center justify-between"
+      >
+        <div>
+          <Image
+            src="/images/l2LabsLogo.svg"
+            alt="Stacks Logo"
+            width={100}
+            height={100}
+          />
         </div>
         <div className="flex flex-row gap-4">
           {LIVECHAT_ID && (

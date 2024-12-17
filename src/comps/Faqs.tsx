@@ -166,29 +166,36 @@ const Faqs = () => {
   return (
     <div
       style={{
-        maxWidth: "800px",
+        backgroundColor: "white",
       }}
-      className="w-full mb-8 flex-col flex border-2 gap-4 border-lightGray rounded-2xl font-Matter "
+      className="w-full  pt-10 flex flex-col items-center justify-center"
     >
-      <div className="flex flex-1 gap-4 px-8 p-6 flex-col ">
-        <div className="w-full flex flex-row items-center justify-between">
-          <h1 className="text-2xl text-black font-Matter font-normal">
-            Learn more about sBTC
-          </h1>
+      <div
+        style={{
+          maxWidth: "800px",
+        }}
+        className="w-full mb-8 flex-col flex  gap-4  rounded-2xl font-Matter "
+      >
+        <div className="flex flex-1 gap-4 px-8 p-6 flex-col ">
+          <div className="w-full flex flex-row items-center justify-between">
+            <h1 className="text-2xl text-black font-Matter font-normal">
+              Learn more about sBTC
+            </h1>
+          </div>
+          <p className="text-darkGray font-Matter font-thin text-sm">
+            Enter into the world of sBTC with these resources
+          </p>
         </div>
-        <p className="text-darkGray font-Matter font-thin text-sm">
-          Enter into the world of sBTC with these resources
-        </p>
-      </div>
-      <div className="flex flex-col w-full px-8 p-6 gap-4  mt-5">
-        {faqs.map((faq, index) => (
-          <FAQItem
-            key={index}
-            question={faq.question}
-            answer={faq.answer}
-            index={index + 1}
-          />
-        ))}
+        <div className="flex flex-col w-full px-8 p-6 gap-4  mt-5">
+          {faqs.map((faq, index) => (
+            <FAQItem
+              key={index}
+              question={faq.question}
+              answer={faq.answer}
+              index={index + 1}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
