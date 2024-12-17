@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
       reclaimScript: body.reclaimScript,
       depositScript: body.depositScript,
     };
-    console.log({ emilyReqPayloadServer: paramsBody });
+    console.log({ emilyReqPayloadServer: JSON.stringify(paramsBody) });
 
     // Forward the request to the Rust server
     const response = await fetch(`${env.EMILY_URL}/deposit`, {

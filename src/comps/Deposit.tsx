@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
 
@@ -40,6 +40,9 @@ import { sendBTCLeather, sendBTCXverse } from "@/util/wallet-utils";
 import useMintCaps from "@/hooks/use-mint-caps";
 import { getAggregateKey } from "@/util/get-aggregate-key";
 import getBitcoinNetwork from "@/util/get-bitcoin-network";
+import { useQuery } from "@tanstack/react-query";
+import getBtcBalance from "@/actions/get-btc-balance";
+import { useDepositStatus } from "@/hooks/use-deposit-status";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -75,25 +78,38 @@ type DepositFlowStepProps = {
 
 type DepositFlowAmountProps = DepositFlowStepProps & {
   setAmount: (amount: number) => void;
+  btcBalance: number;
 };
-const DepositFlowAmount = ({ setStep, setAmount }: DepositFlowAmountProps) => {
-  const { currentCap, isWithinDepositLimits, isLoading } = useMintCaps();
+const DepositFlowAmount = ({
+  setStep,
+  setAmount,
+  btcBalance,
+}: DepositFlowAmountProps) => {
+  const { currentCap, isWithinDepositLimits, isLoading, perDepositMinimum } =
+    useMintCaps();
   const maxDepositAmount = currentCap / 1e8;
-  let { MINIMUM_DEPOSIT_AMOUNT_IN_SATS: minDepositAmount } =
-    useAtomValue(bridgeConfigAtom);
-  minDepositAmount = minDepositAmount / 1e8;
+  const minDepositAmount = perDepositMinimum / 1e8;
 
-  const validationSchema = yup.object({
-    amount: yup
-      .number()
-      // dust amount is in sats
-      .min(
-        minDepositAmount,
-        `Minimum deposit amount is ${minDepositAmount} BTC`,
-      )
-      .max(maxDepositAmount, `Current deposit cap is ${maxDepositAmount} BTC`)
-      .required(),
-  });
+  const validationSchema = useMemo(
+    () =>
+      yup.object({
+        amount: yup
+          .number()
+          // dust amount is in sats
+          .min(
+            minDepositAmount,
+            `Minimum deposit amount is ${minDepositAmount} BTC`,
+          )
+          .max(
+            Math.min(btcBalance, maxDepositAmount),
+            btcBalance < maxDepositAmount
+              ? `The deposit amount exceeds your current balance of ${btcBalance} BTC`
+              : `Current deposit cap is ${maxDepositAmount} BTC`,
+          )
+          .required(),
+      }),
+    [btcBalance, maxDepositAmount, minDepositAmount],
+  );
   const handleSubmit = async (value: string | undefined) => {
     if (value) {
       const sats = Math.floor(Number(value) * 1e8);
@@ -281,6 +297,15 @@ const DepositFlowConfirm = ({
           amountInSats: amount,
           network: walletNetwork,
         };
+        console.log({
+          preSendParams: {
+            bitcoinTxid: txId,
+            bitcoinTxOutputIndex: 0,
+            reclaimScript: reclaimScriptHex,
+            depositScript: depositScriptHexPreHash,
+          },
+        });
+
         switch (walletInfo.selectedWallet) {
           case WalletProvider.LEATHER:
             txId = await sendBTCLeather(params);
@@ -309,7 +334,7 @@ const DepositFlowConfirm = ({
         depositScript: depositScriptHexPreHash,
       };
 
-      console.log({ emilyReqPayloadClient: emilyReqPayload });
+      console.log({ emilyReqPayloadClient: JSON.stringify(emilyReqPayload) });
 
       // make emily post request
       const response = await fetch("/api/emilyDeposit", {
@@ -409,6 +434,8 @@ const DepositFlowReview = ({
   amount,
   stxAddress,
 }: DepositFlowReviewProps) => {
+  const { status, recipient, stacksTxId } = useDepositStatus(txId);
+  const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
   return (
     <FlowContainer>
       <>
@@ -425,22 +452,31 @@ const DepositFlowReview = ({
           <div className="flex flex-col gap-1">
             <SubText>Stacks address to transfer to</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {useShortAddress(stxAddress)}
+              {useShortAddress(recipient)}
             </p>
           </div>
         </div>
         <div className="flex flex-1 items-end">
-          <DepositStepper txId={txId} />
+          <SubText>
+            To avoid losing your progress, please keep this page open.
+          </SubText>
+        </div>
+        <div className="flex flex-1 items-end">
+          <DepositStepper status={status} txId={txId} />
         </div>
 
-        {/* <div className="w-full flex-row flex justify-between items-center">
-          <PrimaryButton onClick={() => handleNextClick()}>
-            VIEW TX INFO
-          </PrimaryButton>
-          <PrimaryButton onClick={() => handleTxStatusClick()}>
-            VIEW STATUS
-          </PrimaryButton>
-        </div> */}
+        {stacksTxId && (
+          <div className="w-full flex-row flex justify-between items-center">
+            <a
+              className="w-40 rounded-lg py-3 flex justify-center items-center flex-row bg-orange"
+              href={`https://explorer.hiro.so/txid/${stacksTxId}?chain=${walletNetwork === "mainnet" ? "mainnet" : "testnet"}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View stacks tx
+            </a>
+          </div>
+        )}
       </>
     </FlowContainer>
   );
@@ -511,11 +547,27 @@ const DepositFlow = () => {
     },
     [setTxId],
   );
+  const { addresses } = useAtomValue(walletInfoAtom);
+  const btcAddress = addresses.payment?.address;
+  const { data: btcBalance } = useQuery({
+    queryKey: ["btcBalance", btcAddress],
+    queryFn: async () => {
+      if (!btcAddress) {
+        return 0;
+      }
+      return await getBtcBalance(btcAddress);
+    },
+    enabled: !!btcAddress,
+  });
   const renderStep = () => {
     switch (step) {
       case DEPOSIT_STEP.AMOUNT:
         return (
-          <DepositFlowAmount setAmount={setAmount} setStep={handleUpdateStep} />
+          <DepositFlowAmount
+            btcBalance={btcBalance || Infinity}
+            setAmount={setAmount}
+            setStep={handleUpdateStep}
+          />
         );
       case DEPOSIT_STEP.ADDRESS:
         return (
