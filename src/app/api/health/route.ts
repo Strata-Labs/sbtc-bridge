@@ -1,5 +1,3 @@
-"use server";
-
 import { env } from "@/env";
 import packageJson from "../../../../package.json";
 import { NextRequest, NextResponse } from "next/server";
@@ -15,3 +13,5 @@ export async function GET(_: NextRequest) {
     { status: 200 },
   );
 }
+
+export const dynamic = "force-dynamic";
