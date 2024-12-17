@@ -23,12 +23,10 @@ import {
   hexToBytes as hexToUint8Array,
 } from "@stacks/common";
 import { FlowContainer } from "./core/FlowContainer";
-import { Heading, SubText } from "./core/Heading";
+import { Heading } from "./core/Heading";
 import { InformationCircleIcon } from "@heroicons/react/20/solid";
-import { useShortAddress } from "@/hooks/use-short-address";
 import { PrimaryButton } from "./core/FlowButtons";
-import { useDepositStatus } from "@/hooks/use-deposit-status";
-import { DepositStepper } from "./deposit-stepper";
+
 import { getEmilyDepositInfo } from "@/util/tx-utils";
 import RecoverReview from "./recover-review";
 
