@@ -156,7 +156,7 @@ const ReclaimManager = () => {
         return;
       }
 
-      const reclaimTransaction = await getRawTransaction(reclaimTxId);
+      const reclaimTransaction = (await getRawTransaction(reclaimTxId))!;
 
       if (reclaimTransaction) {
         setStep(RECLAIM_STEP.CURRENT_STATUS);
@@ -190,7 +190,7 @@ const ReclaimManager = () => {
         setStep(RECLAIM_STEP.NOT_FOUND);
         return;
       }
-      const responseData = await getRawTransaction(depositTxId);
+      const responseData = (await getRawTransaction(depositTxId))!;
 
       // get the amount from vout array
       const vout = responseData.vout;

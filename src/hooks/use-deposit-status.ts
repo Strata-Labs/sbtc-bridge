@@ -5,8 +5,10 @@ import { bridgeConfigAtom } from "@/util/atoms";
 import {
   getCurrentBlockHeight,
   getRawTransaction,
+  getTxRbf,
 } from "@/actions/bitcoinClient";
 import { Cl, PrincipalCV } from "@stacks/transactions";
+import { useRouter } from "next/navigation";
 
 export enum DepositStatus {
   PendingConfirmation = "pending",
@@ -16,6 +18,8 @@ export enum DepositStatus {
 }
 
 export function useDepositStatus(txId: string) {
+  const router = useRouter();
+
   const [transferTxStatus, setTransferTxStatus] = useState<DepositStatus>(
     DepositStatus.PendingConfirmation,
   );
@@ -46,12 +50,29 @@ export function useDepositStatus(txId: string) {
     ) {
       const check = async () => {
         const info = await getRawTransaction(txId);
-        if (info.status.confirmed) {
-          const txInfo = await getEmilyDepositInfo({
-            txId,
-            emilyURL: emilyUrl!,
+        const txInfo = await getEmilyDepositInfo({
+          txId,
+          emilyURL: emilyUrl!,
+        });
+        if (!info) {
+          const rbf = await getTxRbf(txId);
+          const rbfTxId = (rbf as any).replacements.tx.txid;
+          const emilyReqPayload = {
+            bitcoinTxid: rbfTxId,
+            bitcoinTxOutputIndex: 0,
+            reclaimScript: txInfo.reclaimScript,
+            depositScript: txInfo.depositScript,
+          };
+          await fetch("/api/emilyDeposit", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(emilyReqPayload),
           });
-
+          return router.push(`/?txId=${rbfTxId}&step=3`);
+        }
+        if (info.status.confirmed) {
           setEmilyResponse(txInfo);
 
           if (txInfo.status === DepositStatus.Completed) {

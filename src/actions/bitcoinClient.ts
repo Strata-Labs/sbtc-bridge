@@ -80,8 +80,16 @@ export const scanTxOutSet = async (
 // Function to get a raw transaction
 export const getRawTransaction = async (
   txid: string,
-): Promise<BitcoinTransactionResponse> => {
+): Promise<BitcoinTransactionResponse | null> => {
   const result = await fetch(`${env.MEMPOOL_API_URL}/tx/${txid}`);
+  if (result.status === 404) {
+    return null;
+  }
+  return await result.json();
+};
+
+export const getTxRbf = async (txid: string): Promise<boolean> => {
+  const result = await fetch(`${env.MEMPOOL_API_URL}/v1/tx/${txid}/rbf`);
   return await result.json();
 };
 

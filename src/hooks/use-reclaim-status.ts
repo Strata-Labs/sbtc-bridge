@@ -19,7 +19,7 @@ export const useReclaimStatus = (txId: string) => {
       // and update the reclaimStatus
 
       const interval = setInterval(async () => {
-        const reclaimTx = await getRawTransaction(txId);
+        const reclaimTx = (await getRawTransaction(txId))!;
         let status = ReclaimStatus.Pending;
 
         if (reclaimTx.status.confirmed) {
