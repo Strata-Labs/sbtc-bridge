@@ -16,7 +16,6 @@ export const bridgeConfigAtom = atom<BridgeConfig>({
   BANNER_CONTENT: undefined,
   RECLAIM_LOCK_TIME: undefined,
   PUBLIC_MEMPOOL_URL: "",
-  MINIMUM_DEPOSIT_AMOUNT_IN_SATS: 1000,
   LIVECHAT_ID: undefined,
 });
 export const depositMaxFeeAtom = atom(80000);
