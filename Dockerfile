@@ -9,6 +9,8 @@ RUN yarn install --frozen-lockfile
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED="1"
+ARG NEXT_PUBLIC_LIVECHAT_ID
+
 RUN npm run build
 
 FROM node:18
