@@ -8,12 +8,13 @@ import {
   walletInfoAtom,
 } from "@/util/atoms";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { NotificationStatusType } from "./Notifications";
 import { getAggregateKey } from "@/util/get-aggregate-key";
 import { principalCV, serializeCVBytes } from "@stacks/transactions";
 import {
+  createDepositAddress,
   createDepositScript,
   createReclaimScript,
 } from "@/util/depositRequest";
@@ -28,34 +29,40 @@ import { InformationCircleIcon } from "@heroicons/react/20/solid";
 import { PrimaryButton } from "./core/FlowButtons";
 
 import { getEmilyDepositInfo } from "@/util/tx-utils";
-import RecoverReview from "./recover-review";
+import { getRawTransaction } from "@/actions/bitcoinClient";
+import getBitcoinNetwork from "@/util/get-bitcoin-network";
 
 const RecoverManager = () => {
-  const [showStepper, setShowStepper] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const searchParams = useSearchParams();
 
   const { notify } = useNotifications();
 
-  const { EMILY_URL: emilyUrl, RECLAIM_LOCK_TIME: lockTime } =
-    useAtomValue(bridgeConfigAtom);
-
   const walletInfo = useAtomValue(walletInfoAtom);
-
   const maxFee = useAtomValue(depositMaxFeeAtom);
 
   const setShowConnectWallet = useSetAtom(showConnectWalletAtom);
+  const config = useAtomValue(bridgeConfigAtom);
 
   const isConnected = useMemo(() => !!walletInfo.selectedWallet, [walletInfo]);
 
+  const txId = useMemo(
+    () => searchParams.get("txId") || searchParams.get("txid"),
+    [searchParams],
+  );
+
+  const stxAddress = useMemo(
+    () => searchParams.get("stxAddress") || searchParams.get("stxaddress"),
+    [searchParams],
+  );
   useEffect(() => {
     checkIfEmilyIsAware();
   }, []);
 
   const checkIfEmilyIsAware = async () => {
     try {
-      const txId = searchParams.get("txId");
-
       // ensure txId is present
       if (!txId) {
         notify({
@@ -67,24 +74,22 @@ const RecoverManager = () => {
 
       const txInfo = await getEmilyDepositInfo({
         txId,
-        emilyURL: emilyUrl!,
+        emilyURL: config.EMILY_URL!,
       });
 
       console.log("txInfo", txInfo);
 
       if (txInfo.reclaimScript) {
-        setShowStepper(true);
+        //setShowStepper(true);
       }
     } catch (err: any) {
       console.log("checkIfEmilyIsAware", err);
       throw new Error(err);
     }
   };
+
   const generateScripts = async () => {
     try {
-      const stxAddress = searchParams.get("stxAddress");
-      const txId = searchParams.get("txId");
-
       // ensure the user is signed in before proceeding
       if (!walletInfo.selectedWallet) {
         notify({
@@ -115,7 +120,7 @@ const RecoverManager = () => {
       const reclaimPublicKey = paymentAddress.publicKey;
 
       // Parse lockTime from env variable
-      const parsedLockTime = parseInt(lockTime || "144");
+      const parsedLockTime = parseInt(config.RECLAIM_LOCK_TIME! || "144");
 
       // Create the reclaim script and convert to Buffer
       const reclaimScript = Buffer.from(
@@ -138,6 +143,51 @@ const RecoverManager = () => {
         reclaimScript: reclaimScriptHex,
         depositScript: depositScriptHexPreHash,
       };
+      console.log("emilyReqPayload", emilyReqPayload);
+
+      const p2trAddress = createDepositAddress(
+        serializedAddress,
+        signersAggregatePubKey!,
+        maxFee,
+        parsedLockTime,
+        getBitcoinNetwork(config.WALLET_NETWORK),
+        reclaimPublicKey,
+      );
+
+      console.log("p2trAddress", p2trAddress);
+
+      const bitcoinReclaimTxInfo = (await getRawTransaction(txId))!;
+
+      console.log("bitcoinReclaimTxInfo", bitcoinReclaimTxInfo);
+      // ensure that one of the vout scriptpubkey_address matches the p2tr address we generated
+      // if not, throw an error
+
+      const outputs = bitcoinReclaimTxInfo.vout;
+
+      const outputMatch = outputs.find((output: any) => {
+        if (output.scriptpubkey_address) {
+          console.log(
+            "output.scriptpubkey_address",
+            output.scriptpubkey_address,
+          );
+
+          return output.scriptpubkey_address === p2trAddress;
+        } else {
+          return false;
+        }
+      });
+
+      if (!outputMatch) {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: `No matching output address found tied to the transaction`,
+        });
+        throw new Error("No matching output address found");
+      }
+
+      const amount = outputMatch.value;
+
+      console.log("outputMatch", outputMatch);
 
       console.log({ emilyReqPayload });
       //console.log({ emilyReqPayloadClient: JSON.stringify(emilyReqPayload) });
@@ -163,22 +213,18 @@ const RecoverManager = () => {
         type: NotificationStatusType.SUCCESS,
         message: `Request successful`,
       });
-      setShowStepper(true);
+
+      const params = new URLSearchParams();
+
+      params.set("txId", txId);
+      params.set("step", String(1));
+      params.set("amount", String(amount));
+
+      router.push(`${pathname}?${params.toString()}`);
     } catch (err: any) {
       throw new Error(err);
     }
   };
-
-  const renderTxId = () => {
-    const txId = searchParams.get("txId") || "";
-    if (txId.length > 10) {
-      return `${txId.slice(0, 5)}...${txId.slice(-5)}`;
-    }
-    return txId;
-  };
-  if (showStepper) {
-    return <RecoverReview txId={searchParams.get("txId") || ""} />;
-  }
 
   return (
     <>
@@ -187,17 +233,21 @@ const RecoverManager = () => {
           <div className="w-full flex flex-row items-center justify-between">
             <Heading>Recover Lost Transaction</Heading>
           </div>
+          <SubText>
+            In the rare situation where your transaction was lost, use this tool
+            to ensure It's placed back on track within our system{" "}
+          </SubText>
           <div className="flex flex-col  gap-2">
             <div className="flex flex-col gap-1">
               <SubText>Transaction ID</SubText>
-              <p className="text-black font-Matter font-semibold text-sm">
-                {renderTxId()}
+              <p className="text-black break-all  font-Matter font-semibold text-sm">
+                {txId || ""}
               </p>
             </div>
             <div className="flex flex-col gap-1">
               <SubText>Stacks address to transfer to</SubText>
               <p className="text-black font-Matter font-semibold text-sm">
-                {searchParams.get("stxAddress") || ""}
+                {stxAddress || ""}
               </p>
             </div>
           </div>
