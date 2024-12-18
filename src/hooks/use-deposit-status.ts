@@ -9,6 +9,7 @@ import {
 } from "@/actions/bitcoinClient";
 import { Cl, PrincipalCV } from "@stacks/transactions";
 import { useRouter } from "next/navigation";
+import { useEmilyDeposit } from "@/util/use-emily-deposit";
 
 export enum DepositStatus {
   PendingConfirmation = "pending",
@@ -19,7 +20,7 @@ export enum DepositStatus {
 
 export function useDepositStatus(txId: string) {
   const router = useRouter();
-
+  const { notifyEmily } = useEmilyDeposit();
   const [transferTxStatus, setTransferTxStatus] = useState<DepositStatus>(
     DepositStatus.PendingConfirmation,
   );
@@ -57,19 +58,14 @@ export function useDepositStatus(txId: string) {
         if (!info) {
           const rbf = await getTxRbf(txId);
           const rbfTxId = (rbf as any).replacements.tx.txid;
+
           const emilyReqPayload = {
-            bitcoinTxid: rbfTxId,
+            bitcoinTxid: rbfTxId as string,
             bitcoinTxOutputIndex: 0,
             reclaimScript: txInfo.reclaimScript,
             depositScript: txInfo.depositScript,
           };
-          await fetch("/api/emilyDeposit", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(emilyReqPayload),
-          });
+          await notifyEmily(emilyReqPayload);
           return router.push(`/?txId=${rbfTxId}&step=3`);
         }
         if (info.status.confirmed) {

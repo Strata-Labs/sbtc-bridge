@@ -43,6 +43,7 @@ import getBitcoinNetwork from "@/util/get-bitcoin-network";
 import { useQuery } from "@tanstack/react-query";
 import getBtcBalance from "@/actions/get-btc-balance";
 import { useDepositStatus } from "@/hooks/use-deposit-status";
+import { useEmilyDeposit } from "@/util/use-emily-deposit";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -247,6 +248,7 @@ const DepositFlowConfirm = ({
 
   const maxFee = useAtomValue(depositMaxFeeAtom);
   const config = useAtomValue(bridgeConfigAtom);
+  const { notifyEmily, isPending: isPendingNotifyEmily } = useEmilyDeposit();
 
   const walletInfo = useAtomValue(walletInfoAtom);
   const handleNextClick = async () => {
@@ -337,13 +339,7 @@ const DepositFlowConfirm = ({
       console.log({ emilyReqPayloadClient: JSON.stringify(emilyReqPayload) });
 
       // make emily post request
-      const response = await fetch("/api/emilyDeposit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(emilyReqPayload),
-      });
+      const response = await notifyEmily(emilyReqPayload);
 
       if (!response.ok) {
         notify({
@@ -412,7 +408,12 @@ const DepositFlowConfirm = ({
           <SecondaryButton onClick={() => handlePrevClick()}>
             PREV
           </SecondaryButton>
-          <PrimaryButton onClick={() => handleNextClick()}>NEXT</PrimaryButton>
+          <PrimaryButton
+            disabled={isPendingNotifyEmily}
+            onClick={handleNextClick}
+          >
+            NEXT
+          </PrimaryButton>
         </div>
       </>
     </FlowContainer>
