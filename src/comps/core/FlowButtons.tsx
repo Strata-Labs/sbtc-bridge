@@ -38,12 +38,14 @@ export const SecondaryButton = ({
   onClick,
   isValid = true,
   type = "button",
+  disabled,
 }: ButtonProps) => {
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       type={type}
-      className="w-40 rounded-lg py-3 flex justify-center items-center flex-row bg-lightOrange"
+      className="w-40 rounded-lg py-3 flex justify-center items-center flex-row bg-lightOrange disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <p
         className={classNames(

@@ -405,7 +405,10 @@ const DepositFlowConfirm = ({
           </div>
         </div>
         <div className="w-full flex-row flex justify-between items-center">
-          <SecondaryButton onClick={() => handlePrevClick()}>
+          <SecondaryButton
+            disabled={isPendingNotifyEmily}
+            onClick={handlePrevClick}
+          >
             PREV
           </SecondaryButton>
           <PrimaryButton
