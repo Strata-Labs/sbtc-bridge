@@ -144,7 +144,7 @@ const RecoverManager = () => {
       params.set("txId", txId);
       params.set("step", String(1));
       params.set("amount", String(amount));
-
+      params.set("stxaddress", String(stxAddress));
       router.push(`${pathname}?${params.toString()}`);
     } catch (err) {
       console.log("getTransactionAmount", err);
@@ -268,6 +268,7 @@ const RecoverManager = () => {
       params.set("txId", txId);
       params.set("step", String(1));
       params.set("amount", String(amount));
+      params.set("stxaddress", String(stxAddress));
 
       router.push(`${pathname}?${params.toString()}`);
     } catch (err: any) {
