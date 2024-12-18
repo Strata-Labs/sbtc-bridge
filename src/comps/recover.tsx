@@ -9,7 +9,7 @@ import {
 } from "@/util/atoms";
 import { useAtomValue, useSetAtom } from "jotai";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { NotificationStatusType } from "./Notifications";
 import { getAggregateKey } from "@/util/get-aggregate-key";
 import { principalCV, serializeCVBytes } from "@stacks/transactions";
@@ -77,14 +77,77 @@ const RecoverManager = () => {
         emilyURL: config.EMILY_URL!,
       });
 
-      console.log("txInfo", txInfo);
-
       if (txInfo.reclaimScript) {
         //setShowStepper(true);
+        getTransactionAmount();
       }
     } catch (err: any) {
-      console.log("checkIfEmilyIsAware", err);
+      console.warn("checkIfEmilyIsAware", err);
       throw new Error(err);
+    }
+  };
+
+  // reuse some logic to get the amount in order to return the user to their status check
+  const getTransactionAmount = async () => {
+    try {
+      if (!stxAddress || !txId) {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: "Invalid URL parameters",
+        });
+        throw new Error("User not connected");
+      }
+
+      const signersAggregatePubKey = (await getAggregateKey()).slice(2);
+
+      const serializedAddress = serializeCVBytes(principalCV(stxAddress));
+
+      const paymentAddress = walletInfo.addresses.payment!;
+
+      const reclaimPublicKey = paymentAddress.publicKey;
+
+      const parsedLockTime = parseInt(config.RECLAIM_LOCK_TIME! || "144");
+
+      const p2trAddress = createDepositAddress(
+        serializedAddress,
+        signersAggregatePubKey!,
+        maxFee,
+        parsedLockTime,
+        getBitcoinNetwork(config.WALLET_NETWORK),
+        reclaimPublicKey,
+      );
+
+      const bitcoinReclaimTxInfo = (await getRawTransaction(txId))!;
+
+      const outputs = bitcoinReclaimTxInfo.vout;
+
+      const outputMatch = outputs.find((output: any) => {
+        if (output.scriptpubkey_address) {
+          return output.scriptpubkey_address === p2trAddress;
+        } else {
+          return false;
+        }
+      });
+
+      if (!outputMatch) {
+        notify({
+          type: NotificationStatusType.ERROR,
+          message: `No matching output address found tied to the transaction`,
+        });
+        throw new Error("No matching output address found");
+      }
+
+      const amount = outputMatch.value;
+
+      const params = new URLSearchParams();
+
+      params.set("txId", txId);
+      params.set("step", String(1));
+      params.set("amount", String(amount));
+
+      router.push(`${pathname}?${params.toString()}`);
+    } catch (err) {
+      console.log("getTransactionAmount", err);
     }
   };
 
@@ -143,7 +206,6 @@ const RecoverManager = () => {
         reclaimScript: reclaimScriptHex,
         depositScript: depositScriptHexPreHash,
       };
-      console.log("emilyReqPayload", emilyReqPayload);
 
       const p2trAddress = createDepositAddress(
         serializedAddress,
@@ -154,11 +216,8 @@ const RecoverManager = () => {
         reclaimPublicKey,
       );
 
-      console.log("p2trAddress", p2trAddress);
-
       const bitcoinReclaimTxInfo = (await getRawTransaction(txId))!;
 
-      console.log("bitcoinReclaimTxInfo", bitcoinReclaimTxInfo);
       // ensure that one of the vout scriptpubkey_address matches the p2tr address we generated
       // if not, throw an error
 
@@ -166,11 +225,6 @@ const RecoverManager = () => {
 
       const outputMatch = outputs.find((output: any) => {
         if (output.scriptpubkey_address) {
-          console.log(
-            "output.scriptpubkey_address",
-            output.scriptpubkey_address,
-          );
-
           return output.scriptpubkey_address === p2trAddress;
         } else {
           return false;
@@ -186,11 +240,6 @@ const RecoverManager = () => {
       }
 
       const amount = outputMatch.value;
-
-      console.log("outputMatch", outputMatch);
-
-      console.log({ emilyReqPayload });
-      //console.log({ emilyReqPayloadClient: JSON.stringify(emilyReqPayload) });
 
       // make emily post request
       const response = await fetch("/api/emilyDeposit", {
