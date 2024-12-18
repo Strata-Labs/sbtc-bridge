@@ -27,6 +27,9 @@ export function useDepositStatus(txId: string) {
   const [emilyResponse, setEmilyResponse] = useState<Awaited<
     ReturnType<typeof getEmilyDepositInfo>
   > | null>(null);
+  const [statusResponse, setStatusResponse] = useState<Awaited<
+    ReturnType<typeof getRawTransaction>
+  > | null>(null);
 
   const { EMILY_URL: emilyUrl, RECLAIM_LOCK_TIME } =
     useAtomValue(bridgeConfigAtom);
@@ -68,6 +71,7 @@ export function useDepositStatus(txId: string) {
           await notifyEmily(emilyReqPayload);
           return router.push(`/?txId=${rbfTxId}&step=3`);
         }
+        setStatusResponse(info);
         if (info.status.confirmed) {
           setEmilyResponse(txInfo);
 
@@ -93,11 +97,19 @@ export function useDepositStatus(txId: string) {
       const interval = setInterval(check, 5000);
       return () => clearInterval(interval);
     }
-  }, [RECLAIM_LOCK_TIME, emilyUrl, transferTxStatus, txId]);
+  }, [
+    RECLAIM_LOCK_TIME,
+    emilyUrl,
+    notifyEmily,
+    router,
+    transferTxStatus,
+    txId,
+  ]);
 
   return {
     status: transferTxStatus,
     recipient: recipient && (Cl.deserialize(recipient) as PrincipalCV).value,
     stacksTxId: stacksTxId,
+    statusResponse,
   };
 }

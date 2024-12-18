@@ -433,13 +433,13 @@ type DepositFlowReviewProps = DepositFlowStepProps & {
   stxAddress: string;
 };
 
-const DepositFlowReview = ({
-  txId,
-  amount,
-  stxAddress,
-}: DepositFlowReviewProps) => {
-  const { status, recipient, stacksTxId } = useDepositStatus(txId);
+const DepositFlowReview = ({ txId }: DepositFlowReviewProps) => {
+  const { status, recipient, stacksTxId, statusResponse } =
+    useDepositStatus(txId);
   const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
+  const btcAmount = useMemo(() => {
+    return ((statusResponse?.vout[0].value || 0) / 1e8).toLocaleString();
+  }, [statusResponse?.vout]);
   return (
     <FlowContainer>
       <>
@@ -450,7 +450,7 @@ const DepositFlowReview = ({
           <div className="flex flex-col gap-1">
             <SubText>Amount selected to Transfer</SubText>
             <p className="text-black font-Matter font-semibold text-sm">
-              {amount / 1e8} BTC
+              {btcAmount} BTC
             </p>
           </div>
           <div className="flex flex-col gap-1">
