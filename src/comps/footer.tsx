@@ -40,7 +40,7 @@ export default function Footer({ liveChatId }: { liveChatId?: string }) {
           </a>
           <a
             key="docs"
-            href="https://docs.stacks.co"
+            href="https://docs.stacks.co/concepts/sbtc"
             target="_blank"
             rel="noreferrer"
             className="text-black font-light text-sm"
