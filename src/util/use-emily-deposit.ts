@@ -3,7 +3,7 @@ import { useNotifications } from "@/hooks/use-notifications";
 import { useMutation } from "@tanstack/react-query";
 
 const expBackoff = (attempt: number) =>
-  Math.min(attempt > 1 ? 2 ** attempt * 1000 : 1000, 30 * 1000);
+  Math.min(2 ** attempt, 30) * 1000;
 export const useEmilyDeposit = () => {
   const { notify } = useNotifications();
   const { mutateAsync, failureCount, isPending } = useMutation({
