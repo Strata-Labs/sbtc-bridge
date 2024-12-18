@@ -284,7 +284,7 @@ const RecoverManager = () => {
           </div>
           <SubText>
             In the rare situation where your transaction was lost, use this tool
-            to ensure It's placed back on track within our system{" "}
+            to ensure It is placed back on track within our system{" "}
           </SubText>
           <div className="flex flex-col  gap-2">
             <div className="flex flex-col gap-1">
