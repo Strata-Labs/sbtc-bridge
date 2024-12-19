@@ -44,6 +44,7 @@ import { useQuery } from "@tanstack/react-query";
 import getBtcBalance from "@/actions/get-btc-balance";
 import { useDepositStatus } from "@/hooks/use-deposit-status";
 import { useEmilyDeposit } from "@/util/use-emily-deposit";
+import Link from "next/link";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -448,12 +449,33 @@ type DepositFlowReviewProps = DepositFlowStepProps & {
 };
 
 const DepositFlowReview = ({ txId }: DepositFlowReviewProps) => {
-  const { status, recipient, stacksTxId, statusResponse } =
-    useDepositStatus(txId);
+  const {
+    confirmedBlockHeight,
+    currentBlockHeight,
+    status,
+    recipient,
+    stacksTxId,
+    statusResponse,
+  } = useDepositStatus(txId);
+
   const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
   const btcAmount = useMemo(() => {
     return (statusResponse?.vout[0].value || 0) / 1e8;
   }, [statusResponse?.vout]);
+
+  console.log("confirmedBlockHeight", confirmedBlockHeight);
+  console.log("currentBlockHeight", currentBlockHeight);
+
+  const showDepositWarning = useMemo(() => {
+    if (confirmedBlockHeight === 0) {
+      return false;
+    } else {
+      const elapsedBlocks = currentBlockHeight - confirmedBlockHeight;
+
+      console.log("elapsedBlocks,", elapsedBlocks);
+      return elapsedBlocks >= 6;
+    }
+  }, [confirmedBlockHeight, currentBlockHeight]);
   return (
     <FlowContainer>
       <>
@@ -479,6 +501,23 @@ const DepositFlowReview = ({ txId }: DepositFlowReviewProps) => {
             To avoid losing your progress, please keep this page open.
           </SubText>
         </div>
+        {showDepositWarning && (
+          <div className="flex flex-1 items-end">
+            <SubText>
+              There is a delay in processing your deposit, but signers are still
+              working on it and your funds are secure. Please contact our
+              support team
+              <Link
+                className="text-blue-500 underline"
+                href="https://direct.lc.chat/18945692/"
+              >
+                {"  "}
+                here{"  "}
+              </Link>
+              to help us expedite it.”
+            </SubText>
+          </div>
+        )}
         <div className="flex flex-1 items-end">
           <DepositStepper status={status} txId={txId} />
         </div>
@@ -487,7 +526,9 @@ const DepositFlowReview = ({ txId }: DepositFlowReviewProps) => {
           <div className="w-full flex-row flex justify-between items-center">
             <a
               className="w-40 rounded-lg py-3 flex justify-center items-center flex-row bg-orange"
-              href={`https://explorer.hiro.so/txid/${stacksTxId}?chain=${walletNetwork === "mainnet" ? "mainnet" : "testnet"}`}
+              href={`https://explorer.hiro.so/txid/${stacksTxId}?chain=${
+                walletNetwork === "mainnet" ? "mainnet" : "testnet"
+              }`}
               target="_blank"
               rel="noreferrer"
             >

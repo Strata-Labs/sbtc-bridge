@@ -30,6 +30,7 @@ import {
   signPSBTLeather,
   signPSBTXverse,
 } from "@/util/wallet-utils/src/sign-psbt";
+import Link from "next/link";
 
 /*
   Goal : User server side rendering as much as possible
@@ -452,6 +453,20 @@ const ReclaimDeposit = ({
             <p className="text-black font-Matter font-semibold text-sm">
               {useShortAddress(getWalletAddress() || "")}
             </p>
+          </div>
+          <div className="flex flex-1 items-end">
+            <SubText>
+              Please note that we have received reports of errors with Ledgers
+              running the reclaim function - if you are using a ledger and
+              experience this please contact our support team
+              <Link
+                className="text-blue-500 underline"
+                href="https://direct.lc.chat/18945692/"
+              >
+                {"  "}
+                here{"  "}
+              </Link>
+            </SubText>
           </div>
         </div>
         <div className="flex flex-1 ">

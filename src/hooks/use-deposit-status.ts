@@ -31,6 +31,9 @@ export function useDepositStatus(txId: string) {
     ReturnType<typeof getRawTransaction>
   > | null>(null);
 
+  const [currentBlockHeight, setCurrentBlockHeight] = useState<number>(0);
+  const [confirmedBlockHeight, setConfirmedBlockHeight] = useState<number>(0);
+
   const { EMILY_URL: emilyUrl, RECLAIM_LOCK_TIME } =
     useAtomValue(bridgeConfigAtom);
 
@@ -54,6 +57,7 @@ export function useDepositStatus(txId: string) {
     ) {
       const check = async () => {
         const info = await getRawTransaction(txId);
+
         const txInfo = await getEmilyDepositInfo({
           txId,
           emilyURL: emilyUrl!,
@@ -72,6 +76,9 @@ export function useDepositStatus(txId: string) {
           return router.push(`/?txId=${rbfTxId}&step=3`);
         }
         setStatusResponse(info);
+
+        console.log("info", info);
+        console.log("txInfo", txInfo);
         if (info.status.confirmed) {
           setEmilyResponse(txInfo);
 
@@ -81,8 +88,14 @@ export function useDepositStatus(txId: string) {
             return;
           }
           const currentBlockHeight = await getCurrentBlockHeight();
+
+          setCurrentBlockHeight(currentBlockHeight);
+
+          const confirmedBlockTime = info.status.block_height || 0;
+          setConfirmedBlockHeight(confirmedBlockTime);
           const unlockBlock =
             Number(RECLAIM_LOCK_TIME || 144) + info.status.block_height - 1;
+
           const isPastLockTime = currentBlockHeight >= unlockBlock;
           if (isPastLockTime) {
             setTransferTxStatus(DepositStatus.Failed);
@@ -111,5 +124,7 @@ export function useDepositStatus(txId: string) {
     recipient: recipient && (Cl.deserialize(recipient) as PrincipalCV).value,
     stacksTxId: stacksTxId,
     statusResponse,
+    currentBlockHeight,
+    confirmedBlockHeight,
   };
 }
