@@ -77,8 +77,6 @@ export function useDepositStatus(txId: string) {
         }
         setStatusResponse(info);
 
-        console.log("info", info);
-        console.log("txInfo", txInfo);
         if (info.status.confirmed) {
           setEmilyResponse(txInfo);
 

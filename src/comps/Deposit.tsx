@@ -463,16 +463,12 @@ const DepositFlowReview = ({ txId }: DepositFlowReviewProps) => {
     return (statusResponse?.vout[0].value || 0) / 1e8;
   }, [statusResponse?.vout]);
 
-  console.log("confirmedBlockHeight", confirmedBlockHeight);
-  console.log("currentBlockHeight", currentBlockHeight);
-
   const showDepositWarning = useMemo(() => {
     if (confirmedBlockHeight === 0) {
       return false;
     } else {
       const elapsedBlocks = currentBlockHeight - confirmedBlockHeight;
 
-      console.log("elapsedBlocks,", elapsedBlocks);
       return elapsedBlocks >= 6;
     }
   }, [confirmedBlockHeight, currentBlockHeight]);
