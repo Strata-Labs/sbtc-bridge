@@ -44,6 +44,8 @@ import { useQuery } from "@tanstack/react-query";
 import getBtcBalance from "@/actions/get-btc-balance";
 import { useDepositStatus } from "@/hooks/use-deposit-status";
 import { useEmilyDeposit } from "@/util/use-emily-deposit";
+import LedgerWarning from "./ledger-warning";
+import { AnimatePresence } from "framer-motion";
 /*
   deposit flow has 3 steps
   1) enter amount you want to deposit
@@ -241,6 +243,8 @@ const DepositFlowConfirm = ({
   stxAddress,
   handleUpdatingTransactionInfo,
 }: DepositFlowConfirmProps) => {
+  const [showWarning, setShowWarning] = useState(false);
+
   const { notify } = useNotifications();
 
   const { WALLET_NETWORK: walletNetwork, RECLAIM_LOCK_TIME: lockTime } =
@@ -251,6 +255,27 @@ const DepositFlowConfirm = ({
   const { notifyEmily, isPending: isPendingNotifyEmily } = useEmilyDeposit();
 
   const walletInfo = useAtomValue(walletInfoAtom);
+
+  const handleWarnignClose = () => {
+    setShowWarning(false);
+  };
+  const handleWarningConfirmation = async () => {
+    try {
+      setShowWarning(false);
+      handleNextClick();
+    } catch (error) {
+      console.warn(error);
+      let errorMessage = error;
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      notify({
+        type: NotificationStatusType.ERROR,
+        message: `Error while depositing funds: ${errorMessage}`,
+      });
+    }
+  };
   const handleNextClick = async () => {
     try {
       const signersAggregatePubKey = (await getAggregateKey()).slice(2);
@@ -377,49 +402,60 @@ const DepositFlowConfirm = ({
   };
 
   return (
-    <FlowContainer>
-      <>
-        <div className="w-full flex flex-row items-center justify-between">
-          <Heading>Deposit</Heading>
-        </div>
-        <div className="flex flex-col  gap-2">
-          <div className="flex flex-col gap-1">
-            <SubText>Amount selected to Transfer</SubText>
-            <p className="text-black font-Matter font-semibold text-sm">
-              {amount / 1e8} BTC
-            </p>
+    <>
+      <AnimatePresence>
+        {showWarning && (
+          <LedgerWarning
+            onClose={handleWarnignClose}
+            handleAccept={handleWarningConfirmation}
+          />
+        )}
+      </AnimatePresence>
+
+      <FlowContainer>
+        <>
+          <div className="w-full flex flex-row items-center justify-between">
+            <Heading>Deposit</Heading>
           </div>
-          <div className="flex flex-col gap-1">
-            <SubText>Stacks address to transfer to</SubText>
-            <p className="text-black font-Matter font-semibold text-sm">
-              {useShortAddress(stxAddress)}
-            </p>
+          <div className="flex flex-col  gap-2">
+            <div className="flex flex-col gap-1">
+              <SubText>Amount selected to Transfer</SubText>
+              <p className="text-black font-Matter font-semibold text-sm">
+                {amount / 1e8} BTC
+              </p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <SubText>Stacks address to transfer to</SubText>
+              <p className="text-black font-Matter font-semibold text-sm">
+                {useShortAddress(stxAddress)}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="flex flex-1 ">
-          <div className="w-full p-4 bg-lightOrange h-10 rounded-lg flex flex-row items-center justify-center gap-2">
-            <InformationCircleIcon className="h-6 w-6 text-orange" />
-            <p className="text-orange font-Matter font-semibold text-sm break-keep">
-              Please verify the information before proceeding
-            </p>
+          <div className="flex flex-1 ">
+            <div className="w-full p-4 bg-lightOrange h-10 rounded-lg flex flex-row items-center justify-center gap-2">
+              <InformationCircleIcon className="h-6 w-6 text-orange" />
+              <p className="text-orange font-Matter font-semibold text-sm break-keep">
+                Please verify the information before proceeding
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="w-full flex-row flex justify-between items-center">
-          <SecondaryButton
-            disabled={isPendingNotifyEmily}
-            onClick={handlePrevClick}
-          >
-            PREV
-          </SecondaryButton>
-          <PrimaryButton
-            disabled={isPendingNotifyEmily}
-            onClick={handleNextClick}
-          >
-            NEXT
-          </PrimaryButton>
-        </div>
-      </>
-    </FlowContainer>
+          <div className="w-full flex-row flex justify-between items-center">
+            <SecondaryButton
+              disabled={isPendingNotifyEmily}
+              onClick={handlePrevClick}
+            >
+              PREV
+            </SecondaryButton>
+            <PrimaryButton
+              disabled={isPendingNotifyEmily}
+              onClick={() => setShowWarning(true)}
+            >
+              NEXT
+            </PrimaryButton>
+          </div>
+        </>
+      </FlowContainer>
+    </>
   );
 };
 
@@ -473,7 +509,9 @@ const DepositFlowReview = ({ txId }: DepositFlowReviewProps) => {
           <div className="w-full flex-row flex justify-between items-center">
             <a
               className="w-40 rounded-lg py-3 flex justify-center items-center flex-row bg-orange"
-              href={`https://explorer.hiro.so/txid/${stacksTxId}?chain=${walletNetwork === "mainnet" ? "mainnet" : "testnet"}`}
+              href={`https://explorer.hiro.so/txid/${stacksTxId}?chain=${
+                walletNetwork === "mainnet" ? "mainnet" : "testnet"
+              }`}
               target="_blank"
               rel="noreferrer"
             >
