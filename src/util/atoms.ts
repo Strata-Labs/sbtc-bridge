@@ -17,6 +17,7 @@ export const bridgeConfigAtom = atom<BridgeConfig>({
   RECLAIM_LOCK_TIME: undefined,
   PUBLIC_MEMPOOL_URL: "",
   LIVECHAT_ID: undefined,
+  POLLING_INTERVAL: 5000,
 });
 export const depositMaxFeeAtom = atom(80000);
 
