@@ -30,7 +30,6 @@ import {
   signPSBTLeather,
   signPSBTXverse,
 } from "@/util/wallet-utils/src/sign-psbt";
-import Link from "next/link";
 
 /*
   Goal : User server side rendering as much as possible
