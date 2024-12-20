@@ -472,6 +472,7 @@ const DepositFlowReview = ({ txId }: DepositFlowReviewProps) => {
       return elapsedBlocks >= 6;
     }
   }, [confirmedBlockHeight, currentBlockHeight]);
+  const bridgeConfig = useAtomValue(bridgeConfigAtom);
   return (
     <FlowContainer>
       <>
@@ -505,7 +506,7 @@ const DepositFlowReview = ({ txId }: DepositFlowReviewProps) => {
               support team
               <Link
                 className="text-blue-500 underline"
-                href="https://direct.lc.chat/18945692/"
+                href={`https://direct.lc.chat/${bridgeConfig.LIVECHAT_ID}/`}
               >
                 {"  "}
                 here{"  "}

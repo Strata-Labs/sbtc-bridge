@@ -331,7 +331,8 @@ const ReclaimDeposit = ({
   const setShowWallet = useSetAtom(showConnectWalletAtom);
   const router = useRouter();
 
-  const { WALLET_NETWORK: walletNetwork } = useAtomValue(bridgeConfigAtom);
+  const { WALLET_NETWORK: walletNetwork, LIVECHAT_ID } =
+    useAtomValue(bridgeConfigAtom);
 
   const buildReclaimTransaction = async () => {
     try {
@@ -461,7 +462,7 @@ const ReclaimDeposit = ({
               experience this please contact our support team
               <Link
                 className="text-blue-500 underline"
-                href="https://direct.lc.chat/18945692/"
+                href={`https://direct.lc.chat/${LIVECHAT_ID}/`}
               >
                 {"  "}
                 here{"  "}

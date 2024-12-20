@@ -32,8 +32,10 @@ export function useDepositStatus(txId: string) {
   > | null>(null);
 
   const [currentBlockHeight, setCurrentBlockHeight] = useState<number>(0);
-  const [confirmedBlockHeight, setConfirmedBlockHeight] = useState<number>(0);
 
+  const confirmedBlockHeight = useMemo(() => {
+    return statusResponse?.status.block_height || 0;
+  }, [statusResponse]);
   const { EMILY_URL: emilyUrl, RECLAIM_LOCK_TIME } =
     useAtomValue(bridgeConfigAtom);
 
@@ -89,8 +91,6 @@ export function useDepositStatus(txId: string) {
 
           setCurrentBlockHeight(currentBlockHeight);
 
-          const confirmedBlockTime = info.status.block_height || 0;
-          setConfirmedBlockHeight(confirmedBlockTime);
           const unlockBlock =
             Number(RECLAIM_LOCK_TIME || 144) + info.status.block_height - 1;
 
