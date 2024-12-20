@@ -498,22 +498,20 @@ const DepositFlowReview = ({ txId }: DepositFlowReviewProps) => {
             To avoid losing your progress, please keep this page open.
           </SubText>
         </div>
-        {showDepositWarning && (
+        {bridgeConfig.LIVECHAT_ID && showDepositWarning && (
           <div className="flex flex-1 items-end">
             <SubText>
               There is a delay in processing your deposit, but signers are still
-              working on it and your funds are secure. Please contact our
-              support team
+              working on it and your funds are secure. Please contact our{" "}
               <a
                 target="_blank"
                 rel="noreferrer"
                 className="text-blue-500 underline"
                 href={`https://direct.lc.chat/${bridgeConfig.LIVECHAT_ID}/`}
               >
-                {"  "}
-                here{"  "}
-              </a>
-              to help us expedite it.”
+                support team here
+              </a>{" "}
+              to help us expedite it.
             </SubText>
           </div>
         )}
