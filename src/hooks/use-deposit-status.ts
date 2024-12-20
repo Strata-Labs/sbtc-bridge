@@ -36,8 +36,11 @@ export function useDepositStatus(txId: string) {
   const confirmedBlockHeight = useMemo(() => {
     return statusResponse?.status.block_height || 0;
   }, [statusResponse]);
-  const { EMILY_URL: emilyUrl, RECLAIM_LOCK_TIME } =
-    useAtomValue(bridgeConfigAtom);
+  const {
+    EMILY_URL: emilyUrl,
+    RECLAIM_LOCK_TIME,
+    POLLING_INTERVAL,
+  } = useAtomValue(bridgeConfigAtom);
 
   const recipient = useMemo(() => {
     return emilyResponse?.recipient || "";
@@ -105,10 +108,11 @@ export function useDepositStatus(txId: string) {
         }
       };
       check();
-      const interval = setInterval(check, 5000);
+      const interval = setInterval(check, POLLING_INTERVAL);
       return () => clearInterval(interval);
     }
   }, [
+    POLLING_INTERVAL,
     RECLAIM_LOCK_TIME,
     emilyUrl,
     notifyEmily,

@@ -20,4 +20,5 @@ export const env = {
   BANNER_CONTENT: process.env.BANNER_CONTENT,
   RECLAIM_LOCK_TIME: process.env.RECLAIM_LOCK_TIME,
   LIVECHAT_ID: process.env.LIVECHAT_ID,
+  POLLING_INTERVAL: Number(process.env.POLLING_INTERVAL) || 5000,
 };
