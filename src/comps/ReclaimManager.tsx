@@ -460,13 +460,15 @@ const ReclaimDeposit = ({
               Please note that we have received reports of errors with Ledgers
               running the reclaim function - if you are using a ledger and
               experience this please contact our support team
-              <Link
+              <a
+                target="_blank"
+                rel="noreferrer"
                 className="text-blue-500 underline"
                 href={`https://direct.lc.chat/${LIVECHAT_ID}/`}
               >
                 {"  "}
                 here{"  "}
-              </Link>
+              </a>
             </SubText>
           </div>
         </div>

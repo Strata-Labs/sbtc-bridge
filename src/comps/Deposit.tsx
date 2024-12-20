@@ -504,13 +504,15 @@ const DepositFlowReview = ({ txId }: DepositFlowReviewProps) => {
               There is a delay in processing your deposit, but signers are still
               working on it and your funds are secure. Please contact our
               support team
-              <Link
+              <a
+                target="_blank"
+                rel="noreferrer"
                 className="text-blue-500 underline"
                 href={`https://direct.lc.chat/${bridgeConfig.LIVECHAT_ID}/`}
               >
                 {"  "}
                 here{"  "}
-              </Link>
+              </a>
               to help us expedite it.”
             </SubText>
           </div>
